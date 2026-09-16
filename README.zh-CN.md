@@ -5,7 +5,7 @@
 [提示词指南](#prompt-guide) · [配色提示词](#color-guide) · [商业元素 API](skills/themed-cn-pptx/references/business-elements.md)
 
 <p align="center">
-  <img src="docs/img/hero-demos.png" alt="slide-recipes 演示 deck —— miku、editorial-grid、dark-launch" width="820" />
+  <img src="docs/img/hero-commercial.jpg" alt="Slide Recipes 新版商业样例：投资汇报、咨询提案、创意工作室" width="820" />
 </p>
 
 <p align="center">
@@ -16,13 +16,55 @@
   <img src="https://img.shields.io/badge/node-%E2%89%A5%2020-339933?style=flat-square" alt="Node" />
 </p>
 
-用 PptxGenJS 生成并**验收**真实、**可编辑、适配中文排版的 PPTX** 的开源技能合集 —— 由一道确定性 QA 门禁把关，而非肉眼。
+**把材料做成可编辑的商业 PPT：9 套审美 recipe × 20 套语义配色。**
 
-首个技能 [`themed-cn-pptx`](skills/themed-cn-pptx/) 内置九套**审美 recipe**（短简报与完整商业提案）、provider 感知的 AI 配图层（OpenAI GPT Image 2 / Google Nano Banana Pro），以及三个 QA 工具（渲染 QA、CJK 溢出、可编辑性检查）。
+适合经营汇报、客户提案、投资沟通和品牌展示。内置 18 类商业页面/元素 API、中文排版规则、可配置 AI 配图与渲染检查。先看真实生成样例，再复制提示词开始。
+
+[下载新版](https://github.com/CacinieP/slide-recipes/releases/latest) · [看样例](#samples) · [复制提示词](#prompt-guide) · [传播素材](docs/share-kit.md)
 
 ---
 
-## 🎬 演示画廊
+<a id="samples"></a>
+
+## 先看成品，再选风格
+
+以下是本仓库代码生成并渲染的样例，内容与数据均为虚构演示。下载 PPTX 可编辑文字、图形与原生图表；复现这些样例无需生图 API Key。
+
+| 样例 | 适用场景 | 预览与下载 |
+|---|---|---|
+| **investor-signal** · 8 pages | 投资汇报 · 森林绿 / 砂岩 | [Preview](docs/img/commercial/investor-signal.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.2.0/investor-signal.pptx) |
+| **editorial-proposal** · 8 pages | 咨询提案 · 钴蓝 / 纸白 | [Preview](docs/img/commercial/editorial-proposal.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.2.0/editorial-proposal.pptx) |
+| **studio-monochrome** · 8 pages | 工作室介绍 · 黑白 / 大字 | [Preview](docs/img/commercial/studio-monochrome.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.2.0/studio-monochrome.pptx) |
+| **Business elements** · 10 pages | KPI、漏斗、甘特图、SWOT、团队、报价 | [Preview](docs/img/business-elements.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.2.0/business-elements.pptx) |
+
+### 同一套信息，换一种气质
+
+茄紫青柠、孔雀蓝杏桃、咖啡冰蓝……20 套色板均可搭配三套商业 recipe。下面展示角色色及其组合；完整 PPTX 示例仍采用表中标注的原始色板。
+
+![20 semantic palettes](docs/img/palette-gallery.svg)
+
+### 复制这段，做你的版本
+
+```text
+使用 themed-cn-pptx，将 [材料路径] 做成 10 页中文客户提案。
+参考 editorial-proposal 样例，改用 aubergine-lime 茄紫青柠配色。
+面向业务决策者，包含执行摘要、KPI、方案对比、流程、甘特图和下一步。
+每页用结论做标题；缺失数据标注待补充，不编造客户、业绩或证言。
+交付可编辑 PPTX 和预览，并完成渲染检查。
+```
+
+```bash
+npm ci
+npm run demo:commercial  # 3 decks × 8 slides
+npm run demo:elements    # 10 editable business elements
+npm run demo:palettes    # regenerate palette SVG + catalog
+```
+
+中文渲染请通过 `PPT_FONT` 指定本机已安装字体，例如 macOS 的 `Arial Unicode MS`。商业样例输出至 `examples/slides/output/commercial/`，元素样例输出至 `examples/slides/output/business-elements.pptx`；字体和渲染器不同可能导致换行差异。
+
+<details>
+<summary>更多基础样例：Miku / Editorial Grid / Dark Launch</summary>
+
 
 三套锁定 demo，全部本仓库生成，**无需任何 API key**（纯色/发丝线占位回退）。下图用 LibreOffice 150 DPI 渲染。
 
@@ -63,7 +105,9 @@
   <a href="docs/img/demos/darklaunch/darklaunch-slide-5.jpg"><img src="docs/img/demos/darklaunch/darklaunch-slide-5.jpg" width="232" alt="darklaunch 第5页" /></a>
 </p>
 
-> `.pptx` 源文件已提交在 `examples/slides/output/`，可直接用 PowerPoint 打开编辑。
+> 运行 `npm run demos` 生成这三套基础示例。
+
+</details>
 
 ---
 
@@ -328,69 +372,19 @@ const r = createCommercialRecipe(pres, 'editorial-proposal', {
 
 ---
 
-## 🎨 AI 配图
+## 🎨 可配置 AI 配图
 
-用 [`skills/themed-cn-pptx/lib/ai-image.js`](skills/themed-cn-pptx/lib/ai-image.js)，支持多协议生图，配置以 [API 指南](skills/themed-cn-pptx/references/image-providers.md) 为准。没有 key → 返回 `null`，构建回退到占位图。
+支持 OpenAI、Google/Nano、百炼同步 API、MiniMax 和自定义 endpoint。Codex 会话有内置生图工具时，也可生成图片后放入页面。完整参数与使用步骤见 [配图配置指南](skills/themed-cn-pptx/references/image-providers.md)。
 
-```js
-import { generateSlideImage, addImageToSlide, addImageOverlay } from "./lib/ai-image.js";
-
-const cover = await generateSlideImage({
-  provider: "openai",            // 推荐；也支持 google / gpt-image / nano-banana-pro
-  prompt: "青绿色科技封面背景，干净留白，留出标题区域",
-  usage: "cover",                // GPT Image 2 -> 1360x768，Nano Banana Pro -> 16:9 + 2K
-});
-
-if (cover) {
-  addImageToSlide(slide, cover, { x: 0, y: 0, w: 10, h: 5.625 });
-  addImageOverlay(slide, pres, { color: "0B1B2B", opacity: 45 }); // 任何压字的图都需 40-55% 遮罩
-}
+```dotenv
+PPT_IMAGE_PROVIDER=custom
+PPT_IMAGE_API_KEY=replace-locally
+PPT_IMAGE_BASE_URL=https://your-gateway.example/v1
+PPT_IMAGE_MODEL=your-exact-model-id
+PPT_IMAGE_PROTOCOL=openai
 ```
 
-### 供应商优先级
-
-1. `generateSlideImage()` 的 `provider` 参数
-2. `PPT_IMAGE_PROVIDER` / `AI_IMAGE_PROVIDER` 环境变量
-3. 仅当 `GOOGLE_API_KEY` / `GEMINI_API_KEY` 存在且无 `OPENAI_API_KEY` 时选 Google
-4. 默认：OpenAI GPT Image 2
-
-### 环境变量
-
-```bash
-PPT_IMAGE_PROVIDER=openai        # openai | google    （推荐 openai）
-OPENAI_API_KEY=sk-xxx
-GOOGLE_API_KEY=xxx               # GEMINI_API_KEY 也可以
-# 可选覆盖：
-# OPENAI_BASE_URL / GOOGLE_BASE_URL / OPENAI_IMAGE_MODEL / GOOGLE_IMAGE_MODEL
-```
-
-助手在导入时自动读取 `.env`；shell/CI 变量优先级更高。`.env` 只放本地（已 gitignore），切勿提交 key。
-
-### 尺寸映射
-
-用途 → 尺寸/比例/版式契约与上一版（StepFun/MiniMax）完全一致，已发布 deck 的版式不受影响。
-
-| 用途 | GPT Image 2 `size` | Nano Banana Pro 比例 + 档位 | PPTX 布局 |
-| --- | --- | --- | --- |
-| `cover` / `coverOverlay` | `1360x768` | `16:9` + `2K` | `10 × 5.625 in` |
-| `hero` | `1360x768` | `16:9` + `2K` | `10 × 3 in` |
-| `bannerWide` / `ultraWideHero` | `1344x576`（原生 21:9） | `21:9` + `2K` | `10 × 2.45 in` / `10 × 2.8 in` |
-| `sideStrip` / `phoneMockup` | `768x1360` | `9:16` + `2K`/`1K` | `2.5 × 4.44 in` / `1.8 × 3.2 in` |
-| `card` | `1024x1024` | `1:1` + `1K` | `2.5 × 2.5 in` |
-| `cardWide` / `showcase` | `1184x896` | `4:3` + `1K`/`2K` | `3.5 × 2.65 in` / `3.9 × 2.95 in` |
-| `cardTall` | `896x1184` | `3:4` + `1K` | `2.3 × 3.04 in` |
-| `icon` | `1024x1024`（512x512 向上适配） | `1:1` + `1K` | `1.5 × 1.5 in` |
-
-尺寸适配规则：`gpt-image-2` 接受任意满足约束的 `size`（两边 16 的倍数、最长边 ≤ 3840、长短边比例 ≤ 3:1、总像素 655,360–8,294,400）——SIZE_MAP 契约尺寸除 `icon`（512×512 低于最小像素数，适配为 1024×1024）和 21:9 横幅（原生 `1344x576` 生成，不再裁切 16:9）外全部直传；用户自定义尺寸经 `adaptSizeForGptImage()` 自动适配。Nano Banana Pro 传 `aspect_ratio` + `image_size`（`1K/2K/4K`，K 必须大写）；所需比例全部原生支持，不支持的比例由 `adaptAspectRatioForGemini()` 按数值最近适配。
-
-### 端点
-
-| 供应商 | 模型 | 默认 Base URL |
-| --- | --- | --- |
-| OpenAI | `gpt-image-2` | `https://api.openai.com/v1`（`/images/generations`） |
-| Google | `gemini-3-pro-image` | `https://generativelanguage.googleapis.com/v1beta`（Interactions API `/interactions`） |
-
-官方文档：[OpenAI 图片生成](https://developers.openai.com/api/docs/guides/image-generation) · [Gemini 图片生成](https://ai.google.dev/gemini-api/docs/image-generation)
+Key 只放本地环境或未提交的 `.env`。模型 ID、尺寸和可用性以服务商为准。缺少 Key 时可采用原生图形或占位；请求失败应明确报告。Google 适配使用 `generateContent`。
 
 ---
 

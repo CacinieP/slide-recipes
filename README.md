@@ -5,7 +5,7 @@
 [Prompt guide](#prompt-guide) · [Color prompts](#color-guide) · [Business elements](skills/themed-cn-pptx/references/business-elements.md)
 
 <p align="center">
-  <img src="docs/img/hero-demos.png" alt="slide-recipes demo decks — miku, editorial-grid, dark-launch" width="820" />
+  <img src="docs/img/hero-commercial.jpg" alt="Slide Recipes — investor, consulting and studio presentation samples" width="820" />
 </p>
 
 <p align="center">
@@ -16,13 +16,56 @@
   <img src="https://img.shields.io/badge/node-%E2%89%A5%2020-339933?style=flat-square" alt="Node" />
 </p>
 
-Open-source skills for generating and **accepting** real, **editable, CJK-aware PPTX decks** built with PptxGenJS — verified by a deterministic QA gate, not just eyeballed.
+**Turn your brief into an editable business deck: 9 visual recipes × 20 semantic palettes.**
 
-The first released skill, [`themed-cn-pptx`](skills/themed-cn-pptx/), ships nine aesthetic recipes, a provider-aware AI image layer (OpenAI-compatible / Google / Bailian / MiniMax), and three QA tools (render QA, CJK overflow, editable-text check).
+For business reviews, client proposals, investor updates and brand presentations. Includes 18 business page/element APIs, CJK-aware layout, configurable AI images and render checks. See generated samples, then copy a prompt to start.
+
+[Download](https://github.com/CacinieP/slide-recipes/releases/latest) · [Samples](#samples) · [Copy a prompt](#prompt-guide) · [Share kit](docs/share-kit.md)
 
 ---
 
-## 🎬 Demo Gallery
+<a id="samples"></a>
+
+## See the output. Pick a direction.
+
+These samples were generated and rendered from this repository. All content and data are fictional. Download the PPTX to edit text, shapes and native charts. No image API key is needed to reproduce them.
+
+| Sample | Use case | Preview and download |
+|---|---|---|
+| **investor-signal** · 8 pages | Investor update · forest / sand | [Preview](docs/img/commercial/investor-signal.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.2.0/investor-signal.pptx) |
+| **editorial-proposal** · 8 pages | Consulting proposal · cobalt / paper | [Preview](docs/img/commercial/editorial-proposal.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.2.0/editorial-proposal.pptx) |
+| **studio-monochrome** · 8 pages | Studio profile · monochrome / bold type | [Preview](docs/img/commercial/studio-monochrome.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.2.0/studio-monochrome.pptx) |
+| **Business elements** · 10 pages | KPI, funnel, Gantt, SWOT, team, pricing | [Preview](docs/img/business-elements.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.2.0/business-elements.pptx) |
+
+### Same structure. A different character.
+
+Aubergine/lime, petrol/apricot, espresso/ice: 20 palettes work with all three commercial recipes. This board previews semantic colors; the downloadable decks retain their original palettes listed above.
+
+![20 semantic palettes](docs/img/palette-gallery.svg)
+
+### Copy this to make it yours
+
+```text
+Use themed-cn-pptx to turn [source files] into a 10-slide client proposal.
+Start from editorial-proposal, with the aubergine-lime palette.
+For business decision-makers: include an executive summary, KPI dashboard,
+comparison, process, Gantt and next steps. Use conclusion-led titles.
+Mark missing evidence; do not invent clients, results or testimonials.
+Deliver editable PPTX and a preview, with render checks completed.
+```
+
+```bash
+npm ci
+npm run demo:commercial  # 3 decks × 8 slides
+npm run demo:elements    # 10 editable business elements
+npm run demo:palettes    # regenerate palette SVG + catalog
+```
+
+For CJK rendering, set `PPT_FONT` to an installed font, such as `Arial Unicode MS` on macOS. Commercial decks are written to `examples/slides/output/commercial/`, and the elements deck to `examples/slides/output/business-elements.pptx`; font and renderer differences can change line wrapping.
+
+<details>
+<summary>More foundation demos: Miku / Editorial Grid / Dark Launch</summary>
+
 
 Three locked demo decks, all generated from this repo with **zero API keys** (solid-color / hairline fallbacks). Rendered here with LibreOffice at 150 DPI.
 
@@ -63,7 +106,9 @@ Three locked demo decks, all generated from this repo with **zero API keys** (so
   <a href="docs/img/demos/darklaunch/darklaunch-slide-5.jpg"><img src="docs/img/demos/darklaunch/darklaunch-slide-5.jpg" width="232" alt="darklaunch s5" /></a>
 </p>
 
-> The `.pptx` files themselves are committed at `examples/slides/output/` — open them in PowerPoint and edit directly.
+> Run `npm run demos` to generate these three foundation demos.
+
+</details>
 
 ---
 
@@ -328,69 +373,19 @@ Critical text pairs must pass 4.5:1 before generation. Invalid palettes throw a 
 
 ---
 
-## 🎨 AI Image Generation
+## 🎨 Configurable AI images
 
-Use [`skills/themed-cn-pptx/lib/ai-image.js`](skills/themed-cn-pptx/lib/ai-image.js) with configurable models and protocols; see the [API configuration guide](skills/themed-cn-pptx/references/image-providers.md). No key → returns `null`, build falls back to placeholders.
+Use OpenAI, Google/Nano, Bailian synchronous APIs, MiniMax or a custom endpoint. When the Codex session exposes its image tool, generated assets can also be placed into slides. See the [image configuration guide](skills/themed-cn-pptx/references/image-providers.md) for protocols and request options.
 
-```js
-import { generateSlideImage, addImageToSlide, addImageOverlay } from "./lib/ai-image.js";
-
-const cover = await generateSlideImage({
-  provider: "openai",            // recommended; also: google / gpt-image / nano-banana-pro
-  prompt: "teal tech cover background, clean whitespace, room for a title",
-  usage: "cover",                // -> size 1360x768 on GPT Image 2, 16:9 + 2K on Nano Banana Pro
-});
-
-if (cover) {
-  addImageToSlide(slide, cover, { x: 0, y: 0, w: 10, h: 5.625 });
-  addImageOverlay(slide, pres, { color: "0B1B2B", opacity: 45 }); // 40-55% over any image with text
-}
+```dotenv
+PPT_IMAGE_PROVIDER=custom
+PPT_IMAGE_API_KEY=replace-locally
+PPT_IMAGE_BASE_URL=https://your-gateway.example/v1
+PPT_IMAGE_MODEL=your-exact-model-id
+PPT_IMAGE_PROTOCOL=openai
 ```
 
-### Provider priority
-
-1. `provider` arg to `generateSlideImage()`
-2. `PPT_IMAGE_PROVIDER` / `AI_IMAGE_PROVIDER` env
-3. Google only if `GOOGLE_API_KEY`/`GEMINI_API_KEY` set and no `OPENAI_API_KEY`
-4. Default: OpenAI GPT Image 2
-
-### Environment variables
-
-```bash
-PPT_IMAGE_PROVIDER=openai        # openai | google    (openai recommended)
-OPENAI_API_KEY=sk-xxx
-GOOGLE_API_KEY=xxx               # GEMINI_API_KEY also read
-# optional overrides:
-# OPENAI_BASE_URL / GOOGLE_BASE_URL / OPENAI_IMAGE_MODEL / GOOGLE_IMAGE_MODEL
-```
-
-The helper auto-loads `.env` on import; shell/CI vars take priority. Create `.env` locally — it's gitignored, never commit keys.
-
-### Size → layout mapping
-
-The usage → size/ratio/layout contract is unchanged from the previous StepFun/MiniMax provider layer, so existing decks keep their layout slots.
-
-| Usage | GPT Image 2 `size` | Nano Banana Pro ratio + size | PPTX layout |
-| --- | --- | --- | --- |
-| `cover` / `coverOverlay` | `1360x768` | `16:9` + `2K` | `10 × 5.625 in` |
-| `hero` | `1360x768` | `16:9` + `2K` | `10 × 3 in` |
-| `bannerWide` / `ultraWideHero` | `1344x576` (native 21:9) | `21:9` + `2K` | `10 × 2.45 in` / `10 × 2.8 in` |
-| `sideStrip` / `phoneMockup` | `768x1360` | `9:16` + `2K`/`1K` | `2.5 × 4.44 in` / `1.8 × 3.2 in` |
-| `card` | `1024x1024` | `1:1` + `1K` | `2.5 × 2.5 in` |
-| `cardWide` / `showcase` | `1184x896` | `4:3` + `1K`/`2K` | `3.5 × 2.65 in` / `3.9 × 2.95 in` |
-| `cardTall` | `896x1184` | `3:4` + `1K` | `2.3 × 3.04 in` |
-| `icon` | `1024x1024` (adapted from 512x512) | `1:1` + `1K` | `1.5 × 1.5 in` |
-
-Size-adaptation rules: `gpt-image-2` accepts any size whose edges are multiples of 16, max edge ≤ 3840, long:short ≤ 3:1, and total pixels in [655,360, 8,294,400] — every SIZE_MAP size passes directly except `icon` (512×512 is below the pixel minimum, snapped to 1024×1024) and the 21:9 banners (generated natively at 1344×576 instead of cropping 16:9). User-supplied sizes go through `adaptSizeForGptImage()`. Nano Banana Pro takes `aspect_ratio` + `image_size` (`1K/2K/4K`); all ratios used here are native, and unsupported ratios snap to the nearest via `adaptAspectRatioForGemini()`.
-
-### Endpoints
-
-| Provider | Model | Default Base URL |
-| --- | --- | --- |
-| OpenAI | `gpt-image-2` | `https://api.openai.com/v1` (`/images/generations`) |
-| Google | `gemini-3-pro-image` | `https://generativelanguage.googleapis.com/v1beta` (Interactions API `/interactions`) |
-
-Official docs: [OpenAI image generation](https://developers.openai.com/api/docs/guides/image-generation) · [Gemini image generation](https://ai.google.dev/gemini-api/docs/image-generation)
+Keep keys in local environment variables or an untracked `.env`. Model IDs, sizes and availability depend on the provider. Missing keys allow native-shape/placeholders; request failures must be reported. The Google adapter uses `generateContent`.
 
 ---
 
