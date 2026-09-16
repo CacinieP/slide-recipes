@@ -2,8 +2,8 @@
 name: themed-cn-pptx
 description: >-
   Build, modify, and QA-verify Chinese + IP/character-themed + QR-embeddable
-  EDITABLE PPTX decks using PptxGenJS, with SOTA AI image generation via
-  OpenAI GPT Image 2 or Google Nano Banana Pro, locked aesthetic recipes,
+  EDITABLE PPTX decks using PptxGenJS, with configurable AI image generation via
+  OpenAI-compatible APIs, Google, Bailian or MiniMax, content-driven recipes,
   and a deterministic render-QA gate (CJK overflow, text overlap,
   editable-text, color contrast). Triggers:
   可编辑 PPTX, 中文 PPT, PPT 验收, render QA, PptxGenJS, presentation, slide,
@@ -19,7 +19,7 @@ description: >-
 
 **可选搭配**：标准 `pptx` skill（Anthropic 出品，本 skill 早期是它的增量补充）。它**不是依赖**：本 skill 自带 `scripts/` QA 门禁与 `lib/` 工具，没有它也能自成闭环；Anthropic 版 `pptx` 的许可禁止再分发，因此不随本仓库一起安装，需要请自行从官方渠道获取。
 
-**生图能力**：集成 OpenAI GPT Image 2 和 Google Nano Banana Pro（Gemini 3 Pro Image）文生图 API，API Key 从环境变量读取，不硬编码
+**生图能力**：支持 OpenAI-compatible、自定义 endpoint、Google/Nano、百炼同步生图与 MiniMax；API Key 从项目环境读取。
 
 **适合**：
 - 中文 PPT、IP/角色主题 PPT
@@ -29,7 +29,7 @@ description: >-
 - 需要可编辑 PPTX（不是图片化幻灯片）
 
 **不适合**：
-- 只要普通商务模板（用标准 pptx skill）
+- 仅需单页非演示素材（使用相应设计工具）
 - 只要 PDF 输出（用 PDF 工具）
 - 不要求可编辑（直接截图即可）
 - 单页海报/非演示文稿（用设计工具）
@@ -38,9 +38,17 @@ description: >-
 
 ---
 
+## 安装后入口与 recipe 扩展
+
+- 配图、自定义 endpoint、模型 ID、Codex 原生生图路由：先读 [references/image-providers.md](references/image-providers.md)。API 配置以该文档为准。
+- 选版式：先读 [references/recipe-catalog.md](references/recipe-catalog.md)，九套 recipe 覆盖短简报与完整商业提案。商业提案先读 [commercial-recipes.md](references/commercial-recipes.md)，参考研究见 [design-research.md](references/design-research.md)。
+- 常见商业元素（KPI、漏斗、甘特、SWOT、团队、报价等）与语义配色见 [business-elements.md](references/business-elements.md)。
+- 审美决策读 [references/aesthetic-rules.md](references/aesthetic-rules.md)。页脚、条纹、下划线按 recipe 选择，不要求每页叠满；演讲正文优先 16–20pt。
+- 所有安装后命令使用 `$SKILL_DIR/scripts/`，不依赖仓库根目录；生图 CLI 为 `node "$SKILL_DIR/scripts/generate-image.mjs" request.json`。
+
 ## 0. 两条使用路径
 
-> **路径约定**：下文 `$SKILL_DIR` = 本 `SKILL.md` 所在目录（例如 `~/.agents/skills/themed-cn-pptx` 或 `~/.pi/agent/skills/themed-cn-pptx`）。`scripts/`、`lib/`、`references/`、`recipes/` 都以它为根；QA 命令一律写成 `node "$SKILL_DIR/scripts/xxx.mjs" <你的 deck.pptx>`，这样独立安装（没有仓库根目录）也能跑。若你在 `ppt-skills` 仓库 clone 内开发，`npm run qa:render` 等根目录别名等价（见仓库 README §Commands）。
+> **路径约定**：下文 `$SKILL_DIR` = 本 `SKILL.md` 所在目录（例如 `~/.agents/skills/themed-cn-pptx` 或 `~/.pi/agent/skills/themed-cn-pptx`）。`scripts/`、`lib/`、`references/`、`recipes/` 都以它为根；QA 命令一律写成 `node "$SKILL_DIR/scripts/xxx.mjs" <你的 deck.pptx>`，这样独立安装（没有仓库根目录）也能跑。若你在 `slide-recipes` 仓库 clone 内开发，`npm run qa:render` 等根目录别名等价（见仓库 README §Commands）。
 
 本 skill 按用户意图分为两条路径，先判断再执行：
 
@@ -322,142 +330,18 @@ QA 时列出实际使用的 `fg/bg` 对，至少检查：正文 on 浅底、正�
 
 ---
 
-## 2.5 AI 生图 — 尺寸适配（GPT Image 2 / Nano Banana Pro）
+## 2.5 AI 配图与 API
 
-通过 `lib/ai-image.js` 生成配图，自动适配 PPT 排版。**OpenAI GPT Image 2 是默认和重点推荐 provider**（盲测竞技场 SOTA）；Google Nano Banana Pro（Gemini 3 Pro Image）作为并列 SOTA 的可选补充。**不硬编码 API Key**，从环境变量或 `.env` 读取。新脚本优先导入 `ai-image.js`；旧脚本继续导入 `stepfun-image.js` 也能运行（兼容 re-export，provider 层已换新模型）。
+配置协议、模型与 endpoint 时阅读 [image-providers.md](references/image-providers.md)。
+使用 `generateSlideImage({ provider, model, prompt, usage, saveDir })`；返回 `localPath`，无 Key 返回 `null`。
+`usage` 支持 cover、hero、card、cardWide、cardTall、showcase、phoneMockup、sideStrip 等；完整列表由 `listImageUsages(provider)` 返回。
 
-### 引入方式
-
-```jsx
-import { generateSlideImage, addImageToSlide, addImageOverlay, SIZE_MAP } from "./lib/ai-image.js";
-
-// 用法：按用途自动选比例/尺寸
-const img = await generateSlideImage({
-  provider: "openai", // 推荐；也支持 google / gpt-image / nano-banana-pro
-  prompt: "赛博朋克城市夜景，中文发布会封面背景，留出标题区域",
-  usage: "cover",
-});
-
-if (img) {
-  slide.addImage({ path: img.localPath, x: 0, y: 0, w: img.pptxLayout.w, h: img.pptxLayout.h });
-}
-```
-
-### Provider 选择
-
-优先级：
-
-1. `generateSlideImage({ provider: "openai" | "google" })`
-2. 环境变量 `PPT_IMAGE_PROVIDER` 或 `AI_IMAGE_PROVIDER`
-3. 如果只有 `GOOGLE_API_KEY` / `GEMINI_API_KEY`，自动选择 `google`
-4. 默认 `openai`（GPT Image 2）
-
-可直接使用别名：
-
-```jsx
-await generateSlideImage({ provider: "openai", prompt, usage: "cover" });
-await generateSlideImage({ provider: "gpt-image", prompt, usage: "cover" });
-await generateSlideImage({ provider: "google", prompt, usage: "card" });
-await generateSlideImage({ provider: "nano-banana-pro", prompt, usage: "card" });
-```
-
-### 用途 → 尺寸映射
-
-尺寸契约与旧版（StepFun/MiniMax 时代）**完全一致**，已发布的 deck 版式不受影响：
-
-| **用途** | **PPT 场景** | **契约尺寸** | **GPT Image 2 传参** | **Nano Banana Pro 传参** | **PPTX (英寸)** |
-| --- | --- | --- | --- | --- | --- |
-| `cover` | 封面全幅背景 | 1360×768 | `size: 1360x768` | `16:9 + 2K` | `{ w:10, h:5.625 }` |
-| `coverOverlay` | 带文字遮罩的封面背景 | 1360×768 | `size: 1360x768` | `16:9 + 2K` | `{ w:10, h:5.625 }` |
-| `hero` | 上半区横幅 | 1360×768 | `size: 1360x768` | `16:9 + 2K` | `{ w:10, h:3 }` |
-| `bannerWide` | 超宽横幅 | 1360×768 | `size: 1344x576`（原生 21:9） | `21:9 + 2K` | `{ w:10, h:2.45 }` |
-| `ultraWideHero` | 超宽首页/章节视觉 | 1360×768 | `size: 1344x576`（原生 21:9） | `21:9 + 2K` | `{ w:10, h:2.8 }` |
-| `sideStrip` | 右侧竖版装饰条 | 768×1360 | `size: 768x1360` | `9:16 + 2K` | `{ w:2.5, h:4.44 }` |
-| `card` | 方形卡片配图 | 1024×1024 | `size: 1024x1024` | `1:1 + 1K` | `{ w:2.5, h:2.5 }` |
-| `cardTall` | 竖版卡片配图 | 896×1184 | `size: 896x1184` | `3:4 + 1K` | `{ w:2.3, h:3.04 }` |
-| `cardWide` | 横版卡片配图 | 1184×896 | `size: 1184x896` | `4:3 + 1K` | `{ w:3.5, h:2.65 }` |
-| `showcase` | 产品/项目展示 | 1184×896 | `size: 1184x896` | `4:3 + 2K` | `{ w:3.9, h:2.95 }` |
-| `phoneMockup` | 手机竖屏 mockup | 768×1360 | `size: 768x1360` | `9:16 + 1K` | `{ w:1.8, h:3.2 }` |
-| `icon` | 小图标/占位图 | 512×512 | `size: 1024x1024`（向上适配） | `1:1 + 1K` | `{ w:1.5, h:1.5 }` |
-
-适配规则（尺寸适配传参）：
-
-- **GPT Image 2**（`/v1/images/generations`，模型 `gpt-image-2`）接受满足以下约束的任意 `size`：两边均为 16 的倍数、最长边 ≤ 3840、长短边比例 ≤ 3:1、总像素在 655,360–8,294,400。SIZE_MAP 中的契约尺寸除 `icon` 外全部直传；`icon` 的 512×512（262,144 像素）低于最小像素数，适配为 1024×1024（1:1 不变）；`bannerWide` / `ultraWideHero` 以原生 21:9 的 `1344x576` 生成，不再需要 16:9 裁切。用户自定义 `size` 由 `adaptSizeForGptImage()` 自动适配并告警。gpt-image 模型只返回 `b64_json`。
-- **Nano Banana Pro**（Interactions API `/v1beta/interactions`，模型 `gemini-3-pro-image`）在 `response_format` 中传 `aspect_ratio` + `image_size`：`16:9`、`21:9`、`9:16`、`1:1`、`3:4`、`4:3` 全部原生支持；`image_size` 按版面大小取 `2K`（全幅/横幅/侧栏）或 `1K`（卡片/图标），"K" 必须大写。用户自定义 `aspectRatio` 由 `adaptAspectRatioForGemini()` 按数值最近原则适配并告警。
-- `cover`、`hero`、`bannerWide`、`ultraWideHero`、`showcase`、`phoneMockup` 不手写尺寸，统一从 `SIZE_MAP` 或 `getImageUsageConfig()` 取，不混用 OpenAI size 和 Google ratio。
-- 两个 provider 都返回 base64，工具统一落盘到 `assets/<provider>/`，PPTX 只引用本地文件。
-
-### 环境变量配置
-
-```bash
-# 可选：默认生图供应商
-export PPT_IMAGE_PROVIDER=openai    # openai | google
-
-# OpenAI GPT Image 2（https://platform.openai.com）
-export OPENAI_API_KEY=sk-xxx
-# export OPENAI_BASE_URL=https://api.openai.com/v1      # 可选强制覆盖
-# export OPENAI_IMAGE_MODEL=gpt-image-2                 # 可选模型覆盖
-
-# Google Nano Banana Pro（https://aistudio.google.com/apikey）
-export GOOGLE_API_KEY=xxx            # GEMINI_API_KEY 也可以
-# export GOOGLE_BASE_URL=https://generativelanguage.googleapis.com/v1beta  # 可选强制覆盖
-# export GOOGLE_IMAGE_MODEL=gemini-3-pro-image         # 可选模型覆盖
-```
-
-`ai-image.js` 会自动加载项目根目录 `.env`，但 shell / MCP / CI 中已有的 `process.env` 优先。
-
-### Provider 参数
-
-- OpenAI：`/images/generations`，`size` 满足上述约束即任意尺寸直传，`quality` 可传 `high | medium | low`，响应为 `b64_json`。
-- Google：Interactions API `/interactions`，`response_format: { type: "image", aspect_ratio, image_size }`，可传 `seed`（`generation_config.seed`）与 `outputFormat`（`image/png` | `image/jpeg`），单次 1 张、`n > 1` 时循环调用。
-
-```jsx
-const img = await generateSlideImage({
-  provider: "openai",
-  prompt,
-  usage: "cover",
-  quality: "high",
-});
-```
-
-```jsx
-const img = await generateSlideImage({
-  provider: "nano-banana-pro",
-  prompt,
-  usage: "showcase",
-  seed: 42,
-});
-```
-
-### API Key 申请与使用指南（OpenAI 推荐）
-
-1. OpenAI 在 `https://platform.openai.com/api-keys` 创建 Key；Google 在 `https://aistudio.google.com/apikey` 创建 Key。
-2. Key 只放在本地 `.env`、系统环境变量或 CI Secret，不写进源码。
-3. 在构建目录创建 `.env`：
-
-```bash
-PPT_IMAGE_PROVIDER=openai
-OPENAI_API_KEY=sk-xxx
-```
-
-4. 先跑 `npm test` 验证导入、provider 解析、无 key 降级。
-5. 构建 PPT 时优先使用 `provider: "openai"`；用 Google 时改为 `provider: "google"` 或 `provider: "nano-banana-pro"`。
-
-### 图片排版规范
-
-- **深底图片上放文字** → 必须加半透明遮罩（`addImageOverlay`），透明度 40-50%
-- **注意：`addImageOverlay(slide, pres, { opacity: 45 })` 中的 `opacity` 是用户接口参数，传 40–50 的整数；内部映射到 PptxGenJS 的 `transparency`。不要传 0.18 这种比例值。**
-- **卡片内图片** → 上下留 0.15″ padding，用 `rounding: true` 圆角
-- **封面背景图** → 叠加深色半透明矩形 + 文字层，确保文字可读
-- **图片不贴文字** → 左右至少 0.2″ 间距
-- **无 API Key 时** → 自动跳过生图，console.warn 提示，不阻断 PPT 生成
-
-### 模型尺寸对照
-
-| Provider | 模型 | 支持尺寸 / 比例 |
-| --- | --- | --- |
-| OpenAI | `gpt-image-2`（默认） | 任意尺寸：两边 16 的倍数、最长边 ≤ 3840、比例 ≤ 3:1、总像素 655,360–8,294,400 |
-| Google | `gemini-3-pro-image`（Nano Banana Pro） | 1:1, 2:3, 3:2, 3:4, 4:3, 4:5, 5:4, 9:16, 16:9, 21:9 × 1K/2K/4K |
+- 先选 recipe 和图片槽位，再生成主体位置、色调、比例一致的素材。
+- 标题、图表标签、来源和二维码由 PPT 原生对象或专用编码器生成。
+- 用 crop/contain 保持真实比例，不将 1360×768 误称为精确 16:9。
+- 深底图叠字时按实际对比度加遮罩；`addImageOverlay` 的 `opacity` 是 0–100 的历史参数，对应 PptxGenJS transparency，不是 0–1 比例。
+- 图片与文本之间建议至少 0.2 英寸；主体不得落入标题区。
+- 生图失败应明确记录；缺 Key 的降级不等于配图需求已经完成。
 
 ---
 
@@ -486,7 +370,7 @@ OPENAI_API_KEY=sk-xxx
 
 ## 4. 重复装饰 = 品牌一致性
 
-把三个 helper 函数提出来，**每页都调用**：
+以下为 IP 主题示例。其他 recipe 选择自己的重复元素，不要求三者同时使用：
 
 ```jsx
 // 1. 顶部 + 底部条纹 —— deck 的心跳
@@ -552,7 +436,7 @@ function footer(slide, n, total) {
 | 6b | 项目展示 + 竖版 mockup | 手机 App 展示 | 左侧 `phoneMockup` 768×1360 + 右侧特性 |
 | 7a | 双栏映射 + 侧栏图 | 映射 + 装饰 | 右侧 `sideStrip` 768×1360 竖版装饰条 |
 
-用 8–10 张。**一个 deck 不要超过 5 种 layout**，否则视觉碎片化。
+用 8–10 张。**同一 deck 保持统一网格与字号阶**，按信息关系选择所需布局，避免无意义的视觉切换。
 
 ### 带图布局示例代码
 
@@ -826,7 +710,7 @@ skills/themed-cn-pptx/         # = $SKILL_DIR，独立安装后自包含
 ### 通用
 
 - [ ]  调色板只有一个主色，不互相竞争
-- [ ]  每页都有 stripe + sectionTitle + footer（封面/收尾除外）
+- [ ]  重复元素符合所选 recipe，位置与层级一致
 - [ ]  封面主标题不溢出
 - [ ]  二维码能扫（带边框 + 高纠错 + 框在白底里）
 - [ ]  页数上限遵守
@@ -863,3 +747,5 @@ skills/themed-cn-pptx/         # = $SKILL_DIR，独立安装后自包含
 - [ ]  文稿核心信息全部覆盖，无遗漏
 - [ ]  页面逻辑顺序（定位→背景→理论→展示→讨论→收尾）合理
 - [ ]  每页信息密度适中，不堆砌
+
+For distinctive semantic color presets and palette prompts, read [references/palette-catalog.md](references/palette-catalog.md).

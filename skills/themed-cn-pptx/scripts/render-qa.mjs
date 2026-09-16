@@ -3,7 +3,7 @@
 /**
  * render-qa.mjs — PPTX render + heuristic QA gate.
  *
- * ppt-skills bets on real, editable .pptx. The weak point of that bet is that
+ * slide-recipes bets on real, editable .pptx. The weak point of that bet is that
  * PptxGenJS does not measure text, so a title that "looked fine" can wrap and
  * collide in the actual render. This script closes that gap by inspecting the
  * generated .pptx deterministically (no eyeballing required) and, when

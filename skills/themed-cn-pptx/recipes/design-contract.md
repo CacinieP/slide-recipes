@@ -66,7 +66,7 @@ emphasis, use weight, size, or the accent — never a new color.
 ## How to QA this recipe
 
 ```bash
-# Run from the ppt-skills clone root (npm aliases qa:render / color:qa / qa:editable are equivalent).
+# Run from the slide-recipes clone root (npm aliases qa:render / color:qa / qa:editable are equivalent).
 # 1. Static checks (always)
 node skills/themed-cn-pptx/scripts/render-qa.mjs examples/slides/output/editorial-demo.pptx --fix-hints \
   --contract skills/themed-cn-pptx/references/layout-slots.md

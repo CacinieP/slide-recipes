@@ -1,6 +1,6 @@
 # pptx-web
 
-[`pptx-generator`](https://github.com/CacinieP/ppt-skills/) skill 的本地可视化入口:在浏览器里填表单,本机用 PptxGenJS 按 skill 的设计系统生成真正的 `.pptx` 文件。
+[`pptx-generator`](https://github.com/CacinieP/slide-recipes/) skill 的本地可视化入口:在浏览器里填表单,本机用 PptxGenJS 按 skill 的设计系统生成真正的 `.pptx` 文件。
 
 这是一个**本地工具**,不是在线服务。`npm run dev` 起服务,key 用自己的,全程不经过第三方。和 skill 本身一样,装得起就能用,不需要公网、不需要部署、不需要注册。
 

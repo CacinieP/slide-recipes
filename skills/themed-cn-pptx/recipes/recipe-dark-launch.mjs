@@ -105,7 +105,7 @@ function footer(slide, n, total, label) {
  */
 export function build(pres, opts = {}) {
   pres.layout = "LAYOUT_16x9";
-  const label = opts.deckLabel || "Dark Launch · ppt-skills";
+  const label = opts.deckLabel || "Dark Launch · slide-recipes";
 
   // Slide 1 — Cover with hero image slot (CoverBackground contract)
   const cover = pres.addSlide();
@@ -196,7 +196,7 @@ export function build(pres, opts = {}) {
     x: 0.6, y: 1.9, w: 8.8, h: 1.8,
     fontSize: 30, fontFace: FONT_CJK, bold: true, color: theme.white, lineSpacingMultiple: 1.3, margin: 0,
   });
-  s4.addText("— ppt-skills 定位", {
+  s4.addText("— slide-recipes 定位", {
     x: 0.6, y: 3.9, w: 8.8, h: 0.35,
     fontSize: 11, fontFace: FONT_LATIN, color: theme.accent, margin: 0,
   });
@@ -214,7 +214,7 @@ export function build(pres, opts = {}) {
     x: 0.6, y: 1.65, w: 6, h: 1.6,
     fontSize: 40, fontFace: FONT_CJK, bold: true, color: theme.white, lineSpacingMultiple: 1.15, margin: 0,
   });
-  s5.addText("github.com/CacinieP/ppt-skills", {
+  s5.addText("github.com/CacinieP/slide-recipes", {
     x: 0.6, y: 3.4, w: 6, h: 0.35,
     fontSize: 12, fontFace: "Consolas", color: theme.accent, margin: 0,
   });
@@ -241,7 +241,7 @@ export function build(pres, opts = {}) {
     fontSize: 20, fontFace: FONT_LATIN, bold: true, color: theme.mutedOnDark,
     align: "center", valign: "middle", margin: 0,
   });
-  s5.addText("github.com/CacinieP/ppt-skills", {
+  s5.addText("github.com/CacinieP/slide-recipes", {
     x: 7.1, y: 4.05, w: 2.4, h: 0.3,
     fontSize: 8, fontFace: "Consolas", color: theme.mutedOnDark, align: "center", margin: 0,
   });

@@ -75,7 +75,7 @@ The pink is **never** used for body text — only kickers and the dual-stripe ta
 ## How to QA this recipe
 
 ```bash
-# Run from the ppt-skills clone root (npm aliases qa:render / color:qa / qa:editable are equivalent).
+# Run from the slide-recipes clone root (npm aliases qa:render / color:qa / qa:editable are equivalent).
 node skills/themed-cn-pptx/scripts/render-qa.mjs examples/slides/output/darklaunch-demo.pptx --fix-hints \
   --contract skills/themed-cn-pptx/references/layout-slots.md
 node skills/themed-cn-pptx/scripts/color-qa.mjs --palette 0B1B2B,06121E,13243A,FFFFFF,E8FFFD,8FA6B4,39C5BB,FF77AA --role body

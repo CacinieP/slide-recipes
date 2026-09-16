@@ -62,7 +62,7 @@ function mikuStripe(slide) {
 }
 
 function footer(slide, n, total) {
-  slide.addText("PPT Skills · Demo", { x: 0.5, y: SH - 0.35, w: 6, h: 0.25, fontSize: 9, color: C.muted, margin: 0 });
+  slide.addText("Slide Recipes · Demo", { x: 0.5, y: SH - 0.35, w: 6, h: 0.25, fontSize: 9, color: C.muted, margin: 0 });
   slide.addText(`${n} / ${total}`, { x: SW - 1.2, y: SH - 0.35, w: 0.7, h: 0.25, fontSize: 9, color: C.muted, align: "right", margin: 0 });
 }
 
@@ -90,7 +90,7 @@ cover.addText("OPEN SOURCE SKILL", {
 });
 
 // Main title
-cover.addText("PPT Skills", {
+cover.addText("Slide Recipes", {
   x: 0.7, y: 2.0, w: 8, h: 1.0,
   fontSize: 44, fontFace: "Microsoft YaHei", color: C.white, bold: true,
 });
@@ -104,7 +104,7 @@ cover.addShape(pres.shapes.RECTANGLE, { x: 0.7, y: 3.6, w: 1.2, h: 0.06, fill: {
 cover.addShape(pres.shapes.RECTANGLE, { x: 1.92, y: 3.6, w: 0.35, h: 0.06, fill: { color: C.pink }, line: { color: C.pink } });
 
 // Author
-cover.addText("ppt-skills · github.com/CacinieP/ppt-skills", {
+cover.addText("slide-recipes · github.com/CacinieP/slide-recipes", {
   x: 0.7, y: 4.2, w: 8, h: 0.35,
   fontSize: 11, fontFace: "Arial", color: C.textOnDark, transparency: 40,
 });

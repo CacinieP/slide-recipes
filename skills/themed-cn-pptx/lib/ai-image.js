@@ -1,31 +1,6 @@
-/**
- * AI Image Generation Utility for PPT Skills
- *
- * Supports OpenAI GPT Image 2 and Google Nano Banana Pro (Gemini 3 Pro
- * Image) text-to-image APIs in one PPT-friendly helper. It adapts slide
- * usage to each provider's size parameters, saves the generated image
- * locally, and returns PptxGenJS-ready layout metadata.
- *
- * Environment Variables (read from process.env or a project-root .env file):
- *   PPT_IMAGE_PROVIDER  - Optional. "openai" or "google". Provider aliases
- *                         like "gpt-image" and "nano-banana-pro" are supported.
- *                         Defaults to OpenAI unless only GOOGLE_API_KEY exists.
- *   OPENAI_API_KEY      - OpenAI API key from platform.openai.com
- *   OPENAI_BASE_URL     - Optional. Defaults to https://api.openai.com/v1
- *   OPENAI_IMAGE_MODEL  - Optional. Defaults to "gpt-image-2"
- *   GOOGLE_API_KEY      - Google AI Studio API key (GEMINI_API_KEY also read)
- *   GOOGLE_BASE_URL     - Optional. Defaults to
- *                         https://generativelanguage.googleapis.com/v1beta
- *   GOOGLE_IMAGE_MODEL  - Optional. Defaults to "gemini-3-pro-image"
- *
- * Usage in build_<theme>.js:
- *   import { generateSlideImage, addImageToSlide, addImageOverlay } from "./lib/ai-image.js";
- *
- *   const img = await generateSlideImage({
- *     provider: "openai", // optional: "openai" | "google" | aliases
- *     prompt: "赛博朋克城市夜景，中文发布会封面背景",
- *     usage: "cover",
- *   });
+/** PPT image generation: OpenAI-compatible, Gemini, DashScope sync and MiniMax.
+ * Configuration and installed CLI: ../references/image-providers.md.
+ * Model IDs are provider-specific; custom model parameters pass through.
  */
 
 import { writeFile, mkdir } from "node:fs/promises";
@@ -93,6 +68,18 @@ export const IMAGE_PROVIDERS = {
     maxN: 4,
   },
 };
+
+Object.assign(IMAGE_PROVIDERS, {
+  custom: { id: "custom", label: "OpenAI-compatible endpoint", apiKeyEnv: "PPT_IMAGE_API_KEY",
+    baseUrlEnv: "PPT_IMAGE_BASE_URL", modelEnv: "PPT_IMAGE_MODEL", defaultBaseUrl: "",
+    defaultModel: "", defaultSaveDir: "./assets/custom", auth: "bearer", maxN: 4 },
+  bailian: { id: "bailian", label: "Alibaba Cloud Model Studio", apiKeyEnv: "DASHSCOPE_API_KEY",
+    baseUrlEnv: "DASHSCOPE_BASE_URL", modelEnv: "DASHSCOPE_IMAGE_MODEL", defaultBaseUrl: "",
+    defaultModel: "wan2.6-t2i", defaultSaveDir: "./assets/bailian", auth: "bearer", maxN: 4 },
+  minimax: { id: "minimax", label: "MiniMax", apiKeyEnv: "MINIMAX_API_KEY",
+    baseUrlEnv: "MINIMAX_BASE_URL", modelEnv: "MINIMAX_IMAGE_MODEL", defaultBaseUrl: "https://api.minimax.io/v1",
+    defaultModel: "image-01", defaultSaveDir: "./assets/minimax", auth: "bearer", maxN: 4 },
+});
 
 export const SUPPORTED_IMAGE_PROVIDERS = Object.keys(IMAGE_PROVIDERS);
 
@@ -364,7 +351,7 @@ export function getImageUsageConfig(usage = "card", providerInput = "openai") {
   return {
     usage: SIZE_MAP[usage] ? usage : "card",
     provider,
-    model: providerSpec.model || sizeConfig.model || IMAGE_PROVIDERS[provider].defaultModel,
+    model: providerSpec.model || IMAGE_PROVIDERS[provider].defaultModel,
     size: providerSpec.size || sizeConfig.size,
     aspectRatio: providerSpec.aspectRatio || sizeConfig.aspectRatio,
     imageSize: providerSpec.imageSize || null,
@@ -403,7 +390,7 @@ export function listImageUsages(providerInput) {
 export async function generateSlideImage(params = {}) {
   const provider = resolveImageProvider(params.provider);
   const providerConfig = IMAGE_PROVIDERS[provider];
-  const apiKey = getApiKey(provider);
+  const apiKey = params.apiKey || getApiKey(provider);
 
   if (!apiKey) {
     warnMissingApiKey(provider);
@@ -426,11 +413,7 @@ export async function generateSlideImage(params = {}) {
   const n = clampImageCount(params.n || 1, providerConfig.maxN, provider);
   const saveDir = normalizeSaveDir(params.saveDir || providerConfig.defaultSaveDir);
 
-  if (provider === "google") {
-    return generateGoogleImage({ ...params, prompt, n, usage, sizeConfig, saveDir, apiKey });
-  }
-
-  return generateOpenAiImage({ ...params, prompt, n, usage, sizeConfig, saveDir, apiKey });
+  return generateProviderImage({ ...params, provider, prompt, n, usage, sizeConfig, saveDir, apiKey });
 }
 
 export function resolveImageProvider(provider) {
@@ -478,176 +461,95 @@ export function listImageModels(provider) {
 
   if (normalized === "openai") return openai;
   if (normalized === "google") return google;
-  return [...openai, ...google];
+  const extra = ["bailian", "minimax"].map(provider => ({ provider, id: IMAGE_PROVIDERS[provider].defaultModel }));
+  if (normalized === "custom") return [];
+  if (normalized) return extra.filter(x => x.provider === normalized);
+  return [...openai, ...google, ...extra];
 }
 
 // ---------------------------------------------------------------------------
 // Provider implementations
 // ---------------------------------------------------------------------------
-async function generateOpenAiImage(ctx) {
-  const provider = "openai";
-  const providerSpec = ctx.sizeConfig.providers.openai || {};
-  const model =
-    ctx.model ||
-    process.env[IMAGE_PROVIDERS.openai.modelEnv] ||
-    providerSpec.model ||
-    ctx.sizeConfig.model ||
-    IMAGE_PROVIDERS.openai.defaultModel;
-
-  // Size adaptation: SIZE_MAP presets are pre-validated, user overrides go
-  // through the constraint adapter with a warning when they change.
-  const requestedSize = ctx.size || providerSpec.size || ctx.sizeConfig.size || "1024x1024";
-  const size = adaptSizeForGptImage(requestedSize);
-  if (size !== requestedSize) {
-    console.warn(
-      `[ai-image] gpt-image-2 尺寸 "${requestedSize}" 不满足约束（16 的倍数、最长边 ≤ 3840、比例 ≤ 3:1、总像素 ${GPT_IMAGE_SIZE_CONSTRAINTS.minPixels.toLocaleString()}-${GPT_IMAGE_SIZE_CONSTRAINTS.maxPixels.toLocaleString()}），已适配为 "${size}"`
-    );
-  }
-
-  const body = {
-    model,
-    prompt: ctx.prompt,
-    size,
-    n: ctx.n,
-  };
-  if (ctx.quality !== undefined) body.quality = ctx.quality;
-
-  const data = await postJson(`${getImageBaseUrl(provider)}/images/generations`, {
-    provider,
-    apiKey: ctx.apiKey,
-    body,
-  });
-
-  // gpt-image models always return base64 payloads (b64_json), never URLs.
-  const base64Images = Array.isArray(data.data)
-    ? data.data.map((item) => item.b64_json).filter(Boolean)
-    : [];
-
-  if (base64Images.length === 0) {
-    throw new Error("[ai-image] OpenAI API response did not include b64_json image data");
-  }
-
-  return saveBase64Images(base64Images, ctx, {
-    provider,
-    model,
-    size,
-    aspectRatio: sizeToAspectRatio(size),
-    defaultExt: ".png",
-  });
-}
-
-async function generateGoogleImage(ctx) {
-  const provider = "google";
-  const providerSpec = ctx.sizeConfig.providers.google || {};
-  const model =
-    ctx.model ||
-    process.env[IMAGE_PROVIDERS.google.modelEnv] ||
-    providerSpec.model ||
-    IMAGE_PROVIDERS.google.defaultModel;
-
-  // Aspect-ratio adaptation: SIZE_MAP ratios are all natively supported;
-  // user overrides snap to the nearest supported ratio with a warning.
-  const requestedRatio = ctx.aspectRatio || providerSpec.aspectRatio || ctx.sizeConfig.aspectRatio || "1:1";
-  const aspectRatio = adaptAspectRatioForGemini(requestedRatio);
-  if (aspectRatio !== requestedRatio) {
-    console.warn(
-      `[ai-image] Nano Banana Pro 不支持比例 "${requestedRatio}"，可选: ${GEMINI_IMAGE_ASPECT_RATIOS.join(", ")}，已适配为 "${aspectRatio}"`
-    );
-  }
-
-  const imageSize = normalizeGeminiImageSize(ctx.imageSize || providerSpec.imageSize || "1K");
-
-  const responseFormat = {
-    type: "image",
-    aspect_ratio: aspectRatio,
-    image_size: imageSize,
-  };
-  if (ctx.outputFormat) responseFormat.mime_type = ctx.outputFormat;
-
-  const body = {
-    model,
-    input: [{ type: "text", text: ctx.prompt }],
-    response_format: responseFormat,
-  };
-  if (ctx.seed !== undefined) body.generation_config = { seed: ctx.seed };
-
-  // The Interactions API returns one image per call; loop for n > 1.
-  const images = [];
-  for (let i = 0; i < ctx.n; i++) {
-    const data = await postJson(`${getImageBaseUrl(provider)}/interactions`, {
-      provider,
-      apiKey: ctx.apiKey,
-      body,
-    });
-    const extracted = extractGeminiImages(data);
-    if (extracted.length === 0) {
-      throw new Error("[ai-image] Google API response did not include image data");
-    }
-    images.push(...extracted);
-  }
-
-  const size = geminiPixelSize(aspectRatio, imageSize);
-  return saveBase64Images(images, ctx, {
-    provider,
-    model,
-    size,
-    aspectRatio,
-    imageSize,
-    defaultExt: ".png",
-  });
-}
-
-// ---------------------------------------------------------------------------
-// Helpers: network, saving, metadata
-// ---------------------------------------------------------------------------
-async function postJson(url, { provider, apiKey, body }) {
+// Protocol selection is independent of model IDs; custom gateways use their exact IDs.
+async function generateProviderImage(ctx) {
+  const { provider } = ctx;
   const config = IMAGE_PROVIDERS[provider];
-  const headers =
-    config.auth === "x-goog-api-key"
-      ? { "x-goog-api-key": apiKey, "Content-Type": "application/json" }
-      : { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" };
-
-  const res = await fetch(url, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const errText = await res.text();
-    throw new Error(`${config.label} API ${res.status}: ${errText}`);
+  const protocol = ctx.protocol || (provider === "custom" ? process.env.PPT_IMAGE_PROTOCOL : null)
+    || ({ google: "gemini", bailian: "dashscope", minimax: "minimax" }[provider] || "openai");
+  if (!["openai", "gemini", "dashscope", "minimax"].includes(protocol)) throw new Error("Unknown image protocol");
+  const model = ctx.model || process.env[config.modelEnv] || config.defaultModel;
+  const baseUrl = (ctx.baseUrl || getImageBaseUrl(provider)).replace(/\/+$/, "");
+  const endpoint = ctx.endpoint || (provider === "custom" ? process.env.PPT_IMAGE_ENDPOINT : null);
+  if (!model || (!baseUrl && !endpoint)) throw new Error("[ai-image] Configure model and baseUrl or full endpoint");
+  const size = ctx.size || (provider === "openai" ? ctx.sizeConfig.providers.openai?.size : null) || ctx.sizeConfig.size;
+  const aspectRatio = ctx.aspectRatio || ctx.sizeConfig.aspectRatio;
+  const imageSize = ctx.imageSize || ctx.sizeConfig.providers.google?.imageSize || "1K";
+  let path, body;
+  if (protocol === "openai") {
+    path = "/images/generations";
+    body = { model, prompt: ctx.prompt, n: ctx.n, size: model === "gpt-image-2" ? adaptSizeForGptImage(size) : size };
+    if (ctx.quality) body.quality = ctx.quality;
+  } else if (protocol === "gemini") {
+    path = `/models/${encodeURIComponent(model)}:generateContent`;
+    body = { contents: [{ parts: [{ text: ctx.prompt }] }], generationConfig: {
+      responseModalities: ["TEXT", "IMAGE"], imageConfig: { aspectRatio, imageSize } } };
+  } else if (protocol === "minimax") {
+    path = "/image_generation";
+    body = { model, prompt: ctx.prompt, n: ctx.n, aspect_ratio: aspectRatio, response_format: "base64" };
+  } else {
+    path = "/services/aigc/multimodal-generation/generation";
+    body = { model, input: { messages: [{ role: "user", content: [{ text: ctx.prompt }] }] },
+      parameters: { size: size.replace("x", "*"), n: ctx.n, watermark: false } };
   }
-
-  return res.json();
-}
-
-function extractGeminiImages(data) {
+  if (ctx.seed !== undefined && protocol === "gemini") body.generationConfig.seed = ctx.seed;
+  if (ctx.seed !== undefined && protocol === "minimax") body.seed = ctx.seed;
+  // Provider-specific options are explicit; do not silently rewrite unfamiliar models.
+  body = { ...body, ...(ctx.extraBody || {}) };
+  const url = endpoint || `${baseUrl}${path}`;
+  const parsed = new URL(url);
+  if (!["https:", "http:"].includes(parsed.protocol) || parsed.username || parsed.password) throw new Error("Invalid image endpoint");
+  const timeoutMs = Number(ctx.timeoutMs ?? 120000);
+  if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) throw new Error("timeoutMs must be positive");
   const images = [];
-
-  // Convenience field: base64 of the last generated image.
-  const direct = data?.interaction?.output_image;
-  if (direct?.data) images.push(direct.data);
-
-  // Full form: model_output steps carry content blocks with image data.
-  for (const step of data?.interaction?.steps || []) {
-    for (const block of step?.content || []) {
-      if (block?.type === "image" && block?.data && !images.includes(block.data)) {
-        images.push(block.data);
+  for (let i = 0; i < (protocol === "gemini" ? ctx.n : 1); i++) {
+    const headers = { "Content-Type": "application/json", ...(protocol === "gemini"
+      ? { "x-goog-api-key": ctx.apiKey } : { Authorization: `Bearer ${ctx.apiKey}` }) };
+    const res = await fetch(url, { method: "POST", headers, body: JSON.stringify(body),
+      redirect: "error", signal: AbortSignal.timeout(timeoutMs) });
+    // Avoid echoing upstream bodies, which can contain prompts, credentials or signed URLs.
+    if (!res.ok) throw new Error(`[ai-image] ${provider} HTTP ${res.status}`);
+    const data = await res.json();
+    if (data.error || data.code || (data.base_resp?.status_code && data.base_resp.status_code !== 0)) {
+      throw new Error(`[ai-image] ${provider} reported an API error`);
+    }
+    if (protocol === "openai") images.push(...(data.data || []).map(x => x.b64_json || x.url).filter(Boolean));
+    if (protocol === "minimax") images.push(...(data.data?.image_base64 || data.data?.image_urls || []));
+    if (protocol === "dashscope") {
+      for (const choice of data.output?.choices || []) {
+        images.push(...(choice.message?.content || []).map(x => x.image).filter(Boolean));
+      }
+      if (data.output?.task_id && !images.length) throw new Error("[ai-image] Async DashScope models require a polling adapter; select a synchronous model/region");
+    }
+    if (protocol === "gemini") {
+      for (const candidate of data.candidates || []) for (const part of candidate.content?.parts || []) {
+        const inline = part.inlineData || part.inline_data;
+        if (inline?.data) images.push(`data:${inline.mimeType || inline.mime_type || "image/png"};base64,${inline.data}`);
       }
     }
   }
-
-  return images;
-}
-
-function geminiPixelSize(aspectRatio, imageSize) {
-  const ratio = parseAspectRatio(aspectRatio) || 1;
-  // 1K/2K/4K target the image's long edge; derive the short edge from ratio
-  // and report the nominal pixel footprint for metadata only.
-  const longEdge = imageSize === "4K" ? 3840 : imageSize === "2K" ? 2048 : 1024;
-  const width = ratio >= 1 ? longEdge : Math.round(longEdge * ratio);
-  const height = ratio >= 1 ? Math.round(longEdge / ratio) : longEdge;
-  return `${width}x${height}`;
+  if (!images.length) throw new Error(`[ai-image] ${provider} returned no images`);
+  const encoded = [];
+  for (const value of images) {
+    if (/^https?:\/\//.test(value)) {
+      // Image CDN requests never carry the API authorization header.
+      const res = await fetch(value, { signal: AbortSignal.timeout(timeoutMs) });
+      if (!res.ok) throw new Error(`[ai-image] Image download HTTP ${res.status}`);
+      const mime = res.headers.get("content-type")?.split(";")[0];
+      if (!["image/png", "image/jpeg", "image/webp"].includes(mime)) throw new Error("[ai-image] Download is not a supported image");
+      encoded.push(`data:${mime};base64,${Buffer.from(await res.arrayBuffer()).toString("base64")}`);
+    } else encoded.push(value);
+  }
+  return saveBase64Images(encoded, ctx, { provider, model, size, aspectRatio, imageSize, defaultExt: ".png" });
 }
 
 async function saveBase64Images(images, ctx, meta) {
@@ -656,7 +558,12 @@ async function saveBase64Images(images, ctx, meta) {
   const results = [];
   for (let i = 0; i < images.length; i++) {
     const decoded = decodeBase64Image(images[i], meta.defaultExt || ".png");
-    const file = await writeImageBuffer(decoded.buffer, ctx.saveDir, decoded.ext);
+    const b = decoded.buffer;
+    const ext = b.subarray(0, 8).equals(Buffer.from([137,80,78,71,13,10,26,10])) ? ".png"
+      : b[0] === 255 && b[1] === 216 && b[2] === 255 ? ".jpg"
+      : b.toString("ascii", 0, 4) === "RIFF" && b.toString("ascii", 8, 12) === "WEBP" ? ".webp" : null;
+    if (!ext) throw new Error("[ai-image] Response did not contain PNG, JPEG or WebP image bytes");
+    const file = await writeImageBuffer(b, ctx.saveDir, ext);
 
     results.push(buildImageInfo(ctx, meta, file));
   }
@@ -702,6 +609,10 @@ function buildImageInfo(ctx, meta, file) {
 function normalizeProvider(provider) {
   if (!provider) return null;
   const normalized = String(provider).trim().toLowerCase();
+  if (IMAGE_PROVIDERS[normalized]) return normalized;
+  if (["dashscope", "aliyun"].includes(normalized)) return "bailian";
+  if (normalized === "nano") return "google";
+  if (normalized === "openai-compatible") return "custom";
 
   if (
     normalized === "openai" ||
@@ -725,10 +636,7 @@ function normalizeProvider(provider) {
     return "google";
   }
 
-  console.warn(
-    `[ai-image] 未知 provider "${provider}"，可选: ${SUPPORTED_IMAGE_PROVIDERS.join(", ")}，或 gpt-image / nano-banana-pro`
-  );
-  return null;
+  throw new Error(`[ai-image] Unknown provider "${provider}"; choose ${SUPPORTED_IMAGE_PROVIDERS.join(", ")}`);
 }
 
 function getApiKey(provider) {
@@ -752,7 +660,7 @@ function warnMissingApiKey(provider) {
 
   if (provider === "openai") {
     lines.push("  获取 API Key: https://platform.openai.com/api-keys");
-  } else {
+  } else if (provider === "google") {
     lines.push("  获取 API Key: https://aistudio.google.com/apikey");
   }
 

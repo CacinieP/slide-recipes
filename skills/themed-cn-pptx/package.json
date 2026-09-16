@@ -1,0 +1,6 @@
+{
+  "name": "themed-cn-pptx-skill",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" }
+}

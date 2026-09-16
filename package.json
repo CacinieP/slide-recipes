@@ -1,14 +1,14 @@
 {
-  "name": "ppt-skills",
-  "version": "2.1.0",
-  "description": "Open-source PPT generation skills with CJK-aware PptxGenJS workflows, AI image helpers (GPT Image 2 / Nano Banana Pro), and a render-QA gate.",
+  "name": "slide-recipes",
+  "version": "2.2.0",
+  "description": "Editable commercial slide recipes, 20 semantic palettes, CJK-aware layouts, configurable AI image providers, and render QA.",
   "type": "module",
   "engines": {
     "node": ">=20"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CacinieP/ppt-skills.git"
+    "url": "git+https://github.com/CacinieP/slide-recipes.git"
   },
   "keywords": [
     "pptx",
@@ -26,7 +26,7 @@
     "color:qa": "node skills/themed-cn-pptx/scripts/color-qa.mjs",
     "color:qa:presets": "node scripts/color-qa-presets.mjs",
     "smoke": "node scripts/smoke-test.mjs",
-    "test": "node scripts/validate-skills.mjs && node scripts/smoke-test.mjs && node scripts/color-qa-presets.mjs",
+    "test": "node scripts/validate-skills.mjs && node scripts/smoke-test.mjs && node scripts/color-qa-presets.mjs && node scripts/image-providers-test.mjs && node scripts/commercial-recipes-test.mjs && node scripts/business-elements-test.mjs",
     "demo": "node examples/build_miku_demo.mjs",
     "demo:editorial": "node examples/build_editorial_demo.mjs",
     "demo:darklaunch": "node examples/build_darklaunch_demo.mjs",
@@ -34,15 +34,19 @@
     "qa:render": "node skills/themed-cn-pptx/scripts/render-qa.mjs",
     "qa:cjk": "node skills/themed-cn-pptx/scripts/cjk-overflow-check.mjs",
     "qa:editable": "python3 skills/themed-cn-pptx/scripts/pptx-editable-check.py",
-    "qa:all": "node skills/themed-cn-pptx/scripts/render-qa.mjs examples/slides/output/miku-demo.pptx && node skills/themed-cn-pptx/scripts/render-qa.mjs examples/slides/output/editorial-demo.pptx && node skills/themed-cn-pptx/scripts/render-qa.mjs examples/slides/output/darklaunch-demo.pptx"
+    "qa:all": "node skills/themed-cn-pptx/scripts/render-qa.mjs examples/slides/output/miku-demo.pptx && node skills/themed-cn-pptx/scripts/render-qa.mjs examples/slides/output/editorial-demo.pptx && node skills/themed-cn-pptx/scripts/render-qa.mjs examples/slides/output/darklaunch-demo.pptx",
+    "demo:recipes": "node examples/build_recipe_gallery.mjs",
+    "demo:commercial": "node examples/build_commercial_gallery.mjs",
+    "demo:elements": "node examples/build_business_elements.mjs",
+    "demo:palettes": "node examples/build_palette_gallery.mjs"
   },
   "devDependencies": {
     "pptxgenjs": "^4.0.1",
     "yaml": "^2.9.0"
   },
   "bugs": {
-    "url": "https://github.com/CacinieP/ppt-skills/issues"
+    "url": "https://github.com/CacinieP/slide-recipes/issues"
   },
-  "homepage": "https://github.com/CacinieP/ppt-skills#readme",
+  "homepage": "https://github.com/CacinieP/slide-recipes#readme",
   "license": "MIT"
 }

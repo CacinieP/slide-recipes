@@ -49,6 +49,12 @@ jobs:
       - name: Run preset palette contrast QA
         run: node scripts/color-qa-presets.mjs
 
+      - name: Validate image providers and commercial recipes
+        run: |
+          node scripts/image-providers-test.mjs
+          node scripts/commercial-recipes-test.mjs
+          node scripts/business-elements-test.mjs
+
       - name: Build all demo PPTX decks
         run: |
           node examples/build_miku_demo.mjs

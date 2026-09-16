@@ -22,7 +22,7 @@ const { default: pptxgen } = await import("pptxgenjs");
 const { build } = await import(pathToFileURL(recipePath).href);
 
 const pres = new pptxgen();
-build(pres, { deckLabel: "Dark Launch · ppt-skills" });
+build(pres, { deckLabel: "Dark Launch · slide-recipes" });
 
 const outDir = resolve(__dirname, "slides", "output");
 await mkdir(outDir, { recursive: true });

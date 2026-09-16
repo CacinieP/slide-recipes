@@ -128,7 +128,7 @@ export function hairlineCard(pres, slide, { x, y, w, h }) {
 export function build(pres, opts = {}) {
   pres.layout = "LAYOUT_16x9";
   const m = marks(pres, theme);
-  const label = opts.deckLabel || "Editorial Grid · ppt-skills";
+  const label = opts.deckLabel || "Editorial Grid · slide-recipes";
 
   // Slide 1 — Cover (Cover contract: stripe + title, no badge)
   const cover = pres.addSlide();
@@ -151,7 +151,7 @@ export function build(pres, opts = {}) {
     x: 1.84, y: 3.95, w: 0.32, h: 0.04,
     fill: { color: theme.accentDeep }, line: { color: theme.accentDeep, width: 0 },
   });
-  cover.addText("ppt-skills · github.com/CacinieP/ppt-skills", {
+  cover.addText("slide-recipes · github.com/CacinieP/slide-recipes", {
     x: 0.6, y: 4.6, w: 8, h: 0.3,
     fontSize: 11, fontFace: FONT_LATIN, color: theme.muted, margin: 0,
   });
@@ -235,7 +235,7 @@ export function build(pres, opts = {}) {
     x: 0.6, y: 1.95, w: 8.8, h: 1.6,
     fontSize: 22, fontFace: FONT_CJK, color: theme.ink, lineSpacingMultiple: 1.4, margin: 0,
   });
-  s4.addText("— ppt-skills editorial recipe", {
+  s4.addText("— slide-recipes editorial recipe", {
     x: 0.6, y: 3.7, w: 8.8, h: 0.35,
     fontSize: 11, fontFace: FONT_LATIN, color: theme.muted, margin: 0,
   });
@@ -285,11 +285,11 @@ export function build(pres, opts = {}) {
     x: 0.6, y: 1.75, w: 8.8, h: 1.6,
     fontSize: 36, fontFace: FONT_CJK, bold: true, color: theme.white, lineSpacingMultiple: 1.15, margin: 0,
   });
-  s6.addText("npx skills add https://github.com/CacinieP/ppt-skills --skill themed-cn-pptx", {
+  s6.addText("npx skills add https://github.com/CacinieP/slide-recipes --skill themed-cn-pptx", {
     x: 0.6, y: 4.1, w: 8.8, h: 0.4,
     fontSize: 12, fontFace: "Consolas", color: theme.accent, margin: 0,
   });
-  s6.addText("github.com/CacinieP/ppt-skills", {
+  s6.addText("github.com/CacinieP/slide-recipes", {
     x: 0.6, y: 4.6, w: 8.8, h: 0.3,
     fontSize: 11, fontFace: FONT_LATIN, color: theme.line, margin: 0,
   });
