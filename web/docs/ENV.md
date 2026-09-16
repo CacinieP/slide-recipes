@@ -23,7 +23,7 @@
 ### 步骤
 
 ```bash
-cd ~/Developer/pptx-web
+cd /path/to/slide-recipes/web
 
 # 1) 复制示例文件
 cp .env.example .env.local

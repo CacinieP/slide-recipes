@@ -128,7 +128,7 @@ export default function Home() {
             </div>
             <div>
               <h1 className="text-sm font-semibold tracking-tight text-ink">
-                pptx-web
+                Slide Recipes
               </h1>
               <p className="mono-label">AI · PPTX · DESIGN SYSTEM</p>
             </div>

@@ -28,7 +28,7 @@ export async function renderPptx(plan: DeckPlan, ctx: {
   const PptxGenJS = mod.default ?? mod;
   const pres: AnyPptx = new PptxGenJS();
   pres.layout = "LAYOUT_16x9";
-  pres.author = "pptx-web";
+  pres.author = "Slide Recipes";
   pres.title = plan.title;
 
   const { theme, fonts, style } = ctx;

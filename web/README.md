@@ -1,4 +1,4 @@
-# pptx-web
+# Slide Recipes
 
 [`pptx-generator`](https://github.com/CacinieP/slide-recipes/) skill 的本地可视化入口:在浏览器里填表单,本机用 PptxGenJS 按 skill 的设计系统生成真正的 `.pptx` 文件。
 
