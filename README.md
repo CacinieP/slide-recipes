@@ -238,7 +238,7 @@ See the [palette catalog](skills/themed-cn-pptx/references/palette-catalog.md) f
 
 Use one primary emphasis color for charts. Pair status colors with words or symbols. Decorative `line` colors must not be the only encoding for essential data.
 
-### Ready-to-use palettes
+### Five foundation palettes (plus 15 distinctive palettes above)
 
 | ID | Prompt direction | Accent | Dark background |
 | --- | --- | --- | --- |
