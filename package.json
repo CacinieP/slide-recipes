@@ -26,7 +26,7 @@
     "color:qa": "node skills/slide-recipes/scripts/color-qa.mjs",
     "color:qa:presets": "node scripts/color-qa-presets.mjs",
     "smoke": "node scripts/smoke-test.mjs",
-    "test": "node scripts/validate-skills.mjs && node scripts/smoke-test.mjs && node scripts/color-qa-presets.mjs && node scripts/image-providers-test.mjs && node scripts/commercial-recipes-test.mjs && node scripts/business-elements-test.mjs && node scripts/deck-schema-test.mjs",
+    "test": "node scripts/validate-skills.mjs && node scripts/smoke-test.mjs && node scripts/color-qa-presets.mjs && node scripts/image-providers-test.mjs && node scripts/commercial-recipes-test.mjs && node scripts/business-elements-test.mjs && node scripts/deck-schema-test.mjs && node scripts/image-prompt-schema-test.mjs",
     "demo": "node examples/build_miku_demo.mjs",
     "demo:editorial": "node examples/build_editorial_demo.mjs",
     "demo:darklaunch": "node examples/build_darklaunch_demo.mjs",

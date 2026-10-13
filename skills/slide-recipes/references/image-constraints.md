@@ -1,62 +1,91 @@
-# Image Generation Constraints
+# Image Generation Constraints & Prompt Schema
 
 Use this reference before calling `generateSlideImage()`. The image model should create visual assets, not slide layout.
 
-## Image Manifest
+## 1. 结构化生图 Prompt Schema
 
-Declare each generated image before prompting:
+为保证全套 PPT 的配图风格统一、并为文字保留准确的留白区域，系统提供标准化的 `ImagePromptSchema`。可在 `generateSlideImage({ imagePrompt: schema })` 或 Slide JSON 中直接声明：
 
 ```json
 {
+  "subject": "translucent geometric crystal prisms refracting soft data rays",
+  "stylePreset": "editorial-minimal",
+  "medium": "editorial architectural 3D render",
+  "composition": "dynamic off-center arrangement placed on the right half",
+  "negativeSpace": "left-50",
+  "palette": ["#123936", "#28664D", "#D8F0A3"],
+  "colorMood": "cool forest green and warm sandstone ambient gradient",
+  "lighting": "soft diffused directional studio light with gentle ambient shadow",
+  "materials": ["frosted glass", "matte ceramic", "brushed aluminum"],
   "usage": "cover",
-  "provider": "openai",
-  "logicalRatio": "16:9",
-  "size": "1360x768",
-  "safeZone": "left 45% title-safe",
-  "cropPolicy": "none",
-  "allowText": false,
-  "styleId": "cjk-swiss-accent",
-  "negativePrompt": "text, logo, watermark, QR code, slide title, UI chrome"
+  "allowText": false
 }
 ```
 
-## Usage Mapping
+### 核心字段规范
 
-| Usage | Need | GPT Image 2 | Nano Banana Pro | Notes |
-| --- | --- | --- | --- | --- |
-| `cover` | full slide cover | `1360x768` | `16:9 + 2K` | must leave title-safe area |
-| `coverOverlay` | cover under text | `1360x768` | `16:9 + 2K` | always add 40-55% overlay |
-| `hero` | top visual band | `1360x768` | `16:9 + 2K` | crop to about 10 x 3 in |
-| `bannerWide` | ultra-wide banner | `1344x576` (native 21:9) | `21:9 + 2K` | no crop needed on either provider |
-| `ultraWideHero` | wide title visual | `1344x576` (native 21:9) | `21:9 + 2K` | keep title side clean |
-| `sideStrip` | vertical side art | `768x1360` | `9:16 + 2K` | no text or faces near crop edges |
-| `card` | square card art | `1024x1024` | `1:1 + 1K` | no embedded labels |
-| `cardTall` | tall card art | `896x1184` | `3:4 + 1K` | good for process/persona cards |
-| `cardWide` | wide card art | `1184x896` | `4:3 + 1K` | good for project preview |
-| `showcase` | product/project panel | `1184x896` | `4:3 + 2K` | avoid fake app chrome unless requested |
-| `phoneMockup` | mobile mockup | `768x1360` | `9:16 + 1K` | use real screenshots when available |
-| `icon` | small illustrative icon | `1024x1024` (adapted from 512x512) | `1:1 + 1K` | simple silhouette, no tiny details |
+| 字段 | 类型 | 说明与规范 |
+|---|---|---|
+| `subject` | `string` *(必填)* | 核心主体视觉描述，聚焦物体、概念或场景，而非整页幻灯片。 |
+| `stylePreset` | `string` | 预设风格：`editorial-minimal`、`corporate-clean`、`tech-futuristic`、`studio-monochrome`、`warm-education`。 |
+| `medium` | `string` | 视觉媒介：如 `3D render`、`studio photography`、`isometric illustration`。 |
+| `composition` | `string` | 构图景别：如 `rule-of-thirds`、`isometric perspective`、`close-up macro`。 |
+| `negativeSpace` | `string` | **排版安全区（留白）**：`left-50`（左半留白）、`right-50`、`top-40`、`bottom-40`、`surrounding`。 |
+| `palette` | `string[]` | 幻灯片色板 HEX 数组，引导图像与 PPT 主题色系严密呼应。 |
+| `colorMood` | `string` | 光影色调氛围描述，如 `"deep navy with frost cyan accents"`。 |
+| `lighting` | `string` | 光照特征：如 `"soft diffused daylight"`、`"rim lighting with dark backdrop"`。 |
+| `materials` | `string[]` | 材质触感：如 `["matte clay", "frosted glass", "smooth aluminium"]`。 |
+| `usage` | `string` | 版式槽位（见下表），自动推导建议宽高比与像素。 |
+| `allowText` | `boolean` | **严格禁字约束**，默认 `false`。严禁在画面中生成任何文字或伪 UI。 |
+| `avoidConcepts`| `string[]` | 商业负面回避词，如 `["hallucinated text", "distorted faces", "fake logos"]`。 |
 
-## Prompt Rules
+---
 
-- Include subject, style, composition, color family, safe-zone, and forbidden content.
-- State "no text, no logo, no watermark, no QR code" unless the image intentionally needs one.
-- For cover/hero: ask for negative space where PPTX text will sit.
-- For IP themes: request inspired-by colors/motifs, not official character likeness, unless rights are provided.
-- Keep image language consistent across the whole deck: same lighting, lens, material, and abstraction level.
+## 2. 编译为原生提示词
 
-## Negative Prompt Defaults
+通过 `compileImagePrompt(schema)` 自动将结构化 Schema 编译为大模型正向与负向提示词：
 
-Use this baseline unless the user needs otherwise:
+```js
+import { compileImagePrompt } from '../lib/image-prompt-schema.js';
 
-```text
-text, typography, logo, watermark, QR code, signature, page number, slide title, chart labels, fake UI chrome, distorted hands, extra limbs, low resolution, blurry, noisy, cluttered background
+const { prompt, negativePrompt, usage, aspectRatio } = compileImagePrompt({
+  subject: 'interconnected nodes floating in architectural balance',
+  stylePreset: 'corporate-clean',
+  negativeSpace: 'left-50',
+  palette: ['142B40', '006F73'],
+  usage: 'cover'
+});
 ```
 
-## Provider Constraints
+编译出的 Prompt 自动强化留白与禁字指令：
+> `A high-end studio photography depicting interconnected nodes floating in architectural balance. Composition: authoritative, organized balance. Layout requirement: clean uncluttered empty negative space on the left 50% for typography overlay. Color palette: harmonized tones of #142B40, #006F73. STRICT REQUIREMENT: Absolutely NO text, NO words, NO letters, NO numbers, NO watermark, NO logo.`
 
-- OpenAI `gpt-image-2` is the recommended default: exact PPT-friendly pixel sizes pass through directly (both edges multiples of 16, max edge 3840, long:short <= 3:1, total pixels 655,360-8,294,400); out-of-range sizes are adapted by `adaptSizeForGptImage()` with a warning.
-- `icon` 512x512 is below the gpt-image-2 minimum pixel count, so it is generated at 1024x1024 (1:1 unchanged); Nano Banana Pro has no sub-1K output either.
-- `bannerWide` and `ultraWideHero` generate natively at 21:9 (`1344x576` on OpenAI, `21:9` on Google) — no crop needed; keep important content inside the safe zone anyway.
-- Google `gemini-3-pro-image` (Nano Banana Pro) uses `aspect_ratio` + `image_size` (`1K/2K/4K`, uppercase K); unsupported ratios snap to the numerically nearest supported ratio.
-- Both providers return base64 data; the helper always writes local files under `assets/<provider>/` and embeds those into PPTX.
+---
+
+## 3. Usage 槽位与尺寸映射
+
+| Usage | 需求场景 | GPT Image 2 | Nano Banana Pro | 默认安全区 |
+|---|---|---|---|---|
+| `cover` | 全幅幻灯片封面 | `1360x768` (16:9) | `16:9 + 2K` | `left-50`（左侧标题安全区） |
+| `coverOverlay` | 带文字叠加的背景 | `1360x768` (16:9) | `16:9 + 2K` | 叠加 40-55% 遮罩层 |
+| `hero` | 顶部宽幅横幅 | `1360x768` (16:9) | `16:9 + 2K` | 建议留白 35% |
+| `bannerWide` | 21:9 超宽横条 | `1344x576` (21:9) | `21:9 + 2K` | 两端留白 |
+| `ultraWideHero`| 宽幅标题配图 | `1344x576` (21:9) | `21:9 + 2K` | 保持标题侧纯净 |
+| `sideStrip` | 侧栏纵向画带 | `768x1360` (9:16) | `9:16 + 2K` | 边缘无裁切主体 |
+| `card` | 1:1 正方形卡片配图 | `1024x1024` (1:1) | `1:1 + 1K` | 主体居中，周围留白 |
+| `cardTall` | 3:4 竖版卡片配图 | `896x1184` (3:4) | `3:4 + 1K` | 适合流程/人物概念图 |
+| `cardWide` | 4:3 横版卡片配图 | `1184x896` (4:3) | `4:3 + 1K` | 适合产品概览 |
+| `showcase` | 产品/成果展示画廊 | `1184x896` (4:3) | `4:3 + 2K` | 无虚假 UI 边框 |
+| `phoneMockup` | 移动端概念展示 | `768x1360` (9:16) | `9:16 + 1K` | 优先真实截图，非则纯概念 |
+| `icon` | 独立几何示意图标 | `1024x1024` (1:1) | `1:1 + 1K` | 极简剪影，无细碎杂点 |
+
+---
+
+## 4. 商业提示词负向底线 (Negative Defaults)
+
+```text
+text, typography, letters, words, slide title, watermark, logo, barcode, QR code, fake UI chrome, buttons, chart labels, messy details, low resolution, blurry, distorted geometry, extra fingers, noisy background
+```
+
+- **严禁文字**：所有正式文字、数据指标、图表必须由 PPTX 原生形状和文本框提供，绝对不能在生图中印制不可编辑文字。
+- **一致性**：整套演示文稿所有配图必须复用相同的 `stylePreset`、`lighting` 与 `materials`，避免不同页面画风割裂。

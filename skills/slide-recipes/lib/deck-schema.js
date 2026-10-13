@@ -3,6 +3,8 @@
  * 规范化 18 类商业元素/版式以及 9 套 Recipe，供 Skill、Web API 与 LLM 统一使用。
  */
 
+import { validateImagePromptSchema } from './image-prompt-schema.js';
+
 export const SUPPORTED_RECIPE_IDS = [
   'investor-signal',
   'editorial-proposal',
@@ -70,6 +72,16 @@ export function validateSlide(slide, index = 0) {
   // 标题通常需要是字符串（除了少数特殊过渡页）
   if (slide.title !== undefined && typeof slide.title !== 'string') {
     errors.push(`${prefix} title 必须是字符串`);
+  }
+
+  // 生图提示词校验 (支持字符串或结构化 ImagePromptSchema)
+  if (slide.imagePrompt !== undefined) {
+    if (typeof slide.imagePrompt === 'object' && slide.imagePrompt !== null) {
+      const imgErrors = validateImagePromptSchema(slide.imagePrompt);
+      imgErrors.forEach(e => errors.push(`${prefix} ${e}`));
+    } else if (typeof slide.imagePrompt !== 'string') {
+      errors.push(`${prefix} imagePrompt 必须是字符串或结构化 ImagePromptSchema 对象`);
+    }
   }
 
   switch (slide.type) {

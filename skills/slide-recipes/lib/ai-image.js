@@ -7,6 +7,9 @@ import { writeFile, mkdir } from "node:fs/promises";
 import { readFileSync } from "node:fs";
 import { randomBytes } from "node:crypto";
 import { resolve, join, isAbsolute } from "node:path";
+import { compileImagePrompt, validateImagePromptSchema } from "./image-prompt-schema.js";
+
+export { compileImagePrompt, validateImagePromptSchema };
 
 // ---------------------------------------------------------------------------
 // .env auto-loader (runs once on import, zero dependencies)
@@ -397,12 +400,24 @@ export async function generateSlideImage(params = {}) {
     return null;
   }
 
-  const prompt = String(params.prompt || "").trim();
+  let prompt = params.prompt;
+  let usage = params.usage;
+  let aspectRatio = params.aspectRatio;
+
+  if (params.imagePrompt || (params.prompt && typeof params.prompt === "object")) {
+    const rawSchema = params.imagePrompt || params.prompt;
+    const compiled = compileImagePrompt(rawSchema, { defaultUsage: usage });
+    prompt = compiled.prompt;
+    usage = compiled.usage;
+    aspectRatio = aspectRatio || compiled.aspectRatio;
+  }
+
+  prompt = String(prompt || "").trim();
   if (!prompt) {
     throw new Error("[ai-image] prompt is required when an API key is configured");
   }
 
-  const usage = params.usage || "card";
+  usage = usage || "card";
   const sizeConfig = SIZE_MAP[usage] || SIZE_MAP.card;
   if (!SIZE_MAP[usage]) {
     console.warn(

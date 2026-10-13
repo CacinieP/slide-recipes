@@ -86,6 +86,25 @@ export interface SlidePlan {
   outcome?: string;
   action?: string;
   contact?: string;
+  imagePrompt?: string | ImagePromptSchema;
+}
+
+/** Structured AI image generation prompt schema. */
+export interface ImagePromptSchema {
+  subject: string;
+  medium?: string;
+  stylePreset?: "editorial-minimal" | "corporate-clean" | "tech-futuristic" | "studio-monochrome" | "warm-education";
+  composition?: string;
+  negativeSpace?: "left-50" | "right-50" | "top-40" | "bottom-40" | "center-safe" | "surrounding" | string;
+  palette?: string[];
+  colorMood?: string;
+  lighting?: string;
+  materials?: string[];
+  usage?: string;
+  aspectRatio?: string;
+  allowText?: boolean;
+  negativePrompt?: string;
+  avoidConcepts?: string[];
 }
 
 /** A structured deck plan returned by the LLM. */
