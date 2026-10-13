@@ -16,7 +16,7 @@ export async function renderPptx(
     style: StyleMetrics;
     language: "zh-CN" | "en-US";
   },
-): Promise<Buffer> {
+): Promise<Blob | Buffer> {
   const mod: any = await import("pptxgenjs");
   const PptxGenJS = mod.default ?? mod;
   const pres: AnyPptx = new PptxGenJS();
@@ -29,6 +29,13 @@ export async function renderPptx(
   plan.slides.forEach((slide, idx) => {
     renderSlide(pres, slide, idx, { theme, fonts, style });
   });
+
+  // Check if running in browser vs node
+  const isBrowser = typeof window !== "undefined" && typeof window.document !== "undefined";
+  if (isBrowser) {
+    const blob = await pres.write({ outputType: "blob" });
+    return blob as Blob;
+  }
 
   const result = await pres.write({ outputType: "nodebuffer" });
   return Buffer.isBuffer(result) ? result : Buffer.from(result as ArrayBuffer);

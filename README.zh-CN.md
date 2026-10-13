@@ -2,13 +2,14 @@
 
 [English](README.md) | **简体中文**
 
-[提示词指南](#prompt-guide) · [配色提示词](#color-guide) · [商业元素 API](skills/slide-recipes/references/business-elements.md)
+[在线 Web 工作台 (Live)](https://caciniep.github.io/slide-recipes/) · [提示词指南](#prompt-guide) · [配色提示词](#color-guide) · [商业元素 API](skills/slide-recipes/references/business-elements.md)
 
 <p align="center">
   <img src="docs/img/hero-commercial.jpg" alt="Slide Recipes 新版商业样例：投资汇报、咨询提案、创意工作室" width="820" />
 </p>
 
 <p align="center">
+  <a href="https://caciniep.github.io/slide-recipes/"><img src="https://img.shields.io/badge/Web%20%E5%B7%A5%E4%BD%9C%E5%8F%B0-%E5%9C%A8%E7%BA%BF%E4%BD%93%E9%AA%8C-gold?style=flat-square" alt="Web Studio" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/CacinieP/slide-recipes?style=flat-square" alt="License" /></a>
   <a href="https://github.com/CacinieP/slide-recipes/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/CacinieP/slide-recipes/ci.yml?branch=main&label=CI&style=flat-square" alt="CI" /></a>
   <img src="https://img.shields.io/badge/skills-1%20released-39c5bb?style=flat-square" alt="Skills" />
@@ -20,7 +21,7 @@
 
 适合经营汇报、客户提案、投资沟通和品牌展示。内置 23 类商业页面/元素 API、统一 DeckSchema、结构化生图 Prompt Schema、中文排版规则、可配置 AI 配图与渲染检查。先看真实生成样例，再复制提示词开始。
 
-[下载新版](https://github.com/CacinieP/slide-recipes/releases/latest) · [看样例](#samples) · [复制提示词](#prompt-guide) · [传播素材](docs/share-kit.md)
+[🚀 访问在线 Web 工作台](https://caciniep.github.io/slide-recipes/) · [下载新版](https://github.com/CacinieP/slide-recipes/releases/latest) · [看样例](#samples) · [复制提示词](#prompt-guide) · [传播素材](docs/share-kit.md)
 
 ---
 

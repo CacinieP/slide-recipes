@@ -2,13 +2,14 @@
 
 **English** | [简体中文](README.zh-CN.md)
 
-[Prompt guide](#prompt-guide) · [Color prompts](#color-guide) · [Business elements](skills/slide-recipes/references/business-elements.md)
+[Web Studio (Live)](https://caciniep.github.io/slide-recipes/) · [Prompt guide](#prompt-guide) · [Color prompts](#color-guide) · [Business elements](skills/slide-recipes/references/business-elements.md)
 
 <p align="center">
   <img src="docs/img/hero-commercial.jpg" alt="Slide Recipes — investor, consulting and studio presentation samples" width="820" />
 </p>
 
 <p align="center">
+  <a href="https://caciniep.github.io/slide-recipes/"><img src="https://img.shields.io/badge/Web%20Studio-Online%20Demo-gold?style=flat-square" alt="Web Studio" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/github/license/CacinieP/slide-recipes?style=flat-square" alt="License" /></a>
   <a href="https://github.com/CacinieP/slide-recipes/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/CacinieP/slide-recipes/ci.yml?branch=main&label=CI&style=flat-square" alt="CI" /></a>
   <img src="https://img.shields.io/badge/skills-1%20released-39c5bb?style=flat-square" alt="Skills" />
@@ -20,7 +21,7 @@
 
 For business reviews, client proposals, investor updates and brand presentations. Includes 23 business page/element APIs, unified DeckSchema, structured image prompt schema, CJK-aware layout, configurable AI images and render checks. See generated samples, then copy a prompt to start.
 
-[Download](https://github.com/CacinieP/slide-recipes/releases/latest) · [Samples](#samples) · [Copy a prompt](#prompt-guide) · [Share kit](docs/share-kit.md)
+[🚀 Open Web Studio](https://caciniep.github.io/slide-recipes/) · [Download](https://github.com/CacinieP/slide-recipes/releases/latest) · [Samples](#samples) · [Copy a prompt](#prompt-guide) · [Share kit](docs/share-kit.md)
 
 ---
 

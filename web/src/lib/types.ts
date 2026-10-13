@@ -147,7 +147,14 @@ export interface FontPair {
   body: string;
 }
 
-/** Form payload sent from the client to POST /api/generate. */
+/** LLM service connection parameters (three essentials). */
+export interface ModelConfig {
+  baseUrl: string;
+  apiKey: string;
+  model: string;
+}
+
+/** Form payload sent from the client to generate. */
 export interface GenerateOptions {
   topic: string;
   audience: string;
@@ -159,6 +166,8 @@ export interface GenerateOptions {
   styleRecipe: StyleRecipe;
   includeCode: boolean;
   includeChart: boolean;
+  modelConfig?: ModelConfig;
+  customOutlineJson?: string;
 }
 
 /** Numeric layout knobs derived from StyleRecipe (units: inches). */
