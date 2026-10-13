@@ -2,7 +2,7 @@
 
 > 从 [Nord](https://github.com/arcticicestudio/nord)、[Catppuccin](https://github.com/catppuccin/catppuccin)、[Radix Colors](https://github.com/radix-ui/colors)、[Adobe Leonardo](https://github.com/adobe/leonardo) 等成熟设计系统提炼的 PPT 配色方法论。
 > 
-> 本文档是 `themed-cn-pptx` skill 的设计参考附录。
+> 本文档是 `slide-recipes` skill 的设计参考附录。
 
 ---
 

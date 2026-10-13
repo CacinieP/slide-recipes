@@ -22,7 +22,7 @@
  *
  *   2. As a library for YOUR deck (the intended way to ship real content):
  *        import { theme, overlay, FONT_CJK, FONT_LATIN } from
- *          "./skills/themed-cn-pptx/recipes/recipe-dark-launch.mjs";
+ *          "./skills/slide-recipes/recipes/recipe-dark-launch.mjs";
  *        // overlay(pres, slide, { opacity: 45 }) over any background image
  *        // ... author your own slides with the locked theme + overlay().
  *        //     Do NOT call build().

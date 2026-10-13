@@ -3,8 +3,8 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import pptxgen from 'pptxgenjs';
-import { readZip } from '../skills/themed-cn-pptx/lib/zip-reader.js';
-import { createCommercialRecipe, commercialRecipes } from '../skills/themed-cn-pptx/recipes/recipe-commercial.mjs';
+import { readZip } from '../skills/slide-recipes/lib/zip-reader.js';
+import { createCommercialRecipe, commercialRecipes } from '../skills/slide-recipes/recipes/recipe-commercial.mjs';
 import { buildCommercialDemo } from '../examples/build_commercial_gallery.mjs';
 const luminance = hex => {
  const v = hex.match(/../g).map(v => parseInt(v,16)/255).map(v => v <= .04045 ? v/12.92 : ((v+.055)/1.055)**2.4);

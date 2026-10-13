@@ -1,7 +1,7 @@
 import pptxgen from 'pptxgenjs';
 import { mkdir } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
-import { createRecipe } from '../skills/themed-cn-pptx/recipes/recipe-collection.mjs';
+import { createRecipe } from '../skills/slide-recipes/recipes/recipe-collection.mjs';
 const pres = new pptxgen();
 const scenarios = [
   ['research-report', '研究报告', '先展示证据，再解释结论', '让证据支撑判断', '图表区用于真实研究数据', '结论应包含适用条件与不确定性。示例空白区可替换为真实图表。'],

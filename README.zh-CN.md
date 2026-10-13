@@ -2,7 +2,7 @@
 
 [English](README.md) | **简体中文**
 
-[提示词指南](#prompt-guide) · [配色提示词](#color-guide) · [商业元素 API](skills/themed-cn-pptx/references/business-elements.md)
+[提示词指南](#prompt-guide) · [配色提示词](#color-guide) · [商业元素 API](skills/slide-recipes/references/business-elements.md)
 
 <p align="center">
   <img src="docs/img/hero-commercial.jpg" alt="Slide Recipes 新版商业样例：投资汇报、咨询提案、创意工作室" width="820" />
@@ -46,7 +46,7 @@
 ### 复制这段，做你的版本
 
 ```text
-使用 themed-cn-pptx，将 [材料路径] 做成 10 页中文客户提案。
+使用 slide-recipes，将 [材料路径] 做成 10 页中文客户提案。
 参考 editorial-proposal 样例，改用 aubergine-lime 茄紫青柠配色。
 面向业务决策者，包含执行摘要、KPI、方案对比、流程、甘特图和下一步。
 每页用结论做标题；缺失数据标注待补充，不编造客户、业绩或证言。
@@ -142,10 +142,10 @@ npm run demos   # 一次构建全部三套 demo（无需 key）
 **或直接安装技能：**
 
 ```bash
-npx skills add https://github.com/CacinieP/slide-recipes --skill themed-cn-pptx
+npx skills add https://github.com/CacinieP/slide-recipes --skill slide-recipes
 ```
 
-> 安装后即为自包含：`SKILL.md`、`lib/`、`recipes/`、`references/` **以及渲染 QA 门禁（`scripts/`）**一起随技能安装，所以在 `~/.agents/skills/themed-cn-pptx/`（或 `~/.pi/agent/skills/`、`.claude/skills/`）里直接用 `/skill:themed-cn-pptx` 就能跑 `render-qa`、`cjk-overflow-check`、`color-qa`、`pptx-editable-check`，不需要 clone 本仓库。只有生成 deck 需要的 `pptxgenjs` 仍要在你自己的工程里 `npm i`。标准 `pptx` skill（Anthropic 出品）只是**可选搭配**而非依赖——它的许可禁止再分发，所以本仓库刻意不代为打包，需要请自行从官方渠道获取。
+> 安装后即为自包含：`SKILL.md`、`lib/`、`recipes/`、`references/` **以及渲染 QA 门禁（`scripts/`）**一起随技能安装，所以在 `~/.agents/skills/slide-recipes/`（或 `~/.pi/agent/skills/`、`.claude/skills/`）里直接用 `/skill:slide-recipes` 就能跑 `render-qa`、`cjk-overflow-check`、`color-qa`、`pptx-editable-check`，不需要 clone 本仓库。只有生成 deck 需要的 `pptxgenjs` 仍要在你自己的工程里 `npm i`。标准 `pptx` skill（Anthropic 出品）只是**可选搭配**而非依赖——它的许可禁止再分发，所以本仓库刻意不代为打包，需要请自行从官方渠道获取。
 
 ---
 
@@ -159,7 +159,7 @@ npx skills add https://github.com/CacinieP/slide-recipes --skill themed-cn-pptx
 ### 1. 一次生成完整提案
 
 ```text
-使用 themed-cn-pptx，把[材料路径/粘贴内容]做成 12 页中文商业提案。
+使用 slide-recipes，把[材料路径/粘贴内容]做成 12 页中文商业提案。
 受众：[客户管理层]；目的：[批准试点]；演讲时间：[15 分钟]；场景：[会议投影]。
 使用 editorial-proposal，配色 navy-teal。每页标题写成一个明确结论。
 内容包括：执行摘要、客户问题、方案、流程、证据、案例、时间计划、团队、服务范围、报价、下一步。
@@ -218,7 +218,7 @@ KPI 显示当前值、对比期、变化和统计口径；区分百分比与百�
 
 ![商业元素预览](docs/img/business-elements.jpg)
 
-完整字段与数据限制见 [商业元素 API](skills/themed-cn-pptx/references/business-elements.md)。运行 `npm run demo:elements` 查看 10 页示例。
+完整字段与数据限制见 [商业元素 API](skills/slide-recipes/references/business-elements.md)。运行 `npm run demo:elements` 查看 10 页示例。
 
 <a id="color-guide"></a>
 
@@ -264,7 +264,7 @@ C espresso-ice（咖啡冰蓝）。先用同一页 KPI 仪表盘比较，再选�
 如需自定义品牌色，先校验角色色对；不通过时加深文字色并展示调整前后 HEX。
 ```
 
-完整角色值与可复制调用见 [配色目录](skills/themed-cn-pptx/references/palette-catalog.md)。
+完整角色值与可复制调用见 [配色目录](skills/slide-recipes/references/palette-catalog.md)。
 
 ## 配色提示词指南
 
@@ -374,7 +374,7 @@ const r = createCommercialRecipe(pres, 'editorial-proposal', {
 
 ## 🎨 可配置 AI 配图
 
-支持 OpenAI、Google/Nano、百炼同步 API、MiniMax 和自定义 endpoint。Codex 会话有内置生图工具时，也可生成图片后放入页面。完整参数与使用步骤见 [配图配置指南](skills/themed-cn-pptx/references/image-providers.md)。
+支持 OpenAI、Google/Nano、百炼同步 API、MiniMax 和自定义 endpoint。Codex 会话有内置生图工具时，也可生成图片后放入页面。完整参数与使用步骤见 [配图配置指南](skills/slide-recipes/references/image-providers.md)。
 
 ```dotenv
 PPT_IMAGE_PROVIDER=custom
@@ -450,7 +450,7 @@ slide-recipes/
       miku-demo.pptx  editorial-demo.pptx  darklaunch-demo.pptx
   scripts/            # 仅仓库开发/CI 工具（不会随技能安装）
     validate-skills.mjs  smoke-test.mjs  color-qa-presets.mjs
-  skills/themed-cn-pptx/          # ← 这个目录里的东西就是 npx skills add 安装的全部内容
+  skills/slide-recipes/          # ← 这个目录里的东西就是 npx skills add 安装的全部内容
     SKILL.md
     scripts/    render-qa.mjs  cjk-overflow-check.mjs  color-qa.mjs  pptx-editable-check.py
     references/ aesthetic-rules.md  image-constraints.md  layout-slots.md  design-principles.md
@@ -487,9 +487,9 @@ skills/<skill-name>/examples/     # 可选构建脚本
 ## Codex · Recipes & custom image APIs
 
 The recipe collection includes research-report, product-story, magazine-story and roadmap-brief.
-See [recipe catalog](skills/themed-cn-pptx/references/recipe-catalog.md) for content-driven builders and aesthetic constraints.
+See [recipe catalog](skills/slide-recipes/references/recipe-catalog.md) for content-driven builders and aesthetic constraints.
 
-Install the complete skill in Codex with the existing skills installer, or copy `skills/themed-cn-pptx` into your Codex skills directory. Restart/reload skill discovery if needed.
+Install the complete skill in Codex with the existing skills installer, or copy `skills/slide-recipes` into your Codex skills directory. Restart/reload skill discovery if needed.
 The image CLI travels with the skill and runs on Node >=20, without this repository or npm dependencies:
 
 ```bash
@@ -497,14 +497,14 @@ node "$SKILL_DIR/scripts/generate-image.mjs" --check
 node "$SKILL_DIR/scripts/generate-image.mjs" image-request.json
 ```
 
-[Configuration guide](skills/themed-cn-pptx/references/image-providers.md): OpenAI-compatible custom endpoints, Google/Nano, Bailian synchronous images and MiniMax. Exact model IDs are configurable; `gpt-image-2.5` is an example only when your service exposes it. Keys stay in the deck project's environment. Codex native image generation is used only when that tool is available.
+[Configuration guide](skills/slide-recipes/references/image-providers.md): OpenAI-compatible custom endpoints, Google/Nano, Bailian synchronous images and MiniMax. Exact model IDs are configurable; `gpt-image-2.5` is an example only when your service exposes it. Keys stay in the deck project's environment. Codex native image generation is used only when that tool is available.
 
 ### Commercial presentation recipes
 
 Three original systems researched from Pinterest and commercial template previews: **investor-signal**, **editorial-proposal**, **studio-monochrome**. Each supports 18 page/element APIs, including native editable charts, business dashboards, case studies and scope/investment pages.
 
-- [Research and source notes](skills/themed-cn-pptx/references/design-research.md)
-- [Recipe API and visual contracts](skills/themed-cn-pptx/references/commercial-recipes.md)
+- [Research and source notes](skills/slide-recipes/references/design-research.md)
+- [Recipe API and visual contracts](skills/slide-recipes/references/commercial-recipes.md)
 - Run `npm run demo:commercial` to generate three 8-slide decks with clearly labeled fictional content; no API keys or vendor assets needed.
 
 | Investor signal | Editorial proposal | Studio monochrome |

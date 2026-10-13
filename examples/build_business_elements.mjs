@@ -2,7 +2,7 @@ import pptxgen from 'pptxgenjs';
 import { mkdir } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { createCommercialRecipe } from '../skills/themed-cn-pptx/recipes/recipe-commercial.mjs';
+import { createCommercialRecipe } from '../skills/slide-recipes/recipes/recipe-commercial.mjs';
 export function buildBusinessElements(pres, options = {}) {
  const r=createCommercialRecipe(pres,'editorial-proposal',{label:'商业元素库 · 内容与数据均为虚构示例',fontFace:process.env.PPT_FONT||'Microsoft YaHei',palette:'navy-teal',...options});
  r.executiveSummary({title:'先验证需求，再扩大投入',decision:'聚焦一个\n核心场景',evidence:['用户问题已经识别','方案仍需小范围验证','交付能力可以逐步复用'],nextStep:'下一步：产品负责人组织首轮验证，输出决策简报。',page:1});

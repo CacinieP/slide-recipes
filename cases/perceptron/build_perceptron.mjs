@@ -1,5 +1,5 @@
 // build_perceptron.mjs — 感知机问题深度解析（暗色创意 / Catppuccin Mocha 系）
-// 中文学术汇报 PPT，原生可编辑图表（PptxGenJS）。由 themed-cn-pptx skill 生成。
+// 中文学术汇报 PPT，原生可编辑图表（PptxGenJS）。由 slide-recipes skill 生成。
 // 运行：npm i pptxgenjs@4 && node build_perceptron.mjs
 import pptxgen from "pptxgenjs";
 
@@ -54,7 +54,7 @@ function wrapCJK(text, fontSize, boxWidthIn, opts = {}) {
 const pres = new pptxgen();
 pres.defineLayout({ name: "STD", width: SW, height: SH });
 pres.layout = "STD";
-pres.author = "themed-cn-pptx";
+pres.author = "slide-recipes";
 pres.title = "感知机问题深度解析";
 const SHp = pres.ShapeType;
 const TOTAL = 15;

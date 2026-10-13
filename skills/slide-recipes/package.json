@@ -1,5 +1,5 @@
 {
-  "name": "themed-cn-pptx-skill",
+  "name": "slide-recipes-skill",
   "private": true,
   "type": "module",
   "engines": { "node": ">=20" }

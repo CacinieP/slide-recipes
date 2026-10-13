@@ -1,7 +1,7 @@
 import pptxgen from 'pptxgenjs';
 import { mkdir } from 'node:fs/promises';
 import { resolve, dirname } from 'node:path';
-import { createCommercialRecipe, commercialRecipes } from '../skills/themed-cn-pptx/recipes/recipe-commercial.mjs';
+import { createCommercialRecipe, commercialRecipes } from '../skills/slide-recipes/recipes/recipe-commercial.mjs';
 
 export function buildCommercialDemo(pres, id) {
   const r = createCommercialRecipe(pres, id, { label: `${commercialRecipes[id].label} · 演示内容，非真实业务数据`, fontFace: process.env.PPT_FONT || 'Microsoft YaHei' });

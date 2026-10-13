@@ -3,8 +3,8 @@ import { mkdtemp, readFile, rm, cp, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { generateSlideImage, resolveImageProvider } from '../skills/themed-cn-pptx/lib/ai-image.js';
-import { createRecipe, recipes } from '../skills/themed-cn-pptx/recipes/recipe-collection.mjs';
+import { generateSlideImage, resolveImageProvider } from '../skills/slide-recipes/lib/ai-image.js';
+import { createRecipe, recipes } from '../skills/slide-recipes/recipes/recipe-collection.mjs';
 import pptxgen from 'pptxgenjs';
 const temp = await mkdtemp(join(tmpdir(), 'ppt-providers-'));
 const png = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=';
@@ -76,7 +76,7 @@ try {
   }
   // Installed skill runs independently of repository dependencies and package.json.
   const installed = join(temp, 'skill');
-  await cp(new URL('../skills/themed-cn-pptx/', import.meta.url), installed, { recursive: true });
+  await cp(new URL('../skills/slide-recipes/', import.meta.url), installed, { recursive: true });
   const stdout = execFileSync(process.execPath, [join(installed, 'scripts/generate-image.mjs'), '--check', 'custom'], { cwd: temp, encoding: 'utf8', env: { PATH: process.env.PATH } });
   assert.equal(JSON.parse(stdout).networkCalled, false);
   console.log('provider protocols, downloads, failures, recipes and isolated installation PASS');

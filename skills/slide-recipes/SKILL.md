@@ -1,5 +1,5 @@
 ---
-name: themed-cn-pptx
+name: slide-recipes
 description: >-
   Build, modify, and QA-verify Chinese + IP/character-themed + QR-embeddable
   EDITABLE PPTX decks using PptxGenJS, with configurable AI image generation via
@@ -13,7 +13,7 @@ description: >-
 <aside>
 📌
 
-**Skill 名称**：`themed-cn-pptx`
+**Skill 名称**：`slide-recipes`
 
 **适用**：用 PptxGenJS 构建或修改中文 + IP/角色主题 + 嵌入二维码 的可编辑 PPTX 演示文稿
 
@@ -48,7 +48,7 @@ description: >-
 
 ## 0. 两条使用路径
 
-> **路径约定**：下文 `$SKILL_DIR` = 本 `SKILL.md` 所在目录（例如 `~/.agents/skills/themed-cn-pptx` 或 `~/.pi/agent/skills/themed-cn-pptx`）。`scripts/`、`lib/`、`references/`、`recipes/` 都以它为根；QA 命令一律写成 `node "$SKILL_DIR/scripts/xxx.mjs" <你的 deck.pptx>`，这样独立安装（没有仓库根目录）也能跑。若你在 `slide-recipes` 仓库 clone 内开发，`npm run qa:render` 等根目录别名等价（见仓库 README §Commands）。
+> **路径约定**：下文 `$SKILL_DIR` = 本 `SKILL.md` 所在目录（例如 `~/.agents/skills/slide-recipes` 或 `~/.pi/agent/skills/slide-recipes`）。`scripts/`、`lib/`、`references/`、`recipes/` 都以它为根；QA 命令一律写成 `node "$SKILL_DIR/scripts/xxx.mjs" <你的 deck.pptx>`，这样独立安装（没有仓库根目录）也能跑。若你在 `slide-recipes` 仓库 clone 内开发，`npm run qa:render` 等根目录别名等价（见仓库 README §Commands）。
 
 本 skill 按用户意图分为两条路径，先判断再执行：
 
@@ -655,7 +655,7 @@ pdftoppm -jpeg -r 100 -f N -l N deck.pdf slide-fix
 ## 9. 默认文件布局
 
 ```
-skills/themed-cn-pptx/         # = $SKILL_DIR，独立安装后自包含
+skills/slide-recipes/         # = $SKILL_DIR，独立安装后自包含
   SKILL.md                     # 本文档
   references/
     aesthetic-rules.md         # 视觉系统与美学负面清单

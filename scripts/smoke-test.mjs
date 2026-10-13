@@ -8,7 +8,7 @@ import {
   listImageModels,
   listImageUsages,
   resolveImageProvider,
-} from "../skills/themed-cn-pptx/lib/ai-image.js";
+} from "../skills/slide-recipes/lib/ai-image.js";
 
 const originalEnv = {
   OPENAI_API_KEY: process.env.OPENAI_API_KEY,

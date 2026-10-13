@@ -1,6 +1,6 @@
 # Codex 安装后配图与自定义 API
 
-安装整份 `themed-cn-pptx` 技能后，生图脚本只需要 Node >=20，不依赖仓库根目录或 npm 包。
+安装整份 `slide-recipes` 技能后，生图脚本只需要 Node >=20，不依赖仓库根目录或 npm 包。
 `SKILL_DIR` 指安装后的技能目录；工作目录是用户的 PPT 项目。不要修改 Codex 全局模型配置。
 项目 `.env` 自动加载，shell 中已有变量优先。Key 仅置于本地环境或 `.env`，并把 `.env` 加入项目 `.gitignore`。
 

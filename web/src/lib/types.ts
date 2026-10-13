@@ -1,7 +1,30 @@
 // Shared types for the PPTX web generator.
 
-/** The five slide page types every slide must be exactly one of. */
-export type SlideType = "cover" | "toc" | "section" | "content" | "summary";
+/**
+ * All supported slide page types (5 basic types + 15 commercial/analytical elements).
+ */
+export type SlideType =
+  | "cover"
+  | "toc"
+  | "section"
+  | "content"
+  | "summary"
+  | "agenda"
+  | "closing"
+  | "executiveSummary"
+  | "kpiDashboard"
+  | "funnel"
+  | "gantt"
+  | "processFlow"
+  | "quadrant"
+  | "swot"
+  | "team"
+  | "pricing"
+  | "testimonial"
+  | "metrics"
+  | "comparison"
+  | "caseStudy"
+  | "scope";
 
 /**
  * The theme object contract — MANDATORY shape.
@@ -21,11 +44,48 @@ export interface SlidePlan {
   type: SlideType;
   title: string;
   /** Bullet points / key lines. For cover this may hold subtitle/meta. */
-  bullets: string[];
+  bullets?: string[];
   /** Optional layout hint within the type (e.g. "asymmetric", "center"). */
   layout?: string;
-  /** Optional speaker note. */
+  /** Optional speaker note or data source. */
   note?: string;
+
+  // 商业与专业元素支持
+  lead?: string;
+  body?: string;
+  decision?: string;
+  evidence?: string[];
+  nextStep?: string;
+  items?: any[];
+  steps?: Array<{ title: string; body: string }>;
+  stages?: Array<{ label: string; value: number }>;
+  periods?: string[];
+  tasks?: Array<{ label: string; start: number; end: number }>;
+  points?: Array<{ label: string; x: number; y: number }>;
+  xLabel?: string;
+  yLabel?: string;
+  strengths?: string[];
+  weaknesses?: string[];
+  opportunities?: string[];
+  threats?: string[];
+  people?: Array<{ name: string; role: string; bio: string; initials?: string }>;
+  plans?: Array<{ name: string; price: string; period: string; features: string[]; recommended?: boolean }>;
+  quote?: string;
+  author?: string;
+  role?: string;
+  source?: string;
+  columns?: [string, string];
+  rows?: Array<{ label: string; values: [string, string] }>;
+  verdict?: string;
+  stats?: Array<{ label: string; value: string }>;
+  categories?: string[];
+  values?: number[];
+  client?: string;
+  problem?: string;
+  approach?: string;
+  outcome?: string;
+  action?: string;
+  contact?: string;
 }
 
 /** A structured deck plan returned by the LLM. */

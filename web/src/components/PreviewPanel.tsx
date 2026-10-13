@@ -1,6 +1,6 @@
 "use client";
 
-import type { DeckPlan } from "@/lib/types";
+import type { DeckPlan, SlidePlan } from "@/lib/types";
 
 interface Props {
   plan: DeckPlan | null;
@@ -9,12 +9,88 @@ interface Props {
 }
 
 const TYPE_META: Record<string, { label: string; color: string }> = {
-  cover: { label: "封面", color: "text-gold" },
-  toc: { label: "目录", color: "text-azure" },
-  section: { label: "章节", color: "text-azure" },
-  content: { label: "内容", color: "text-ink-dim" },
-  summary: { label: "总结", color: "text-gold" },
+  cover: { label: "封面", color: "text-amber-400" },
+  toc: { label: "目录", color: "text-blue-400" },
+  agenda: { label: "议程", color: "text-blue-400" },
+  section: { label: "章节", color: "text-indigo-400" },
+  executiveSummary: { label: "执行摘要", color: "text-emerald-400" },
+  kpiDashboard: { label: "KPI指标", color: "text-emerald-400" },
+  processFlow: { label: "实施流程", color: "text-cyan-400" },
+  funnel: { label: "转化漏斗", color: "text-rose-400" },
+  gantt: { label: "甘特计划", color: "text-purple-400" },
+  comparison: { label: "方案对比", color: "text-orange-400" },
+  swot: { label: "SWOT分析", color: "text-amber-400" },
+  quadrant: { label: "优先级矩阵", color: "text-sky-400" },
+  team: { label: "团队阵容", color: "text-teal-400" },
+  pricing: { label: "方案报价", color: "text-emerald-400" },
+  testimonial: { label: "客户证言", color: "text-violet-400" },
+  metrics: { label: "指标图表", color: "text-cyan-400" },
+  caseStudy: { label: "客户案例", color: "text-blue-400" },
+  scope: { label: "交付范围", color: "text-indigo-400" },
+  content: { label: "核心要点", color: "text-zinc-400" },
+  summary: { label: "总结", color: "text-amber-400" },
+  closing: { label: "收尾行动", color: "text-amber-400" },
 };
+
+function renderSlideDetails(s: SlidePlan) {
+  if (s.decision) {
+    return <div className="mt-1 text-xs text-emerald-300 font-medium truncate">决策: {s.decision}</div>;
+  }
+  if (s.items && Array.isArray(s.items)) {
+    return (
+      <div className="mt-1 flex flex-wrap gap-1 text-[11px] text-zinc-400">
+        {s.items.slice(0, 4).map((it: any, j: number) => (
+          <span key={j} className="rounded bg-zinc-800/60 px-1.5 py-0.5 border border-zinc-700/40">
+            {it.label || it.title || JSON.stringify(it)} {it.value ? `: ${it.value}` : ""}
+          </span>
+        ))}
+      </div>
+    );
+  }
+  if (s.steps && Array.isArray(s.steps)) {
+    return (
+      <div className="mt-1 text-xs text-zinc-400 truncate">
+        流程: {s.steps.map((st) => st.title).join(" → ")}
+      </div>
+    );
+  }
+  if (s.stages && Array.isArray(s.stages)) {
+    return (
+      <div className="mt-1 text-xs text-zinc-400 truncate">
+        阶段: {s.stages.map((st) => `${st.label}(${st.value})`).join(" → ")}
+      </div>
+    );
+  }
+  if (s.tasks && Array.isArray(s.tasks)) {
+    return (
+      <div className="mt-1 text-xs text-zinc-400 truncate">
+        任务: {s.tasks.map((t) => t.label).join(", ")}
+      </div>
+    );
+  }
+  if (s.columns && s.rows) {
+    return (
+      <div className="mt-1 text-xs text-zinc-400 truncate">
+        对比: {s.columns.join(" vs ")} ({s.rows.length} 维度)
+      </div>
+    );
+  }
+  if (s.bullets && s.bullets.length > 0) {
+    return (
+      <ul className="mt-1 flex flex-col gap-0.5 text-xs text-zinc-400">
+        {s.bullets.slice(0, 3).map((b, j) => (
+          <li key={j} className="truncate">
+            · {b}
+          </li>
+        ))}
+      </ul>
+    );
+  }
+  if (s.action) {
+    return <div className="mt-1 text-xs text-amber-300 truncate">行动: {s.action}</div>;
+  }
+  return null;
+}
 
 export default function PreviewPanel({ plan, isLoading, error }: Props) {
   return (
@@ -70,15 +146,7 @@ export default function PreviewPanel({ plan, isLoading, error }: Props) {
                       {s.title || "—"}
                     </span>
                   </div>
-                  {s.bullets.length > 0 && (
-                    <ul className="mt-1.5 ml-8 flex flex-col gap-0.5 text-xs text-ink-dim">
-                      {s.bullets.slice(0, 4).map((b, j) => (
-                        <li key={j} className="truncate">
-                          · {b}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                  <div className="ml-8">{renderSlideDetails(s)}</div>
                 </li>
               );
             })}

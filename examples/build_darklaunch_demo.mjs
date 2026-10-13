@@ -15,7 +15,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import { mkdir } from "node:fs/promises";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const recipePath = resolve(__dirname, "..", "skills", "themed-cn-pptx", "recipes", "recipe-dark-launch.mjs");
+const recipePath = resolve(__dirname, "..", "skills", "slide-recipes", "recipes", "recipe-dark-launch.mjs");
 
 // Dynamic import() needs a file:// URL on Windows, not a bare absolute path.
 const { default: pptxgen } = await import("pptxgenjs");
@@ -30,4 +30,4 @@ const out = resolve(outDir, "darklaunch-demo.pptx");
 await pres.writeFile({ fileName: out });
 
 console.log(`Dark-launch demo PPTX generated: ${out}`);
-console.log("Run QA:  node skills/themed-cn-pptx/scripts/render-qa.mjs " + out);
+console.log("Run QA:  node skills/slide-recipes/scripts/render-qa.mjs " + out);

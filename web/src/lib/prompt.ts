@@ -1,57 +1,51 @@
-import type { GenerateOptions } from "./types";
+import type { GenerateOptions, DeckPlan, SlidePlan, SlideType } from "./types";
 
 /**
- * Build a strong system+user prompt that injects the skill's 5-page-type
- * discipline and forces a strict JSON deck plan. This is the key differentiator
- * vs. a "one-line system prompt" generator — we encode real slide knowledge.
+ * Build a strong system+user prompt that injects the complete slide recipes
+ * design system (including executive summaries, KPIs, funnels, Gantts, SWOT, comparison)
+ * and forces a strict JSON deck plan.
  */
 export function buildPrompt(opts: GenerateOptions): { system: string; user: string } {
   const count = clampSlideCount(opts.slideCount);
 
   const system = [
-    "You are a senior presentation architect.",
+    "You are a principal presentation architect and consulting partner.",
     "You produce ONLY a JSON deck plan — no prose, no markdown fences, no explanation.",
     "",
-    "OUTPUT SCHEMA (strict):",
-    '{ "title": string, "slides": [ { "type": string, "title": string, "bullets": string[], "layout"?: string, "note"?: string } ] }',
+    "OUTPUT SCHEMA (strict JSON):",
+    '{ "title": string, "slides": [ { "type": string, "title": string, ...typeSpecificFields } ] }',
     "",
-    "RULES — every slide MUST be exactly ONE of these 5 page types:",
-    "",
-    "1. cover      — opening / tone-setting. Big title + subtitle/meta. NO page badge.",
-    "   bullets[0] = subtitle, bullets[1..] = meta (presenter/date/occasion). 1 per deck (always first).",
-    "2. toc        — table of contents / agenda. 3-5 section names. bullets = section titles (short).",
-    "   layout: 'numbered' | 'two-column' | 'sidebar' | 'card'.",
-    "3. section    — divider between major parts. Huge section number in title; 1-2 line intro in bullets.",
-    "   layout: 'bold-center' | 'left-accent' | 'split'.",
-    "4. content    — the body. title = page heading; bullets = key points (concise, <=5).",
-    "   Exactly ONE subtype per content slide, set in layout:",
-    "     'text' | 'mixed-media' | 'data-viz' | 'comparison' | 'timeline' | 'image'.",
-    "   Vary layouts across content slides — never repeat the same layout twice in a row.",
-    "5. summary    — closing. title = 'Thank You' / 'Summary' / next-step CTA. bullets = takeaways or action items.",
+    "SUPPORTED SLIDE TYPES:",
+    "1. cover: { title, subtitle?, kicker? } — Deck opening.",
+    "2. agenda: { title, items: [{ title, body }] } — 2-4 agenda points.",
+    "3. section: { title, number, summary? } — Part divider with large number.",
+    "4. executiveSummary: { title, decision: string, evidence: string[2..3], nextStep?: string } — Decision & proof.",
+    "5. kpiDashboard: { title, items: [{ label, value, change, context }][3..4], note: string } — Key metrics.",
+    "6. processFlow: { title, steps: [{ title, body }][3..4], note?: string } — Step-by-step workflow.",
+    "7. funnel: { title, stages: [{ label, value: number }][3..5], note: string } — Conversion funnel (values non-increasing).",
+    "8. gantt: { title, periods: string[4..8], tasks: [{ label, start: int, end: int }][3..5], note?: string } — Timeline.",
+    "9. comparison: { title, columns: [string, string], rows: [{ label, values: [string, string] }][2..4], verdict?: string } — 2-way comparison.",
+    "10. swot: { title, strengths: string[1..2], weaknesses: string[1..2], opportunities: string[1..2], threats: string[1..2] } — Strategic SWOT.",
+    "11. quadrant: { title, xLabel, yLabel, points: [{ label, x: 0..1, y: 0..1 }][1..5], note: string } — 2x2 priority matrix.",
+    "12. team: { title, people: [{ name, role, bio }][2..3], note?: string } — Team profiles.",
+    "13. pricing: { title, plans: [{ name, price, period, features: string[2..3], recommended?: bool }][2..3], note: string } — Tiered pricing.",
+    "14. content: { title, lead?: string, body?: string, bullets?: string[], source?: string } — Detailed insights/cards.",
+    "15. closing: { title, action: string, contact?: string } — Call-to-action closing.",
     "",
     "STRUCTURAL REQUIREMENTS:",
     `- Total slides: exactly ${count}.`,
     "- slides[0].type MUST be 'cover'.",
-    "- slides[last].type MUST be 'summary'.",
-    "- Use 'toc' exactly once (typically slide 2) when count >= 5.",
-    "- Use 'section' dividers to break content into parts (1-3 section slides for larger decks).",
-    "- The remaining slides are 'content', with DIVERSE layouts.",
-    "- NEVER repeat the same layout string on consecutive slides.",
-    "- bullets: 2-5 items each (except cover/section which may have 1-2).",
-    "- All text in the requested language; titles short and punchy.",
-    "",
-    "CONTENT QUALITY:",
-    "- Write actual, specific content for the topic — not placeholders.",
-    "- Make bullets informative, parallel in structure, and concise.",
-    "- Match the requested tone and audience.",
-    "- If includeCode is true, include at least one 'content' slide with layout 'text' containing a code snippet as a bullet (use ``` fences inside the bullet string).",
-    "- If includeChart is true, include at least one 'content' slide with layout 'data-viz', and note the chart type in 'note'.",
+    "- slides[last].type MUST be 'closing'.",
+    "- If count >= 6, slide 2 should be 'agenda' or 'executiveSummary'.",
+    "- Pick suitable rich business layouts (kpiDashboard, funnel, gantt, processFlow, comparison, swot, quadrant) whenever relevant to the topic instead of boring bullet lists.",
+    "- NEVER use generic placeholder text; provide realistic, specific numbers, units, and clear takeaways.",
+    "- All text in the requested language; titles must state clear conclusions.",
   ].join("\n");
 
   const user = [
     `主题 / Topic: ${opts.topic}`,
-    `受众 / Audience: ${opts.audience || "通用 / general"}`,
-    `语气 / Tone: ${opts.tone || "专业清晰 / professional and clear"}`,
+    `受众 / Audience: ${opts.audience || "业务决策者 / business decision makers"}`,
+    `语气 / Tone: ${opts.tone || "专业严谨 / professional and authoritative"}`,
     `语言 / Language: ${opts.language}`,
     `页数 / Slide count: ${count}`,
     `含代码片段 / Include code: ${opts.includeCode ? "yes" : "no"}`,
@@ -70,10 +64,9 @@ export function clampSlideCount(value: number): number {
 
 /**
  * Validate + normalize a raw parsed LLM JSON object into a DeckPlan.
- * Enforces the structural rules; repairs minor issues (trim, clamp count).
  */
 export function validatePlan(raw: unknown, count: number): {
-  plan: import("./types").DeckPlan | null;
+  plan: DeckPlan | null;
   error?: string;
 } {
   if (!raw || typeof raw !== "object") return { plan: null, error: "LLM did not return a JSON object." };
@@ -82,28 +75,32 @@ export function validatePlan(raw: unknown, count: number): {
   const slidesRaw = Array.isArray(obj.slides) ? obj.slides : null;
   if (!slidesRaw) return { plan: null, error: "Missing 'slides' array." };
 
-  const allowed = new Set(["cover", "toc", "section", "content", "summary"]);
-  const slides = slidesRaw
+  const validTypes = new Set([
+    "cover", "toc", "section", "content", "summary", "agenda", "closing",
+    "executiveSummary", "kpiDashboard", "funnel", "gantt", "processFlow",
+    "quadrant", "swot", "team", "pricing", "testimonial", "metrics",
+    "comparison", "caseStudy", "scope"
+  ]);
+
+  const slides: SlidePlan[] = slidesRaw
     .filter((s): s is Record<string, unknown> => !!s && typeof s === "object")
     .map((s) => {
-      const type = typeof s.type === "string" && allowed.has(s.type) ? (s.type as import("./types").SlideType) : "content";
+      const typeStr = typeof s.type === "string" ? s.type : "content";
+      const type = (validTypes.has(typeStr) ? typeStr : "content") as SlideType;
       const t = typeof s.title === "string" ? s.title : "";
       const b = Array.isArray(s.bullets)
         ? s.bullets.filter((x): x is string => typeof x === "string").map((x) => x.trim()).filter(Boolean)
         : [];
-      const layout = typeof s.layout === "string" ? s.layout : undefined;
-      const note = typeof s.note === "string" ? s.note : undefined;
-      return { type, title: t, bullets: b, layout, note };
+      return {
+        ...s,
+        type,
+        title: t,
+        bullets: b.length > 0 ? b : undefined,
+      } as SlidePlan;
     })
-    .filter((s) => s.title || s.bullets.length);
+    .filter((s) => s.title || (s.bullets && s.bullets.length > 0) || s.decision);
 
   if (slides.length === 0) return { plan: null, error: "No usable slides in plan." };
-
-  // Force first = cover, last = summary.
-  if (slides[0].type !== "cover") slides[0] = { ...slides[0], type: "cover" };
-  if (slides[slides.length - 1].type !== "summary") {
-    slides[slides.length - 1] = { ...slides[slides.length - 1], type: "summary" };
-  }
 
   return { plan: { title, slides } };
 }

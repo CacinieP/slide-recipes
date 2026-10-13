@@ -2,7 +2,7 @@
 
 **English** | [简体中文](README.zh-CN.md)
 
-[Prompt guide](#prompt-guide) · [Color prompts](#color-guide) · [Business elements](skills/themed-cn-pptx/references/business-elements.md)
+[Prompt guide](#prompt-guide) · [Color prompts](#color-guide) · [Business elements](skills/slide-recipes/references/business-elements.md)
 
 <p align="center">
   <img src="docs/img/hero-commercial.jpg" alt="Slide Recipes — investor, consulting and studio presentation samples" width="820" />
@@ -46,7 +46,7 @@ Aubergine/lime, petrol/apricot, espresso/ice: 20 palettes work with all three co
 ### Copy this to make it yours
 
 ```text
-Use themed-cn-pptx to turn [source files] into a 10-slide client proposal.
+Use slide-recipes to turn [source files] into a 10-slide client proposal.
 Start from editorial-proposal, with the aubergine-lime palette.
 For business decision-makers: include an executive summary, KPI dashboard,
 comparison, process, Gantt and next steps. Use conclusion-led titles.
@@ -143,10 +143,10 @@ Make this README into an editable Chinese PPTX, ~8 slides, editorial-grid recipe
 **Or install the skill directly:**
 
 ```bash
-npx skills add https://github.com/CacinieP/slide-recipes --skill themed-cn-pptx
+npx skills add https://github.com/CacinieP/slide-recipes --skill slide-recipes
 ```
 
-> The install is self-contained — `SKILL.md`, `lib/`, `recipes/`, `references/` **and the render-QA gate (`scripts/`)** travel together, so `/skill:themed-cn-pptx` in pi (or the equivalent in Claude Code / Codex) can run `render-qa`, `cjk-overflow-check`, `color-qa` and `pptx-editable-check` straight out of `~/.agents/skills/themed-cn-pptx/` with no clone of this repo. Only `pptxgenjs` (deck *generation*) still needs `npm i` in your own deck project. The standard Anthropic `pptx` skill is an **optional** pairing, not a dependency — its license forbids redistribution, so it is deliberately not vendored in this repo; fetch it from the official channel if you want it alongside.
+> The install is self-contained — `SKILL.md`, `lib/`, `recipes/`, `references/` **and the render-QA gate (`scripts/`)** travel together, so `/skill:slide-recipes` in pi (or the equivalent in Claude Code / Codex) can run `render-qa`, `cjk-overflow-check`, `color-qa` and `pptx-editable-check` straight out of `~/.agents/skills/slide-recipes/` with no clone of this repo. Only `pptxgenjs` (deck *generation*) still needs `npm i` in your own deck project. The standard Anthropic `pptx` skill is an **optional** pairing, not a dependency — its license forbids redistribution, so it is deliberately not vendored in this repo; fetch it from the official channel if you want it alongside.
 
 ---
 
@@ -159,7 +159,7 @@ Copy a prompt and replace bracketed fields. Specify **audience, decision, source
 ### 1. Create a complete proposal
 
 ```text
-Use themed-cn-pptx to turn [file or pasted material] into a 12-slide business proposal.
+Use slide-recipes to turn [file or pasted material] into a 12-slide business proposal.
 Audience: [client leadership]. Decision: [approve a pilot]. Duration: [15 minutes].
 Viewing context: [meeting-room projection]. Use editorial-proposal with navy-teal.
 Use conclusion-led titles. Include an executive summary, problem, approach, process,
@@ -218,7 +218,7 @@ The three commercial recipes support **18 page/element APIs**: the existing eigh
 
 ![Business element gallery](docs/img/business-elements.jpg)
 
-See [business element fields and constraints](skills/themed-cn-pptx/references/business-elements.md). Run `npm run demo:elements` for the ten-slide example.
+See [business element fields and constraints](skills/slide-recipes/references/business-elements.md). Run `npm run demo:elements` for the ten-slide example.
 
 <a id="color-guide"></a>
 
@@ -265,7 +265,7 @@ Avoid candy-colored pages, glow gradients, and meaningless colored panels.
 If a brand override fails contrast checks, darken the text color and show both HEX values.
 ```
 
-See the [palette catalog](skills/themed-cn-pptx/references/palette-catalog.md) for every role and usage.
+See the [palette catalog](skills/slide-recipes/references/palette-catalog.md) for every role and usage.
 
 ## Color prompting guide
 
@@ -375,7 +375,7 @@ Critical text pairs must pass 4.5:1 before generation. Invalid palettes throw a 
 
 ## 🎨 Configurable AI images
 
-Use OpenAI, Google/Nano, Bailian synchronous APIs, MiniMax or a custom endpoint. When the Codex session exposes its image tool, generated assets can also be placed into slides. See the [image configuration guide](skills/themed-cn-pptx/references/image-providers.md) for protocols and request options.
+Use OpenAI, Google/Nano, Bailian synchronous APIs, MiniMax or a custom endpoint. When the Codex session exposes its image tool, generated assets can also be placed into slides. See the [image configuration guide](skills/slide-recipes/references/image-providers.md) for protocols and request options.
 
 ```dotenv
 PPT_IMAGE_PROVIDER=custom
@@ -455,7 +455,7 @@ slide-recipes/
       miku-demo.pptx  editorial-demo.pptx  darklaunch-demo.pptx
   scripts/            # repo dev/CI tooling only (not part of the installed skill)
     validate-skills.mjs  smoke-test.mjs  color-qa-presets.mjs
-  skills/themed-cn-pptx/          # ← everything here is what `npx skills add` installs
+  skills/slide-recipes/          # ← everything here is what `npx skills add` installs
     SKILL.md
     scripts/    render-qa.mjs  cjk-overflow-check.mjs  color-qa.mjs  pptx-editable-check.py
     references/ aesthetic-rules.md  image-constraints.md  layout-slots.md  design-principles.md
@@ -492,9 +492,9 @@ skills/<skill-name>/examples/     # optional build scripts
 ## Codex · Recipes & custom image APIs
 
 The recipe collection includes research-report, product-story, magazine-story and roadmap-brief.
-See [recipe catalog](skills/themed-cn-pptx/references/recipe-catalog.md) for content-driven builders and aesthetic constraints.
+See [recipe catalog](skills/slide-recipes/references/recipe-catalog.md) for content-driven builders and aesthetic constraints.
 
-Install the complete skill in Codex with the existing skills installer, or copy `skills/themed-cn-pptx` into your Codex skills directory. Restart/reload skill discovery if needed.
+Install the complete skill in Codex with the existing skills installer, or copy `skills/slide-recipes` into your Codex skills directory. Restart/reload skill discovery if needed.
 The image CLI travels with the skill and runs on Node >=20, without this repository or npm dependencies:
 
 ```bash
@@ -502,14 +502,14 @@ node "$SKILL_DIR/scripts/generate-image.mjs" --check
 node "$SKILL_DIR/scripts/generate-image.mjs" image-request.json
 ```
 
-[Configuration guide](skills/themed-cn-pptx/references/image-providers.md): OpenAI-compatible custom endpoints, Google/Nano, Bailian synchronous images and MiniMax. Exact model IDs are configurable; `gpt-image-2.5` is an example only when your service exposes it. Keys stay in the deck project's environment. Codex native image generation is used only when that tool is available.
+[Configuration guide](skills/slide-recipes/references/image-providers.md): OpenAI-compatible custom endpoints, Google/Nano, Bailian synchronous images and MiniMax. Exact model IDs are configurable; `gpt-image-2.5` is an example only when your service exposes it. Keys stay in the deck project's environment. Codex native image generation is used only when that tool is available.
 
 ### Commercial presentation recipes
 
 Three original systems researched from Pinterest and commercial template previews: **investor-signal**, **editorial-proposal**, **studio-monochrome**. Each supports 18 page/element APIs, including native editable charts, business dashboards, case studies and scope/investment pages.
 
-- [Research and source notes](skills/themed-cn-pptx/references/design-research.md)
-- [Recipe API and visual contracts](skills/themed-cn-pptx/references/commercial-recipes.md)
+- [Research and source notes](skills/slide-recipes/references/design-research.md)
+- [Recipe API and visual contracts](skills/slide-recipes/references/commercial-recipes.md)
 - Run `npm run demo:commercial` to generate three 8-slide decks with clearly labeled fictional content; no API keys or vendor assets needed.
 
 | Investor signal | Editorial proposal | Studio monochrome |

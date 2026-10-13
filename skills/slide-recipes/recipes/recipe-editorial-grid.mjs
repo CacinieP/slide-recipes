@@ -22,7 +22,7 @@
  *
  *   2. As a library for YOUR deck (the intended way to ship real content):
  *        import { theme, marks, hairlineCard, FONT_CJK, FONT_LATIN } from
- *          "./skills/themed-cn-pptx/recipes/recipe-editorial-grid.mjs";
+ *          "./skills/slide-recipes/recipes/recipe-editorial-grid.mjs";
  *        const m = marks(pres, theme);   // { hairline, sectionTitle, footer }
  *        // ... call m.hairline(slide), m.sectionTitle(slide, kicker, title),
  *        //     m.footer(slide, n, total, label), and hairlineCard(pres, slide, {x,y,w,h})
@@ -285,7 +285,7 @@ export function build(pres, opts = {}) {
     x: 0.6, y: 1.75, w: 8.8, h: 1.6,
     fontSize: 36, fontFace: FONT_CJK, bold: true, color: theme.white, lineSpacingMultiple: 1.15, margin: 0,
   });
-  s6.addText("npx skills add https://github.com/CacinieP/slide-recipes --skill themed-cn-pptx", {
+  s6.addText("npx skills add https://github.com/CacinieP/slide-recipes --skill slide-recipes", {
     x: 0.6, y: 4.1, w: 8.8, h: 0.4,
     fontSize: 12, fontFace: "Consolas", color: theme.accent, margin: 0,
   });
