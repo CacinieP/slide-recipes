@@ -32,6 +32,17 @@ export async function requestLlmPlan(
   const count = clampSlideCount(opts.slideCount);
   const { system, user } = buildPrompt(opts);
 
+  // Request body with response_format json_object; fallback without if rejected
+  const reqBody: any = {
+    model,
+    temperature: 0.4,
+    response_format: { type: "json_object" },
+    messages: [
+      { role: "system", content: system },
+      { role: "user", content: user },
+    ],
+  };
+
   let resp: Response;
   try {
     resp = await fetch(`${baseUrl}/chat/completions`, {
@@ -40,16 +51,25 @@ export async function requestLlmPlan(
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        model,
-        temperature: 0.4,
-        response_format: { type: "json_object" },
-        messages: [
-          { role: "system", content: system },
-          { role: "user", content: user },
-        ],
-      }),
+      body: JSON.stringify(reqBody),
     });
+
+    // If 400 with response_format unsupported message, retry once without it
+    if (resp.status === 400) {
+      const errClone = resp.clone();
+      const errText = await errClone.text().catch(() => "");
+      if (errText.includes("response_format") || errText.includes("json_object")) {
+        delete reqBody.response_format;
+        resp = await fetch(`${baseUrl}/chat/completions`, {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(reqBody),
+        });
+      }
+    }
   } catch (err) {
     throw new Error(
       `网络请求失败: ${err instanceof Error ? err.message : String(err)}。若使用第三方 API，请确保服务支持浏览器跨域 (CORS)。`,

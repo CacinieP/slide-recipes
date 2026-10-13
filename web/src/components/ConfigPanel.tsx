@@ -3,6 +3,7 @@
 import { useState } from "react";
 import type { FontPairId, ModelConfig, StyleRecipe } from "@/lib/types";
 import { FONT_PAIRS } from "@/lib/palettes";
+import { PROVIDER_PRESETS } from "@/lib/providers";
 import PalettePicker from "./PalettePicker";
 
 interface Props {
@@ -45,9 +46,36 @@ export default function ConfigPanel(props: Props) {
   const { set } = props;
   const [showModelConfig, setShowModelConfig] = useState(true);
 
+  // 根据当前的 baseUrl 匹配预设渠道，若没有匹配到则是 custom
+  const matchedPreset = PROVIDER_PRESETS.find(
+    (p) => p.id !== "custom" && p.baseUrl === props.modelConfig.baseUrl,
+  );
+  const currentProviderId = matchedPreset ? matchedPreset.id : "custom";
+
+  const handleSelectProvider = (presetId: string) => {
+    const preset = PROVIDER_PRESETS.find((p) => p.id === presetId);
+    if (!preset) return;
+    if (preset.id === "custom") {
+      set({
+        modelConfig: {
+          ...props.modelConfig,
+          // 保留当前填写的内容
+        },
+      });
+    } else {
+      set({
+        modelConfig: {
+          ...props.modelConfig,
+          baseUrl: preset.baseUrl,
+          model: preset.defaultModel,
+        },
+      });
+    }
+  };
+
   return (
     <div className="flex flex-col gap-5">
-      {/* 1. 模型服务配置三要素 */}
+      {/* 1. 模型服务配置三要素 (预设快捷选择 + 自定义 Endpoint) */}
       <div className="rounded-lg border border-line bg-elev/60 p-3.5">
         <div className="flex items-center justify-between mb-2.5">
           <div className="flex items-center gap-2">
@@ -64,9 +92,46 @@ export default function ConfigPanel(props: Props) {
         </div>
 
         {showModelConfig && (
-          <div className="flex flex-col gap-2.5">
+          <div className="flex flex-col gap-3">
+            {/* 常见服务商快速切换按钮 */}
             <div>
-              <div className="text-[11px] text-ink-dim mb-1">API Base URL (兼容 OpenAI 规范)</div>
+              <div className="text-[11px] text-ink-dim mb-1.5">预设服务商快捷选择：</div>
+              <div className="flex flex-wrap gap-1.5">
+                {PROVIDER_PRESETS.map((p) => {
+                  const active = currentProviderId === p.id;
+                  return (
+                    <button
+                      key={p.id}
+                      type="button"
+                      onClick={() => handleSelectProvider(p.id)}
+                      className={`rounded px-2.5 py-1 text-xs transition border ${
+                        active
+                          ? "border-gold bg-gold-soft text-gold font-medium"
+                          : "border-line bg-elev text-ink-dim hover:border-line-strong hover:text-ink"
+                      }`}
+                    >
+                      {p.name.split(" ")[0]} ({p.badge})
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Base URL (支持自由自定义修改) */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] text-ink-dim">1. API Base URL (兼容 OpenAI 规范)</span>
+                {matchedPreset?.docUrl && (
+                  <a
+                    href={matchedPreset.docUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-[10px] text-azure hover:underline"
+                  >
+                    获取 API Key →
+                  </a>
+                )}
+              </div>
               <input
                 className={inputCls}
                 value={props.modelConfig.baseUrl}
@@ -75,27 +140,51 @@ export default function ConfigPanel(props: Props) {
                     modelConfig: { ...props.modelConfig, baseUrl: e.target.value },
                   })
                 }
-                placeholder="https://api.modelbest.cn/v1"
+                placeholder="例如: https://api.modelbest.cn/v1 或 自定义端点"
               />
             </div>
 
+            {/* Model Name & API Key */}
             <div className="grid grid-cols-2 gap-2.5">
               <div>
-                <div className="text-[11px] text-ink-dim mb-1">Model Name (模型名称)</div>
-                <input
-                  className={inputCls}
-                  value={props.modelConfig.model}
-                  onChange={(e) =>
-                    set({
-                      modelConfig: { ...props.modelConfig, model: e.target.value },
-                    })
-                  }
-                  placeholder="MiniCPM-V-4.7-35B-A3B"
-                />
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-[11px] text-ink-dim">2. Model Name (模型)</span>
+                </div>
+                {matchedPreset && matchedPreset.models.length > 0 ? (
+                  <div className="flex flex-col gap-1">
+                    <select
+                      className={inputCls}
+                      value={props.modelConfig.model}
+                      onChange={(e) =>
+                        set({
+                          modelConfig: { ...props.modelConfig, model: e.target.value },
+                        })
+                      }
+                    >
+                      {matchedPreset.models.map((m) => (
+                        <option key={m.id} value={m.id}>
+                          {m.name} {m.desc ? `(${m.desc})` : ""}
+                        </option>
+                      ))}
+                      <option value={props.modelConfig.model}>自定义其他型号...</option>
+                    </select>
+                  </div>
+                ) : (
+                  <input
+                    className={inputCls}
+                    value={props.modelConfig.model}
+                    onChange={(e) =>
+                      set({
+                        modelConfig: { ...props.modelConfig, model: e.target.value },
+                      })
+                    }
+                    placeholder="输入模型 ID，如 gpt-4o, qwen-max..."
+                  />
+                )}
               </div>
 
               <div>
-                <div className="text-[11px] text-ink-dim mb-1">API Key (仅保存在本地浏览器)</div>
+                <div className="text-[11px] text-ink-dim mb-1">3. API Key (本地保存)</div>
                 <input
                   type="password"
                   className={inputCls}
@@ -105,12 +194,13 @@ export default function ConfigPanel(props: Props) {
                       modelConfig: { ...props.modelConfig, apiKey: e.target.value },
                     })
                   }
-                  placeholder="sk-..."
+                  placeholder={matchedPreset?.keyPlaceholder || "sk-..."}
                 />
               </div>
             </div>
+
             <div className="text-[10px] text-ink-mute">
-              * 纯前端安全运行：API Key 仅在浏览器发起调用，不会上传到任何第三方后端。
+              * 预设覆盖：ModelBest (MiniCPM)、StepFun (阶跃)、Moonshot (Kimi)、Zhipu (智谱)、MiniMax (海螺)、Qwen (通义千问)、OpenAI 等，支持任意自定义 Endpoint。所有 Key 仅在你的本地浏览器安全发起直连，不经任何第三方。
             </div>
           </div>
         )}
