@@ -21,23 +21,25 @@
 
 适合经营汇报、客户提案、投资沟通和品牌展示。内置 23 类商业页面/元素 API、统一 DeckSchema、结构化生图 Prompt Schema、中文排版规则、可配置 AI 配图与渲染检查。先看真实生成样例，再复制提示词开始。
 
-[🚀 访问在线 Web 工作台](https://caciniep.github.io/slide-recipes/) · [下载新版](https://github.com/CacinieP/slide-recipes/releases/latest) · [看样例](#samples) · [复制提示词](#prompt-guide) · [传播素材](docs/share-kit.md)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FCacinieP%2Fslide-recipes&project-name=slide-recipes&root-directory=web) · [下载新版](https://github.com/CacinieP/slide-recipes/releases/latest) · [看样例](#samples) · [复制提示词](#prompt-guide) · [传播素材](docs/share-kit.md)
 
 ---
 
-### 💡 在线 Web 工作台与 API 快速配置
+### 💡 在线 Web 工作台与 API 快速配置 (支持 Vercel 一键部署 · 原生解决跨域)
 
-你可以直接打开 **[Web 在线工作台](https://caciniep.github.io/slide-recipes/)**，在浏览器中直连 AI 模型生成并导出可编辑 PPTX。推荐使用 **ModelBest (MiniCPM)**，其在大纲推理与结构化输出表现尤为出色：
+你可以点击上方 **Deploy with Vercel** 按钮 1 分钟免费部署你自己的专属 PPT 在线工作台（内置 `/api/proxy` 服务端中转，原生彻底解决国内各大模型的浏览器 CORS 跨域问题）。
 
-1. **注册领取免费额度**：通过专属邀请链接注册进入控制台 👉 **[platform.modelbest.cn (邀请码 A93DCA73)](https://platform.modelbest.cn/console/login?ref=A93DCA73)**
+推荐使用 **ModelBest (MiniCPM)**，其在大纲推理与商业 PPT 结构化规划上表现尤为出色：
+
+1. **注册领取免费额度**：通过专属邀请链接注册进入控制台 👉 **[platform.modelbest.cn (专属邀请码 A93DCA73)](https://platform.modelbest.cn/console/login?ref=A93DCA73)**
 2. **创建 API Key**：在控制台「API 密钥」中创建并复制 `sk-live-...` 密钥。
-3. **在 Web 工作台填入三要素**：
+3. **在工作台填入三要素**：
    - **Base URL**：`https://api.modelbest.cn/v1`
-   - **Model**：`MiniCPM-V-4.7-35B-A3B`
-   - **API Key**：填入你申请的密钥（*仅在本地浏览器端保存与直连，不经任何第三方服务器*）。
-4. **一键生成**：输入任意主题或粘贴自定义大纲 JSON，即可实时预览并下载原生矢量 PPTX。
+   - **Model**：点击 **「🔍 自动检测模型」** 即可自动检测并选择 `MiniCPM-V-4.7-35B-A3B`
+   - **API Key**：填入你申请的密钥（*仅在本地前端填入，通过同源服务直达模型官方，安全无泄漏*）。
+4. **一键生成**：输入任意主题，或切换为「自定义大纲与内容 (JSON)」免 API 模式，即可实时预览并秒级下载原生矢量 PPTX。
 
-*(同时预设支持 StepFun 阶跃、Kimi、智谱 GLM、MiniMax、通义千问 Qwen 及任意自定义兼容端点)*
+*(同时预设覆盖 StepFun 阶跃、Kimi、智谱 GLM、MiniMax、通义千问 Qwen 及任意自定义兼容端点)*
 
 ---
 

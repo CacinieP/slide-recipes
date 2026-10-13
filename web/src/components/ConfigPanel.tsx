@@ -4,6 +4,7 @@ import { useState } from "react";
 import type { FontPairId, ModelConfig, StyleRecipe } from "@/lib/types";
 import { FONT_PAIRS } from "@/lib/palettes";
 import { PROVIDER_PRESETS } from "@/lib/providers";
+import { smartFetch } from "@/lib/client-generator";
 import PalettePicker from "./PalettePicker";
 
 interface Props {
@@ -94,7 +95,7 @@ export default function ConfigPanel(props: Props) {
     setDetectedModels([]);
 
     try {
-      const resp = await fetch(`${baseUrl}/models`, {
+      const resp = await smartFetch(`${baseUrl}/models`, {
         method: "GET",
         headers: {
           Authorization: apiKey ? `Bearer ${apiKey}` : "",

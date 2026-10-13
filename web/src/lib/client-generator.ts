@@ -15,6 +15,34 @@ export interface GenerateDeckResult {
 }
 
 /**
+ * 智能网络请求：
+ * 1. 优先通过同源 /api/proxy 进行服务端中转 (彻底杜绝浏览器跨域 CORS 拦截)
+ * 2. 若当前环境无代理服务端，自动回退到浏览器直连
+ */
+export async function smartFetch(
+  targetUrl: string,
+  init: RequestInit = {},
+): Promise<Response> {
+  try {
+    const headers = new Headers(init.headers || {});
+    headers.set("x-target-url", targetUrl);
+
+    const proxyResp = await fetch("/api/proxy", {
+      ...init,
+      headers,
+    });
+
+    if (proxyResp.status !== 404 && proxyResp.status !== 405) {
+      return proxyResp;
+    }
+  } catch {
+    // 代理网络异常，回退直连
+  }
+
+  return fetch(targetUrl, init);
+}
+
+/**
  * Call the user's OpenAI-compatible model service directly from the browser.
  */
 export async function requestLlmPlan(
@@ -45,7 +73,7 @@ export async function requestLlmPlan(
 
   let resp: Response;
   try {
-    resp = await fetch(`${baseUrl}/chat/completions`, {
+    resp = await smartFetch(`${baseUrl}/chat/completions`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -60,7 +88,7 @@ export async function requestLlmPlan(
       const errText = await errClone.text().catch(() => "");
       if (errText.includes("response_format") || errText.includes("json_object")) {
         delete reqBody.response_format;
-        resp = await fetch(`${baseUrl}/chat/completions`, {
+        resp = await smartFetch(`${baseUrl}/chat/completions`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${apiKey}`,

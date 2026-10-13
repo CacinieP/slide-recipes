@@ -1,10 +1,7 @@
 import type { NextConfig } from "next";
 
-const isGithubActions = process.env.GITHUB_ACTIONS === "true";
-
 const nextConfig: NextConfig = {
-  output: "export",
-  basePath: isGithubActions ? "/slide-recipes" : "",
+  // 适合 Vercel Serverless 及全功能部署，原生支持 /api/proxy 服务端转发
   images: {
     unoptimized: true,
   },

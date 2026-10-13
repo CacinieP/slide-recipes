@@ -195,7 +195,7 @@ export default function Home() {
                   Slide Recipes Web Studio
                 </h1>
                 <span className="rounded bg-azure/20 text-azure px-1.5 py-0.2 text-[10px] font-mono border border-azure/40">
-                  Client-Only / GitHub Pages
+                  Vercel Ready · Native CORS Proxy
                 </span>
               </div>
               <p className="mono-label">28 PALETTES · 23 SLIDE TYPES · BROWSER-NATIVE PPTX</p>
