@@ -46,6 +46,11 @@ export default function ConfigPanel(props: Props) {
   const { set } = props;
   const [showModelConfig, setShowModelConfig] = useState(true);
 
+  // 自动探测模型状态
+  const [isDetecting, setIsDetecting] = useState(false);
+  const [detectedModels, setDetectedModels] = useState<string[]>([]);
+  const [detectStatus, setDetectStatus] = useState<string>("");
+
   // 根据当前的 baseUrl 匹配预设渠道，若没有匹配到则是 custom
   const matchedPreset = PROVIDER_PRESETS.find(
     (p) => p.id !== "custom" && p.baseUrl === props.modelConfig.baseUrl,
@@ -55,11 +60,12 @@ export default function ConfigPanel(props: Props) {
   const handleSelectProvider = (presetId: string) => {
     const preset = PROVIDER_PRESETS.find((p) => p.id === presetId);
     if (!preset) return;
+    setDetectedModels([]);
+    setDetectStatus("");
     if (preset.id === "custom") {
       set({
         modelConfig: {
           ...props.modelConfig,
-          // 保留当前填写的内容
         },
       });
     } else {
@@ -73,9 +79,71 @@ export default function ConfigPanel(props: Props) {
     }
   };
 
+  // 自动检测可用模型函数
+  const handleDetectModels = async () => {
+    const baseUrl = (props.modelConfig.baseUrl || "").trim().replace(/\/+$/, "");
+    const apiKey = (props.modelConfig.apiKey || "").trim();
+
+    if (!baseUrl) {
+      setDetectStatus("请先填写 API Base URL");
+      return;
+    }
+
+    setIsDetecting(true);
+    setDetectStatus("正在检测端点与模型列表...");
+    setDetectedModels([]);
+
+    try {
+      const resp = await fetch(`${baseUrl}/models`, {
+        method: "GET",
+        headers: {
+          Authorization: apiKey ? `Bearer ${apiKey}` : "",
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!resp.ok) {
+        const text = await resp.text().catch(() => "");
+        throw new Error(`端点返回错误 (${resp.status}): ${text.slice(0, 150)}`);
+      }
+
+      const resData = (await resp.json()) as any;
+      const rawList = Array.isArray(resData)
+        ? resData
+        : Array.isArray(resData?.data)
+          ? resData.data
+          : [];
+
+      // 提取所有有效的 model id
+      const modelIds: string[] = rawList
+        .map((item: any) => (typeof item === "string" ? item : item?.id || item?.name))
+        .filter((id: any): id is string => typeof id === "string" && id.trim().length > 0);
+
+      if (modelIds.length === 0) {
+        throw new Error("成功连接，但返回的 /models 列表为空");
+      }
+
+      setDetectedModels(modelIds);
+      setDetectStatus(`✅ 检测成功！探测到 ${modelIds.length} 个可用模型`);
+
+      // 若当前填写的模型不在列表里，默认选中第一个
+      if (!modelIds.includes(props.modelConfig.model)) {
+        set({
+          modelConfig: { ...props.modelConfig, model: modelIds[0] },
+        });
+      }
+    } catch (err) {
+      setDetectStatus(
+        `❌ 检测失败: ${err instanceof Error ? err.message : String(err)}（若跨域受阻可手动填写）`,
+      );
+    } finally {
+      setIsDetecting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col gap-5">
-      {/* 1. 模型服务配置三要素 (预设快捷选择 + 自定义 Endpoint) */}
+      {/* 1. 模型服务配置三要素 (预设快捷选择 + 自定义 Endpoint + 自动检测) */}
       <div className="rounded-lg border border-line bg-elev/60 p-3.5">
         <div className="flex items-center justify-between mb-2.5">
           <div className="flex items-center gap-2">
@@ -120,7 +188,7 @@ export default function ConfigPanel(props: Props) {
             {/* Base URL (支持自由自定义修改) */}
             <div>
               <div className="flex items-center justify-between mb-1">
-                <span className="text-[11px] text-ink-dim">1. API Base URL (兼容 OpenAI 规范)</span>
+                <span className="text-[11px] text-ink-dim">1. API Base URL (自定义或预设端点)</span>
                 {matchedPreset?.docUrl && (
                   <a
                     href={matchedPreset.docUrl}
@@ -144,47 +212,10 @@ export default function ConfigPanel(props: Props) {
               />
             </div>
 
-            {/* Model Name & API Key */}
-            <div className="grid grid-cols-2 gap-2.5">
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <span className="text-[11px] text-ink-dim">2. Model Name (模型)</span>
-                </div>
-                {matchedPreset && matchedPreset.models.length > 0 ? (
-                  <div className="flex flex-col gap-1">
-                    <select
-                      className={inputCls}
-                      value={props.modelConfig.model}
-                      onChange={(e) =>
-                        set({
-                          modelConfig: { ...props.modelConfig, model: e.target.value },
-                        })
-                      }
-                    >
-                      {matchedPreset.models.map((m) => (
-                        <option key={m.id} value={m.id}>
-                          {m.name} {m.desc ? `(${m.desc})` : ""}
-                        </option>
-                      ))}
-                      <option value={props.modelConfig.model}>自定义其他型号...</option>
-                    </select>
-                  </div>
-                ) : (
-                  <input
-                    className={inputCls}
-                    value={props.modelConfig.model}
-                    onChange={(e) =>
-                      set({
-                        modelConfig: { ...props.modelConfig, model: e.target.value },
-                      })
-                    }
-                    placeholder="输入模型 ID，如 gpt-4o, qwen-max..."
-                  />
-                )}
-              </div>
-
-              <div>
-                <div className="text-[11px] text-ink-dim mb-1">3. API Key (本地保存)</div>
+            {/* API Key */}
+            <div>
+              <div className="text-[11px] text-ink-dim mb-1">2. API Key (仅保存在本地浏览器)</div>
+              <div className="flex gap-2">
                 <input
                   type="password"
                   className={inputCls}
@@ -196,7 +227,91 @@ export default function ConfigPanel(props: Props) {
                   }
                   placeholder={matchedPreset?.keyPlaceholder || "sk-..."}
                 />
+                <button
+                  type="button"
+                  onClick={handleDetectModels}
+                  disabled={isDetecting || !props.modelConfig.baseUrl}
+                  className="shrink-0 rounded-md border border-azure/60 bg-azure/10 px-3 py-2 text-xs font-medium text-azure transition hover:bg-azure/20 disabled:cursor-not-allowed disabled:opacity-50"
+                  title="根据输入的 Base URL 与 API Key 自动请求 /v1/models 探测可用模型"
+                >
+                  {isDetecting ? "检测中…" : "🔍 自动检测模型"}
+                </button>
               </div>
+              {detectStatus && (
+                <div
+                  className={`mt-1 text-[11px] ${
+                    detectStatus.startsWith("✅") ? "text-emerald-400" : "text-amber-400"
+                  }`}
+                >
+                  {detectStatus}
+                </div>
+              )}
+            </div>
+
+            {/* Model Name (模型选择或填入) */}
+            <div>
+              <div className="flex items-center justify-between mb-1">
+                <span className="text-[11px] text-ink-dim">3. Model Name (检测选择或手动填入)</span>
+                {detectedModels.length > 0 && (
+                  <span className="text-[10px] text-emerald-400 font-mono">
+                    已连通 ({detectedModels.length} 个模型)
+                  </span>
+                )}
+              </div>
+
+              {/* 如果自动探测到了模型，优先展示自动探测下拉列表 */}
+              {detectedModels.length > 0 ? (
+                <div className="flex flex-col gap-1.5">
+                  <select
+                    className={inputCls}
+                    value={props.modelConfig.model}
+                    onChange={(e) =>
+                      set({
+                        modelConfig: { ...props.modelConfig, model: e.target.value },
+                      })
+                    }
+                  >
+                    {detectedModels.map((id) => (
+                      <option key={id} value={id}>
+                        {id}
+                      </option>
+                    ))}
+                  </select>
+                  <div className="text-[10px] text-ink-mute">
+                    * 已自动拉取该服务支持的模型列表，可直接点选。也可在下方修改为任意自定义 ID。
+                  </div>
+                </div>
+              ) : matchedPreset && matchedPreset.models.length > 0 ? (
+                <div className="flex flex-col gap-1">
+                  <select
+                    className={inputCls}
+                    value={props.modelConfig.model}
+                    onChange={(e) =>
+                      set({
+                        modelConfig: { ...props.modelConfig, model: e.target.value },
+                      })
+                    }
+                  >
+                    {matchedPreset.models.map((m) => (
+                      <option key={m.id} value={m.id}>
+                        {m.name} {m.desc ? `(${m.desc})` : ""}
+                      </option>
+                    ))}
+                    <option value={props.modelConfig.model}>自定义型号: {props.modelConfig.model}</option>
+                  </select>
+                </div>
+              ) : (
+                <input
+                  className={inputCls}
+                  value={props.modelConfig.model}
+                  onChange={(e) =>
+                    set({
+                      modelConfig: { ...props.modelConfig, model: e.target.value },
+                    })
+                  }
+                  placeholder="输入模型 ID，如 MiniCPM-V-4.7-35B-A3B, qwen-max..."
+                />
+              )}
             </div>
 
             {/* ModelBest 注册教程与专属邀请入口 */}
@@ -227,12 +342,12 @@ export default function ConfigPanel(props: Props) {
                 <br />
                 2. 进入控制台「API 密钥」创建并复制以 <code className="text-gold font-mono">sk-live-</code> 开头的密钥填入上方。
                 <br />
-                3. 模型默认推荐 <code className="text-azure font-mono">MiniCPM-V-4.7-35B-A3B</code>，对商业 PPT 大纲的结构化规划极度精准。
+                3. 点击「🔍 自动检测模型」按钮，系统即可自动拉取并选择 <code className="text-azure font-mono">MiniCPM-V-4.7-35B-A3B</code>！
               </p>
             </div>
 
             <div className="text-[10px] text-ink-mute">
-              * 预设覆盖：ModelBest (MiniCPM)、StepFun (阶跃)、Moonshot (Kimi)、Zhipu (智谱)、MiniMax (海螺)、Qwen (通义千问)、OpenAI 等，支持任意自定义 Endpoint。所有 Key 仅在你的本地浏览器安全发起直连，不经任何第三方。
+              * 填入任意兼容 OpenAI 的 Endpoint 和 API Key 后，点击「🔍 自动检测模型」即可自动获取端点支持的模型并选择填入。所有请求仅在本地浏览器发起，安全无泄漏。
             </div>
           </div>
         )}
@@ -406,7 +521,7 @@ export default function ConfigPanel(props: Props) {
                 onClick={() => set({ styleRecipe: s.id })}
                 className={`rounded-md border px-2 py-2 text-center transition ${
                   active
-                    ? "border-gold bg-gold-soft text-gold"
+                    ? "border-gold bg-gold-soft text-gold font-medium"
                     : "border-line bg-elev text-ink-dim hover:border-line-strong hover:text-ink"
                 }`}
               >
