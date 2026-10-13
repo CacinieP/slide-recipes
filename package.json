@@ -1,7 +1,7 @@
 {
   "name": "slide-recipes",
-  "version": "2.3.0",
-  "description": "Editable commercial slide recipes, 20 semantic palettes, CJK-aware layouts, configurable AI image providers, and render QA.",
+  "version": "2.4.0",
+  "description": "Editable commercial slide recipes, 28 semantic palettes, 23 slide types, CJK-aware layouts, configurable AI image providers, and render QA.",
   "type": "module",
   "engines": {
     "node": ">=20"
@@ -38,7 +38,8 @@
     "demo:recipes": "node examples/build_recipe_gallery.mjs",
     "demo:commercial": "node examples/build_commercial_gallery.mjs",
     "demo:elements": "node examples/build_business_elements.mjs",
-    "demo:palettes": "node examples/build_palette_gallery.mjs"
+    "demo:palettes": "node examples/build_palette_gallery.mjs",
+    "demo:showcase": "node examples/build_showcase_deck.mjs"
   },
   "devDependencies": {
     "pptxgenjs": "^4.0.1",

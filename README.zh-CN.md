@@ -16,9 +16,9 @@
   <img src="https://img.shields.io/badge/node-%E2%89%A5%2020-339933?style=flat-square" alt="Node" />
 </p>
 
-**把材料做成可编辑的商业 PPT：9 套审美 recipe × 20 套语义配色。**
+**把材料做成可编辑的商业 PPT：11 套审美 recipe × 28 套语义配色。**
 
-适合经营汇报、客户提案、投资沟通和品牌展示。内置 18 类商业页面/元素 API、中文排版规则、可配置 AI 配图与渲染检查。先看真实生成样例，再复制提示词开始。
+适合经营汇报、客户提案、投资沟通和品牌展示。内置 23 类商业页面/元素 API、统一 DeckSchema、结构化生图 Prompt Schema、中文排版规则、可配置 AI 配图与渲染检查。先看真实生成样例，再复制提示词开始。
 
 [下载新版](https://github.com/CacinieP/slide-recipes/releases/latest) · [看样例](#samples) · [复制提示词](#prompt-guide) · [传播素材](docs/share-kit.md)
 
@@ -32,16 +32,17 @@
 
 | 样例 | 适用场景 | 预览与下载 |
 |---|---|---|
-| **investor-signal** · 8 pages | 投资汇报 · 森林绿 / 砂岩 | [Preview](docs/img/commercial/investor-signal.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.3.0/investor-signal.pptx) |
-| **editorial-proposal** · 8 pages | 咨询提案 · 钴蓝 / 纸白 | [Preview](docs/img/commercial/editorial-proposal.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.3.0/editorial-proposal.pptx) |
-| **studio-monochrome** · 8 pages | 工作室介绍 · 黑白 / 大字 | [Preview](docs/img/commercial/studio-monochrome.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.3.0/studio-monochrome.pptx) |
-| **Business elements** · 10 pages | KPI、漏斗、甘特图、SWOT、团队、报价 | [Preview](docs/img/business-elements.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.3.0/business-elements.pptx) |
+| **Slide Recipes Showcase** · 10 pages | 官方项目全景 · 咨询深蓝 / 纸白 | [Preview](examples/slides/output/showcase_preview-01.png) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.4.0/slide-recipes-showcase.pptx) |
+| **investor-signal** · 8 pages | 投资汇报 · 森林绿 / 砂岩 | [Preview](docs/img/commercial/investor-signal.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.4.0/investor-signal.pptx) |
+| **editorial-proposal** · 8 pages | 咨询提案 · 钴蓝 / 纸白 | [Preview](docs/img/commercial/editorial-proposal.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.4.0/editorial-proposal.pptx) |
+| **studio-monochrome** · 8 pages | 工作室介绍 · 黑白 / 大字 | [Preview](docs/img/commercial/studio-monochrome.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.4.0/studio-monochrome.pptx) |
+| **Business elements** · 10 pages | KPI、漏斗、甘特图、SWOT、团队、报价 | [Preview](docs/img/business-elements.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.4.0/business-elements.pptx) |
 
 ### 同一套信息，换一种气质
 
-茄紫青柠、孔雀蓝杏桃、咖啡冰蓝……20 套色板均可搭配三套商业 recipe。下面展示角色色及其组合；完整 PPTX 示例仍采用表中标注的原始色板。
+茄紫青柠、孔雀蓝杏桃、北欧鼠尾草、咨询深蓝……28 套色板均可搭配商业 recipe。下面展示角色色及其组合；完整 PPTX 示例仍采用表中标注的原始色板。
 
-![20 semantic palettes](docs/img/palette-gallery.svg)
+![28 semantic palettes](docs/img/palette-gallery.svg)
 
 ### 复制这段，做你的版本
 

@@ -164,27 +164,26 @@ export function createBusinessElements({ pres, t, base, text, rect, rule, image,
       text(s, label, .8, 3.4, 3.1, .4, 15, t.light, true);
       // 右侧核心结论与论据
       text(s, takeaway, 4.55, 1.9, 4.9, .8, 22, t.ink, true);
-      rule(s, 4.55, 2.85, 4.9);
       if (Array.isArray(details) && details.length > 0) {
-        text(s, details.map(d => '• ' + d).join('\n\n'), 4.55, 3.05, 4.9, 1.5, 14, t.muted);
+        text(s, details.map(d => '• ' + d).join('\n'), 4.55, 3.05, 4.9, 1.6, 13, t.muted);
       }
       source(s, note); return s;
     },
     architectureStack({ title, layers, kicker = 'SYSTEM ARCHITECTURE', note = '', page }) {
       count(layers, 3, 4, 'Architecture layers');
       const s = base({ title, kicker, page });
-      const h = 2.8 / layers.length;
+      const h = 2.45 / layers.length;
       layers.forEach((l, i) => {
         const y = 1.88 + i * (h + .08);
         rect(s, .55, y, 2.2, h, t.dark);
-        text(s, l.name, .7, y + h * .3, 1.9, h * .5, 15, t.light, true);
+        text(s, l.name, .7, y + h * .25, 1.9, h * .55, 14, t.light, true);
         rect(s, 2.85, y, 6.6, h, t.paper, { line: { color: t.line, width: .8 } });
         const items = l.items || [];
         const itemW = 6.4 / Math.max(items.length, 1);
         items.forEach((it, j) => {
           const ix = 2.95 + j * itemW;
-          rect(s, ix, y + .1, itemW - .12, h - .2, t.highlight);
-          text(s, it, ix + .05, y + .15, itemW - .22, h - .3, 11, t.ink, true, { align: 'center', valign: 'mid' });
+          rect(s, ix, y + .08, itemW - .12, h - .16, t.highlight);
+          text(s, it, ix + .05, y + .12, itemW - .22, h - .24, 11, t.ink, true, { align: 'center', valign: 'mid' });
         });
       });
       source(s, note); return s;

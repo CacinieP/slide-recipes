@@ -16,9 +16,9 @@
   <img src="https://img.shields.io/badge/node-%E2%89%A5%2020-339933?style=flat-square" alt="Node" />
 </p>
 
-**Turn your brief into an editable business deck: 9 visual recipes × 20 semantic palettes.**
+**Turn your brief into an editable business deck: 11 visual recipes × 28 semantic palettes.**
 
-For business reviews, client proposals, investor updates and brand presentations. Includes 18 business page/element APIs, CJK-aware layout, configurable AI images and render checks. See generated samples, then copy a prompt to start.
+For business reviews, client proposals, investor updates and brand presentations. Includes 23 business page/element APIs, unified DeckSchema, structured image prompt schema, CJK-aware layout, configurable AI images and render checks. See generated samples, then copy a prompt to start.
 
 [Download](https://github.com/CacinieP/slide-recipes/releases/latest) · [Samples](#samples) · [Copy a prompt](#prompt-guide) · [Share kit](docs/share-kit.md)
 
@@ -32,16 +32,17 @@ These samples were generated and rendered from this repository. All content and 
 
 | Sample | Use case | Preview and download |
 |---|---|---|
-| **investor-signal** · 8 pages | Investor update · forest / sand | [Preview](docs/img/commercial/investor-signal.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.3.0/investor-signal.pptx) |
-| **editorial-proposal** · 8 pages | Consulting proposal · cobalt / paper | [Preview](docs/img/commercial/editorial-proposal.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.3.0/editorial-proposal.pptx) |
-| **studio-monochrome** · 8 pages | Studio profile · monochrome / bold type | [Preview](docs/img/commercial/studio-monochrome.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.3.0/studio-monochrome.pptx) |
-| **Business elements** · 10 pages | KPI, funnel, Gantt, SWOT, team, pricing | [Preview](docs/img/business-elements.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.3.0/business-elements.pptx) |
+| **Slide Recipes Showcase** · 10 pages | Official repo walkthrough · consulting / navy | [Preview](examples/slides/output/showcase_preview-01.png) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.4.0/slide-recipes-showcase.pptx) |
+| **investor-signal** · 8 pages | Investor update · forest / sand | [Preview](docs/img/commercial/investor-signal.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.4.0/investor-signal.pptx) |
+| **editorial-proposal** · 8 pages | Consulting proposal · cobalt / paper | [Preview](docs/img/commercial/editorial-proposal.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.4.0/editorial-proposal.pptx) |
+| **studio-monochrome** · 8 pages | Studio profile · monochrome / bold type | [Preview](docs/img/commercial/studio-monochrome.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.4.0/studio-monochrome.pptx) |
+| **Business elements** · 10 pages | KPI, funnel, Gantt, SWOT, team, pricing | [Preview](docs/img/business-elements.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.4.0/business-elements.pptx) |
 
 ### Same structure. A different character.
 
-Aubergine/lime, petrol/apricot, espresso/ice: 20 palettes work with all three commercial recipes. This board previews semantic colors; the downloadable decks retain their original palettes listed above.
+Aubergine/lime, petrol/apricot, nordic/sage, consulting/navy: 28 palettes work with commercial recipes. This board previews semantic colors; the downloadable decks retain their original palettes listed above.
 
-![20 semantic palettes](docs/img/palette-gallery.svg)
+![28 semantic palettes](docs/img/palette-gallery.svg)
 
 ### Copy this to make it yours
 
