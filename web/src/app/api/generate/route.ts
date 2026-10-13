@@ -119,16 +119,17 @@ export async function POST(request: Request) {
   // 4) Return the binary .pptx, with the deck plan in a header so the client
   //    can render the real preview without a second LLM call. The plan JSON is
   //    small (2-6KB for typical decks) and URI-encoded for header safety.
-  const safeName = (plan.title || "presentation")
+  const rawName = (plan.title || "presentation")
     .replace(/[^\w\u4e00-\u9fa5-]+/g, "_")
     .slice(0, 40) || "presentation";
+  const encodedName = encodeURIComponent(rawName);
   const planHeader = encodeURIComponent(JSON.stringify(plan));
   // Wrap the Buffer in a Uint8Array view so it satisfies BodyInit across TS lib defs.
   return new Response(new Uint8Array(buffer), {
     status: 200,
     headers: {
       "Content-Type": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-      "Content-Disposition": `attachment; filename="${safeName}.pptx"`,
+      "Content-Disposition": `attachment; filename="presentation.pptx"; filename*=UTF-8''${encodedName}.pptx`,
       "Content-Length": String(buffer.byteLength),
       "X-Deck-Plan": planHeader,
     },

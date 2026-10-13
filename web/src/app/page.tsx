@@ -81,9 +81,12 @@ export default function Home() {
 
       const blob = await resp.blob();
       const blobUrl = URL.createObjectURL(blob);
-      const fileName =
-        resp.headers.get("content-disposition")?.match(/filename="?([^"]+)"?/)?.[1] ||
-        "presentation.pptx";
+      const cd = resp.headers.get("content-disposition") || "";
+      const fnStarMatch = cd.match(/filename\*=UTF-8''([^;]+)/i);
+      const fnNormalMatch = cd.match(/filename="?([^";]+)"?/i);
+      const fileName = fnStarMatch
+        ? decodeURIComponent(fnStarMatch[1])
+        : (fnNormalMatch ? fnNormalMatch[1] : "presentation.pptx");
 
       // The server returns the real deck plan in the X-Deck-Plan header so we
       // can show the actual generated slides (not a synthetic placeholder).
