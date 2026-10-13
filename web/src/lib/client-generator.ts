@@ -71,9 +71,13 @@ export async function requestLlmPlan(
       }
     }
   } catch (err) {
-    throw new Error(
-      `网络请求失败: ${err instanceof Error ? err.message : String(err)}。若使用第三方 API，请确保服务支持浏览器跨域 (CORS)。`,
-    );
+    const msg = err instanceof Error ? err.message : String(err);
+    if (msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("Network request failed")) {
+      throw new Error(
+        `网络请求失败: Failed to fetch (浏览器跨域受阻 CORS)。服务商 API (${baseUrl}) 未向浏览器返回 Access-Control-Allow-Origin 跨域头。请开启浏览器「Allow CORS」插件直连，或切换为左侧免 API 的自定义大纲模式。`,
+      );
+    }
+    throw new Error(`网络请求失败: ${msg}`);
   }
 
   if (!resp.ok) {

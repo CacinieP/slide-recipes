@@ -133,9 +133,16 @@ export default function ConfigPanel(props: Props) {
         });
       }
     } catch (err) {
-      setDetectStatus(
-        `❌ 检测失败: ${err instanceof Error ? err.message : String(err)}（若跨域受阻可手动填写）`,
-      );
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes("Failed to fetch") || msg.includes("NetworkError")) {
+        setDetectStatus(
+          "⚠️ 跨域受阻 (CORS): 服务商接口未开放浏览器跨域。建议开启 Chrome 扩展「Allow CORS」直连，或直接在下方手动输入/保留预设模型。",
+        );
+      } else {
+        setDetectStatus(
+          `❌ 检测失败: ${msg}`,
+        );
+      }
     } finally {
       setIsDetecting(false);
     }
@@ -346,8 +353,23 @@ export default function ConfigPanel(props: Props) {
               </p>
             </div>
 
-            <div className="text-[10px] text-ink-mute">
-              * 填入任意兼容 OpenAI 的 Endpoint 和 API Key 后，点击「🔍 自动检测模型」即可自动获取端点支持的模型并选择填入。所有请求仅在本地浏览器发起，安全无泄漏。
+            <div className="space-y-1 text-[10px] text-ink-mute">
+              <div>
+                * 填入任意兼容 OpenAI 的 Endpoint 和 API Key 后，点击「🔍 自动检测模型」即可自动获取端点支持的模型并选择填入。所有请求仅在本地浏览器发起，安全无泄漏。
+              </div>
+              <div className="rounded border border-amber-500/30 bg-amber-500/10 p-2 text-amber-300">
+                <span className="font-semibold">💡 浏览器跨域 (CORS) 必读：</span>
+                国内各大模型（如 ModelBest、阶跃、智谱等）官方 API 默认未开启浏览器跨域许可。若在 GitHub Pages 直连报错 Failed to fetch，推荐安装 Chrome / Edge 插件
+                <a
+                  href="https://chromewebstore.google.com/search/allow%20cors"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mx-1 underline text-amber-200 hover:text-white"
+                >
+                  「Allow CORS」
+                </a>
+                并开启，即可免代理直连！或直接切换至下方「自定义大纲」模式，免 API 秒出 PPT。
+              </div>
             </div>
           </div>
         )}
