@@ -32,10 +32,10 @@
 
 | 样例 | 适用场景 | 预览与下载 |
 |---|---|---|
-| **investor-signal** · 8 pages | 投资汇报 · 森林绿 / 砂岩 | [Preview](docs/img/commercial/investor-signal.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.2.0/investor-signal.pptx) |
-| **editorial-proposal** · 8 pages | 咨询提案 · 钴蓝 / 纸白 | [Preview](docs/img/commercial/editorial-proposal.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.2.0/editorial-proposal.pptx) |
-| **studio-monochrome** · 8 pages | 工作室介绍 · 黑白 / 大字 | [Preview](docs/img/commercial/studio-monochrome.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.2.0/studio-monochrome.pptx) |
-| **Business elements** · 10 pages | KPI、漏斗、甘特图、SWOT、团队、报价 | [Preview](docs/img/business-elements.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.2.0/business-elements.pptx) |
+| **investor-signal** · 8 pages | 投资汇报 · 森林绿 / 砂岩 | [Preview](docs/img/commercial/investor-signal.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.3.0/investor-signal.pptx) |
+| **editorial-proposal** · 8 pages | 咨询提案 · 钴蓝 / 纸白 | [Preview](docs/img/commercial/editorial-proposal.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.3.0/editorial-proposal.pptx) |
+| **studio-monochrome** · 8 pages | 工作室介绍 · 黑白 / 大字 | [Preview](docs/img/commercial/studio-monochrome.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.3.0/studio-monochrome.pptx) |
+| **Business elements** · 10 pages | KPI、漏斗、甘特图、SWOT、团队、报价 | [Preview](docs/img/business-elements.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.3.0/business-elements.pptx) |
 
 ### 同一套信息，换一种气质
 
@@ -114,6 +114,7 @@ npm run demo:palettes    # regenerate palette SVG + catalog
 ## ✨ 核心亮点
 
 - **可编辑 PPTX** —— 输出真实 `.pptx`，非整页图片；由 `pptx-editable-check.py` 验证。
+- **统一 Deck Schema** —— 标准化 JSON 规范覆盖 19 类版式；Recipe 风格与商业组件正交解耦，赋能 Web 与大模型。
 - **中文排版优先** —— 字体回退、全角符号、保守字号；溢出在渲染前预测。
 - **渲染 QA 门禁** —— `render-qa.mjs` 捕捉溢出、遮挡、越界、比例错误、缺页码 badge。
 - **锁定配方** —— 九套 recipe，统一排版规则并按信息关系选页。

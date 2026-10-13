@@ -32,10 +32,10 @@ These samples were generated and rendered from this repository. All content and 
 
 | Sample | Use case | Preview and download |
 |---|---|---|
-| **investor-signal** · 8 pages | Investor update · forest / sand | [Preview](docs/img/commercial/investor-signal.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.2.0/investor-signal.pptx) |
-| **editorial-proposal** · 8 pages | Consulting proposal · cobalt / paper | [Preview](docs/img/commercial/editorial-proposal.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.2.0/editorial-proposal.pptx) |
-| **studio-monochrome** · 8 pages | Studio profile · monochrome / bold type | [Preview](docs/img/commercial/studio-monochrome.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.2.0/studio-monochrome.pptx) |
-| **Business elements** · 10 pages | KPI, funnel, Gantt, SWOT, team, pricing | [Preview](docs/img/business-elements.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.2.0/business-elements.pptx) |
+| **investor-signal** · 8 pages | Investor update · forest / sand | [Preview](docs/img/commercial/investor-signal.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.3.0/investor-signal.pptx) |
+| **editorial-proposal** · 8 pages | Consulting proposal · cobalt / paper | [Preview](docs/img/commercial/editorial-proposal.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.3.0/editorial-proposal.pptx) |
+| **studio-monochrome** · 8 pages | Studio profile · monochrome / bold type | [Preview](docs/img/commercial/studio-monochrome.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.3.0/studio-monochrome.pptx) |
+| **Business elements** · 10 pages | KPI, funnel, Gantt, SWOT, team, pricing | [Preview](docs/img/business-elements.jpg) · [PPTX](https://github.com/CacinieP/slide-recipes/releases/download/v2.3.0/business-elements.pptx) |
 
 ### Same structure. A different character.
 
@@ -115,6 +115,7 @@ Three locked demo decks, all generated from this repo with **zero API keys** (so
 ## ✨ Highlights
 
 - **Editable PPTX** — real `.pptx`, not flattened slide images; verified by `pptx-editable-check.py`.
+- **Unified Deck Schema** — normalized JSON schema covering 19 layout types; decoupled recipe aesthetics and business components.
 - **CJK-first layout** — font fallback, full-width punctuation, conservative sizes; overflow predicted *before* render.
 - **Render QA gate** — `render-qa.mjs` catches overflow, overlap, off-canvas, bad image ratios, missing page badges.
 - **Locked recipes** — nine aesthetic recipes for briefings, brand proposals, investor updates and studio decks so you stop re-deciding every detail.

@@ -28,7 +28,7 @@ https://github.com/CacinieP/slide-recipes
 1. [商业样例总览](img/hero-commercial.jpg)：首图，展示三种视觉方向。
 2. [20 套色板](img/palette-gallery.svg)：第二张，展示配色差异。
 3. [商业元素总览](img/business-elements.jpg)：第三张，展示可以实际使用的页面。
-4. 正文附仓库链接；完整 PPTX 在 [v2.2.0](https://github.com/CacinieP/slide-recipes/releases/tag/v2.2.0) 下载。
+4. 正文附仓库链接；完整 PPTX 在 [v2.3.0](https://github.com/CacinieP/slide-recipes/releases/tag/v2.3.0) 下载。
 
 所有展示数据与人物均为虚构示例；这些是代码生成成果，不是客户案例或效果背书。色板预览与下载示例分别展示能力，不暗示每套色板都已提供完整下载 deck。
 
