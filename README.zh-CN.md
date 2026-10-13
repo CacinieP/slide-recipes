@@ -25,6 +25,22 @@
 
 ---
 
+### 💡 在线 Web 工作台与 API 快速配置
+
+你可以直接打开 **[Web 在线工作台](https://caciniep.github.io/slide-recipes/)**，在浏览器中直连 AI 模型生成并导出可编辑 PPTX。推荐使用 **ModelBest (MiniCPM)**，其在大纲推理与结构化输出表现尤为出色：
+
+1. **注册领取免费额度**：通过专属邀请链接注册进入控制台 👉 **[platform.modelbest.cn (邀请码 A93DCA73)](https://platform.modelbest.cn/console/login?ref=A93DCA73)**
+2. **创建 API Key**：在控制台「API 密钥」中创建并复制 `sk-live-...` 密钥。
+3. **在 Web 工作台填入三要素**：
+   - **Base URL**：`https://api.modelbest.cn/v1`
+   - **Model**：`MiniCPM-V-4.7-35B-A3B`
+   - **API Key**：填入你申请的密钥（*仅在本地浏览器端保存与直连，不经任何第三方服务器*）。
+4. **一键生成**：输入任意主题或粘贴自定义大纲 JSON，即可实时预览并下载原生矢量 PPTX。
+
+*(同时预设支持 StepFun 阶跃、Kimi、智谱 GLM、MiniMax、通义千问 Qwen 及任意自定义兼容端点)*
+
+---
+
 <a id="samples"></a>
 
 ## 先看成品，再选风格

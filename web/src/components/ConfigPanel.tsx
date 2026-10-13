@@ -199,6 +199,38 @@ export default function ConfigPanel(props: Props) {
               </div>
             </div>
 
+            {/* ModelBest 注册教程与专属邀请入口 */}
+            <div className="rounded-md border border-gold/40 bg-gold-soft/60 p-2.5 text-xs text-ink-dim">
+              <div className="flex items-center justify-between font-medium text-ink mb-1">
+                <span className="flex items-center gap-1.5 text-gold">
+                  <span>💡</span> 推荐方案：ModelBest (MiniCPM) API 快速获取
+                </span>
+                <a
+                  href="https://platform.modelbest.cn/console/login?ref=A93DCA73"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded bg-gold px-2 py-0.5 text-[11px] font-semibold text-canvas hover:brightness-110"
+                >
+                  免费注册领取额度 →
+                </a>
+              </div>
+              <p className="text-[11px] leading-relaxed">
+                1. 点击专属邀请链接注册/登录：
+                <a
+                  href="https://platform.modelbest.cn/console/login?ref=A93DCA73"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-azure underline mx-0.5"
+                >
+                  platform.modelbest.cn (专属邀请码 A93DCA73)
+                </a>
+                <br />
+                2. 进入控制台「API 密钥」创建并复制以 <code className="text-gold font-mono">sk-live-</code> 开头的密钥填入上方。
+                <br />
+                3. 模型默认推荐 <code className="text-azure font-mono">MiniCPM-V-4.7-35B-A3B</code>，对商业 PPT 大纲的结构化规划极度精准。
+              </p>
+            </div>
+
             <div className="text-[10px] text-ink-mute">
               * 预设覆盖：ModelBest (MiniCPM)、StepFun (阶跃)、Moonshot (Kimi)、Zhipu (智谱)、MiniMax (海螺)、Qwen (通义千问)、OpenAI 等，支持任意自定义 Endpoint。所有 Key 仅在你的本地浏览器安全发起直连，不经任何第三方。
             </div>

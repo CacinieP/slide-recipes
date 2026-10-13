@@ -25,6 +25,22 @@ For business reviews, client proposals, investor updates and brand presentations
 
 ---
 
+### 💡 Web Studio & Model API Quickstart
+
+Launch the **[Online Web Studio](https://caciniep.github.io/slide-recipes/)** to generate and export editable PPTX decks directly from your browser. We recommend **ModelBest (MiniCPM)** for its high reasoning accuracy and precise structured JSON output:
+
+1. **Sign Up & Get Free Credits**: Register via the referral link 👉 **[platform.modelbest.cn (Invite Code: A93DCA73)](https://platform.modelbest.cn/console/login?ref=A93DCA73)**
+2. **Create API Key**: Go to the console "API Keys" section and copy your key (starts with `sk-live-...`).
+3. **Fill in the 3 Essentials in Web Studio**:
+   - **Base URL**: `https://api.modelbest.cn/v1`
+   - **Model**: `MiniCPM-V-4.7-35B-A3B`
+   - **API Key**: Paste your key (*stored locally in your browser, never transmitted to third-party servers*).
+4. **Generate**: Enter any presentation topic or paste custom outline JSON to preview and download native vector PPTX.
+
+*(Also comes with presets for StepFun, Moonshot Kimi, Zhipu GLM, MiniMax, Alibaba Qwen, and any custom OpenAI-compatible endpoint)*
+
+---
+
 <a id="samples"></a>
 
 ## See the output. Pick a direction.

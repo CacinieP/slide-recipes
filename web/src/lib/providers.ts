@@ -23,7 +23,7 @@ export const PROVIDER_PRESETS: ProviderPreset[] = [
       { id: "MiniCPM-4-35B-A3B", name: "MiniCPM-4-35B-A3B", desc: "35B 密集推理" },
     ],
     keyPlaceholder: "sk-live-...",
-    docUrl: "https://modelbest.cn",
+    docUrl: "https://platform.modelbest.cn/console/login?ref=A93DCA73",
   },
   {
     id: "stepfun",
