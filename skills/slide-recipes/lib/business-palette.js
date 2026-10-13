@@ -20,6 +20,14 @@ export const businessPalettes = {
   'olive-orchid': {"paper": "F8F6EF", "ink": "3C3C28", "muted": "6A6752", "accent": "68612F", "highlight": "E8D6EA", "line": "DBD8C5", "dark": "3C3C28", "light": "F8F6EF"},
   'prussian-butter': {"paper": "F8F6EE", "ink": "193B50", "muted": "556773", "accent": "245B79", "highlight": "F4E5B8", "line": "D1DADE", "dark": "193B50", "light": "F8F6EE"},
   'mulberry-mist': {"paper": "F8F4F6", "ink": "452E43", "muted": "745F70", "accent": "803E73", "highlight": "D2E4E5", "line": "DECFDA", "dark": "452E43", "light": "F8F4F6"},
+  'nordic-sage': { paper: 'F4F6F0', ink: '233228', muted: '54695B', accent: '2E5E43', highlight: 'CDE4D4', line: 'CCD6CC', dark: '1B2920', light: 'F4F6F0' },
+  'consulting-navy': { paper: 'F8F9FA', ink: '111E2E', muted: '4B5B6D', accent: '0B4F8A', highlight: 'D0E4F7', line: 'CFD9E3', dark: '111E2E', light: 'F8F9FA' },
+  'tokyo-cherry': { paper: 'F9F8F6', ink: '2B2326', muted: '6B575D', accent: 'B82645', highlight: 'FBD2DB', line: 'DDD2D5', dark: '2B1F23', light: 'F9F8F6' },
+  'desert-dune': { paper: 'F8F5EE', ink: '382A20', muted: '6B5748', accent: '8C4724', highlight: 'F5D5C2', line: 'DBD1C3', dark: '33241A', light: 'F8F5EE' },
+  'electric-violet': { paper: 'F7F6FB', ink: '221D38', muted: '595078', accent: '5C32A8', highlight: 'E2D4FD', line: 'D7D0EB', dark: '221D38', light: 'F7F6FB' },
+  'alpine-cyan': { paper: 'F6F9FA', ink: '1A2C38', muted: '536573', accent: '1B6B8A', highlight: 'CDE7F2', line: 'D0DDE5', dark: '162630', light: 'F6F9FA' },
+  'bamboo-teal': { paper: 'F5F8F6', ink: '1D3328', muted: '50695B', accent: '1C6E4A', highlight: 'C6E8D6', line: 'CCD9D1', dark: '162A20', light: 'F5F8F6' },
+  'amber-coal': { paper: 'FAF8F4', ink: '282725', muted: '6B665E', accent: '9E5D10', highlight: 'FCE5C3', line: 'DCD5CA', dark: '26231E', light: 'FAF8F4' },
 };
 const roles = ['paper','ink','muted','accent','highlight','line','dark','light'];
 function luminance(hex) {

@@ -30,6 +30,14 @@ const recipe = createCommercialRecipe(pres, "editorial-proposal", {
 | olive-orchid | `F8F6EF` | `3C3C28` | `6A6752` | `68612F` | `E8D6EA` | `DBD8C5` | `3C3C28` | `F8F6EF` |
 | prussian-butter | `F8F6EE` | `193B50` | `556773` | `245B79` | `F4E5B8` | `D1DADE` | `193B50` | `F8F6EE` |
 | mulberry-mist | `F8F4F6` | `452E43` | `745F70` | `803E73` | `D2E4E5` | `DECFDA` | `452E43` | `F8F4F6` |
+| nordic-sage | `F4F6F0` | `233228` | `54695B` | `2E5E43` | `CDE4D4` | `CCD6CC` | `1B2920` | `F4F6F0` |
+| consulting-navy | `F8F9FA` | `111E2E` | `4B5B6D` | `0B4F8A` | `D0E4F7` | `CFD9E3` | `111E2E` | `F8F9FA` |
+| tokyo-cherry | `F9F8F6` | `2B2326` | `6B575D` | `B82645` | `FBD2DB` | `DDD2D5` | `2B1F23` | `F9F8F6` |
+| desert-dune | `F8F5EE` | `382A20` | `6B5748` | `8C4724` | `F5D5C2` | `DBD1C3` | `33241A` | `F8F5EE` |
+| electric-violet | `F7F6FB` | `221D38` | `595078` | `5C32A8` | `E2D4FD` | `D7D0EB` | `221D38` | `F7F6FB` |
+| alpine-cyan | `F6F9FA` | `1A2C38` | `536573` | `1B6B8A` | `CDE7F2` | `D0DDE5` | `162630` | `F6F9FA` |
+| bamboo-teal | `F5F8F6` | `1D3328` | `50695B` | `1C6E4A` | `C6E8D6` | `CCD9D1` | `162A20` | `F5F8F6` |
+| amber-coal | `FAF8F4` | `282725` | `6B665E` | `9E5D10` | `FCE5C3` | `DCD5CA` | `26231E` | `FAF8F4` |
 
 Use paper for light backgrounds, ink/muted/accent for text on paper, light on dark/ink/accent, and highlight on dark. line is decorative. Never assume other pairs are readable. Use labels and shapes alongside colors for categories/status. Image backgrounds require visual review.
 

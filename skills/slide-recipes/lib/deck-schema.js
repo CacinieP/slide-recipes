@@ -15,6 +15,8 @@ export const SUPPORTED_RECIPE_IDS = [
   'roadmap-brief',
   'editorial-grid',
   'dark-launch',
+  'consulting-dense',
+  'tech-keynote',
 ];
 
 export const SLIDE_TYPES = [
@@ -30,6 +32,7 @@ export const SLIDE_TYPES = [
   'funnel',
   'gantt',
   'metrics',
+  'statCallout',
   // 分析与决策
   'comparison',
   'quadrant',
@@ -37,6 +40,9 @@ export const SLIDE_TYPES = [
   'caseStudy',
   // 执行与交付
   'processFlow',
+  'milestoneTimeline',
+  'featureGrid',
+  'architectureStack',
   'scope',
   'pricing',
   'team',
@@ -272,6 +278,48 @@ export function validateSlide(slide, index = 0) {
         slide.items.forEach((item, i) => {
           if (!isNonEmptyString(item?.title) || !isNonEmptyString(item?.body)) {
             errors.push(`${prefix} item[${i}] 需要 title 和 body`);
+          }
+        });
+      }
+      break;
+
+    case 'milestoneTimeline':
+      if (!Array.isArray(slide.milestones) || slide.milestones.length < 3 || slide.milestones.length > 5) {
+        errors.push(`${prefix} milestoneTimeline 需要 3–5 个 milestones 里程碑`);
+      } else {
+        slide.milestones.forEach((m, i) => {
+          if (!isNonEmptyString(m?.date) || !isNonEmptyString(m?.title)) {
+            errors.push(`${prefix} milestone[${i}] 需要 date 和 title`);
+          }
+        });
+      }
+      break;
+
+    case 'featureGrid':
+      if (!Array.isArray(slide.features) || slide.features.length < 4 || slide.features.length > 6) {
+        errors.push(`${prefix} featureGrid 需要 4–6 个 features 特性卡片`);
+      } else {
+        slide.features.forEach((f, i) => {
+          if (!isNonEmptyString(f?.title)) {
+            errors.push(`${prefix} feature[${i}] 需要 title`);
+          }
+        });
+      }
+      break;
+
+    case 'statCallout':
+      if (!isNonEmptyString(slide.stat) || !isNonEmptyString(slide.label) || !isNonEmptyString(slide.takeaway)) {
+        errors.push(`${prefix} statCallout 需要 stat 巨幅数字、label 含义与 takeaway 核心结论`);
+      }
+      break;
+
+    case 'architectureStack':
+      if (!Array.isArray(slide.layers) || slide.layers.length < 3 || slide.layers.length > 4) {
+        errors.push(`${prefix} architectureStack 需要 3–4 层 layers 架构`);
+      } else {
+        slide.layers.forEach((l, i) => {
+          if (!isNonEmptyString(l?.name) || !Array.isArray(l?.items) || l.items.length === 0) {
+            errors.push(`${prefix} layer[${i}] 需要 name 和非空 items 数组`);
           }
         });
       }

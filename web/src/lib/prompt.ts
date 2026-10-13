@@ -30,7 +30,11 @@ export function buildPrompt(opts: GenerateOptions): { system: string; user: stri
     "12. team: { title, people: [{ name, role, bio }][2..3], note?: string } — Team profiles.",
     "13. pricing: { title, plans: [{ name, price, period, features: string[2..3], recommended?: bool }][2..3], note: string } — Tiered pricing.",
     "14. content: { title, lead?: string, body?: string, bullets?: string[], source?: string } — Detailed insights/cards.",
-    "15. closing: { title, action: string, contact?: string } — Call-to-action closing.",
+    "15. milestoneTimeline: { title, milestones: [{ date: string, title: string, body?: string, status?: 'done'|'doing'|'todo' }][3..5], note?: string } — Project/product roadmap.",
+    "16. featureGrid: { title, features: [{ title: string, desc?: string, badge?: string }][4..6], note?: string } — 2x2 or 3x2 capability card grid.",
+    "17. statCallout: { title, stat: string, label: string, takeaway: string, details?: string[], note?: string } — Giant statistic with executive takeaway.",
+    "18. architectureStack: { title, layers: [{ name: string, items: string[] }][3..4], note?: string } — System or business tiered architecture.",
+    "19. closing: { title, action: string, contact?: string } — Call-to-action closing.",
     "",
     "STRUCTURAL REQUIREMENTS:",
     `- Total slides: exactly ${count}.`,
@@ -79,7 +83,8 @@ export function validatePlan(raw: unknown, count: number): {
     "cover", "toc", "section", "content", "summary", "agenda", "closing",
     "executiveSummary", "kpiDashboard", "funnel", "gantt", "processFlow",
     "quadrant", "swot", "team", "pricing", "testimonial", "metrics",
-    "comparison", "caseStudy", "scope"
+    "comparison", "caseStudy", "scope",
+    "milestoneTimeline", "featureGrid", "statCallout", "architectureStack"
   ]);
 
   const slides: SlidePlan[] = slidesRaw

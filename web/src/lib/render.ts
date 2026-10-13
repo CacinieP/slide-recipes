@@ -110,6 +110,26 @@ function renderSlide(pres: AnyPptx, slide: SlidePlan, idx: number, ctx: RenderCt
       addBadge(pres, s, pageNum, ctx);
       break;
 
+    case "milestoneTimeline":
+      renderMilestoneTimeline(pres, s, slide, ctx);
+      addBadge(pres, s, pageNum, ctx);
+      break;
+
+    case "featureGrid":
+      renderFeatureGrid(pres, s, slide, ctx);
+      addBadge(pres, s, pageNum, ctx);
+      break;
+
+    case "statCallout":
+      renderStatCallout(pres, s, slide, ctx);
+      addBadge(pres, s, pageNum, ctx);
+      break;
+
+    case "architectureStack":
+      renderArchitectureStack(pres, s, slide, ctx);
+      addBadge(pres, s, pageNum, ctx);
+      break;
+
     case "closing":
     case "summary":
       renderClosing(pres, s, slide, ctx);
@@ -601,6 +621,186 @@ function renderContent(pres: AnyPptx, s: AnyPptx, slide: SlidePlan, ctx: RenderC
   }
 
   renderSource(s, slide.source || slide.note, ctx);
+}
+
+function renderMilestoneTimeline(pres: AnyPptx, s: AnyPptx, slide: SlidePlan, ctx: RenderCtx): void {
+  const { theme, fonts } = ctx;
+  renderHeader(pres, s, "MILESTONES & ROADMAP", slide.title, ctx);
+
+  const milestones = slide.milestones || [];
+  if (milestones.length === 0) {
+    renderContent(pres, s, slide, ctx);
+    return;
+  }
+
+  const w = 8.9 / milestones.length;
+  s.addShape(pres.shapes.LINE, { x: 0.55, y: 2.7, w: 8.9, h: 0, line: { color: theme.secondary, width: 1 } });
+
+  milestones.forEach((m, i) => {
+    const x = 0.55 + i * w;
+    s.addText(m.date, {
+      x, y: 1.9, w: w - 0.25, h: 0.35,
+      fontSize: 13, fontFace: fonts.header, color: theme.accent, bold: true,
+    });
+
+    const fillColor = m.status === "done" ? theme.accent : (m.status === "doing" ? theme.light : theme.bg);
+    const borderColor = m.status === "done" ? theme.accent : theme.secondary;
+
+    s.addShape(pres.shapes.OVAL, {
+      x: x + 0.05, y: 2.58, w: 0.24, h: 0.24,
+      fill: { color: fillColor }, line: { color: borderColor, width: 1.5 },
+    });
+
+    s.addText(m.title, {
+      x, y: 3.1, w: w - 0.25, h: 0.5,
+      fontSize: 16, fontFace: fonts.header, color: theme.primary, bold: true,
+    });
+
+    if (m.body) {
+      s.addText(m.body, {
+        x, y: 3.65, w: w - 0.25, h: 1.0,
+        fontSize: 12, fontFace: fonts.body, color: theme.secondary,
+      });
+    }
+  });
+
+  renderSource(s, slide.note || slide.source, ctx);
+}
+
+function renderFeatureGrid(pres: AnyPptx, s: AnyPptx, slide: SlidePlan, ctx: RenderCtx): void {
+  const { theme, fonts } = ctx;
+  renderHeader(pres, s, "CORE CAPABILITIES", slide.title, ctx);
+
+  const features = slide.features || [];
+  if (features.length === 0) {
+    renderContent(pres, s, slide, ctx);
+    return;
+  }
+
+  const cols = features.length <= 4 ? 2 : 3;
+  const rows = Math.ceil(features.length / cols);
+  const w = 8.9 / cols;
+  const h = 2.8 / rows;
+
+  features.forEach((f, i) => {
+    const col = i % cols;
+    const row = Math.floor(i / cols);
+    const x = 0.55 + col * w;
+    const y = 1.88 + row * (h + 0.15);
+
+    s.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+      x, y, w: w - 0.25, h,
+      fill: { color: theme.bg }, line: { color: theme.secondary, width: 0.8 }, rectRadius: 0.05,
+    });
+    s.addShape(pres.shapes.LINE, {
+      x, y, w: w - 0.25, h: 0,
+      line: { color: theme.accent, width: 2.5 },
+    });
+
+    const badge = f.badge || String(i + 1).padStart(2, "0");
+    s.addText(badge, {
+      x: x + 0.15, y: y + 0.15, w: w - 0.55, h: 0.25,
+      fontSize: 11, fontFace: fonts.header, color: theme.accent, bold: true,
+    });
+    s.addText(f.title, {
+      x: x + 0.15, y: y + 0.45, w: w - 0.55, h: 0.4,
+      fontSize: 15, fontFace: fonts.header, color: theme.primary, bold: true,
+    });
+    s.addText(f.desc || f.body || "", {
+      x: x + 0.15, y: y + 0.9, w: w - 0.55, h: Math.max(0.3, h - 1.0),
+      fontSize: 12, fontFace: fonts.body, color: theme.secondary,
+    });
+  });
+
+  renderSource(s, slide.note || slide.source, ctx);
+}
+
+function renderStatCallout(pres: AnyPptx, s: AnyPptx, slide: SlidePlan, ctx: RenderCtx): void {
+  const { theme, fonts } = ctx;
+  renderHeader(pres, s, "IMPACT SIGNAL", slide.title, ctx);
+
+  // 左侧深色大数字卡片
+  s.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+    x: 0.55, y: 1.88, w: 3.6, h: 2.7,
+    fill: { color: theme.primary }, rectRadius: 0.08,
+  });
+  s.addText(slide.stat || "", {
+    x: 0.8, y: 2.15, w: 3.1, h: 1.1,
+    fontSize: 52, fontFace: fonts.header, color: theme.light, bold: true,
+  });
+  s.addText(slide.bullets?.[0] || slide.takeaway || "", {
+    x: 0.8, y: 3.4, w: 3.1, h: 0.9,
+    fontSize: 14, fontFace: fonts.body, color: "FFFFFF", bold: true,
+  });
+
+  // 右侧核心结论与细节
+  s.addText(slide.takeaway || slide.lead || "", {
+    x: 4.55, y: 1.9, w: 4.9, h: 0.8,
+    fontSize: 22, fontFace: fonts.header, color: theme.primary, bold: true,
+  });
+  s.addShape(pres.shapes.LINE, {
+    x: 4.55, y: 2.85, w: 4.9, h: 0,
+    line: { color: theme.secondary, width: 0.5 },
+  });
+
+  const details = slide.details || slide.bullets?.slice(1) || [];
+  if (details.length > 0) {
+    s.addText(details.map((d) => "• " + d).join("\n\n"), {
+      x: 4.55, y: 3.05, w: 4.9, h: 1.5,
+      fontSize: 13, fontFace: fonts.body, color: theme.secondary,
+    });
+  }
+
+  renderSource(s, slide.note || slide.source, ctx);
+}
+
+function renderArchitectureStack(pres: AnyPptx, s: AnyPptx, slide: SlidePlan, ctx: RenderCtx): void {
+  const { theme, fonts } = ctx;
+  renderHeader(pres, s, "SYSTEM ARCHITECTURE", slide.title, ctx);
+
+  const layers = slide.layers || [];
+  if (layers.length === 0) {
+    renderContent(pres, s, slide, ctx);
+    return;
+  }
+
+  const h = 2.8 / layers.length;
+  layers.forEach((l, i) => {
+    const y = 1.88 + i * (h + 0.08);
+
+    // 左侧层级标题 (深色卡片)
+    s.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+      x: 0.55, y, w: 2.2, h,
+      fill: { color: theme.primary }, rectRadius: 0.04,
+    });
+    s.addText(l.name, {
+      x: 0.7, y: y + h * 0.25, w: 1.9, h: h * 0.5,
+      fontSize: 14, fontFace: fonts.header, color: "FFFFFF", bold: true,
+    });
+
+    // 右侧子组件背景容器
+    s.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+      x: 2.85, y, w: 6.6, h,
+      fill: { color: theme.bg }, line: { color: theme.secondary, width: 0.8 }, rectRadius: 0.04,
+    });
+
+    const items = l.items || [];
+    const itemW = 6.4 / Math.max(items.length, 1);
+    items.forEach((it, j) => {
+      const ix = 2.95 + j * itemW;
+      s.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+        x: ix, y: y + 0.1, w: itemW - 0.12, h: h - 0.2,
+        fill: { color: theme.light }, rectRadius: 0.04,
+      });
+      s.addText(it, {
+        x: ix + 0.05, y: y + 0.15, w: itemW - 0.22, h: h - 0.3,
+        fontSize: 11, fontFace: fonts.body, color: theme.primary, bold: true,
+        align: "center", valign: "middle",
+      });
+    });
+  });
+
+  renderSource(s, slide.note || slide.source, ctx);
 }
 
 function renderClosing(pres: AnyPptx, s: AnyPptx, slide: SlidePlan, ctx: RenderCtx): void {

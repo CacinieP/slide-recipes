@@ -10,12 +10,19 @@ import { parseSlide } from '../skills/slide-recipes/lib/pptx-shapes.js';
 console.log('Testing deck-schema.js & deck-renderer.js...');
 
 // 1. 基本常数检查
-assert.equal(SLIDE_TYPES.length, 19);
+assert.equal(SLIDE_TYPES.length, 23);
 assert.ok(SLIDE_TYPES.includes('kpiDashboard'));
 assert.ok(SLIDE_TYPES.includes('funnel'));
 assert.ok(SLIDE_TYPES.includes('gantt'));
 assert.ok(SLIDE_TYPES.includes('swot'));
+assert.ok(SLIDE_TYPES.includes('milestoneTimeline'));
+assert.ok(SLIDE_TYPES.includes('featureGrid'));
+assert.ok(SLIDE_TYPES.includes('statCallout'));
+assert.ok(SLIDE_TYPES.includes('architectureStack'));
+assert.equal(SUPPORTED_RECIPE_IDS.length, 11);
 assert.ok(SUPPORTED_RECIPE_IDS.includes('investor-signal'));
+assert.ok(SUPPORTED_RECIPE_IDS.includes('consulting-dense'));
+assert.ok(SUPPORTED_RECIPE_IDS.includes('tech-keynote'));
 
 // 2. 单 slide 校验成功案例
 const validKpi = {
@@ -132,6 +139,49 @@ const sampleDeck = {
       verdict: '结论: 推荐全面采用 Slide Recipes 架构',
     },
     {
+      type: 'milestoneTimeline',
+      title: '产品落地里程碑',
+      milestones: [
+        { date: '2026 Q1', title: '核心引擎发布', body: '完成 Schema 规范统一与校验', status: 'done' },
+        { date: '2026 Q2', title: '生态模板扩充', body: '支持 28 款调色盘与 23 种版式', status: 'doing' },
+        { date: '2026 Q3', title: '企业服务集成', body: '开放私有化部署 SDK', status: 'todo' },
+      ],
+      note: '基准版本规划',
+    },
+    {
+      type: 'featureGrid',
+      title: '四大核心能力矩阵',
+      features: [
+        { badge: '01', title: '对比度质检', desc: 'WCAG >= 4.5:1 自动化对比度门禁' },
+        { badge: '02', title: '多平台一致性', desc: 'Mac/Windows/WPS 严格矢量渲染' },
+        { badge: '03', title: '结构化生图', desc: '语义化负空间与材质提示词' },
+        { badge: '04', title: '丰富商业组件', desc: '覆盖漏斗/甘特/架构/时序等版式' },
+      ],
+      note: '平台能力总览',
+    },
+    {
+      type: 'statCallout',
+      title: '核心交付成效',
+      stat: '99.4%',
+      label: '版式质检合格率',
+      takeaway: '彻底告别低质量 PPT 乱码与裁切溢出',
+      details: [
+        '排版耗时由传统平均 3.5 小时降低至 15 秒',
+        '高管评审通过率提升 42%，无缝导出标准矢量 PPTX',
+      ],
+      note: '2026 Q1 内部试点评估',
+    },
+    {
+      type: 'architectureStack',
+      title: '分层技术架构体系',
+      layers: [
+        { name: '展现与交互层', items: ['Web Studio', 'CLI 工具', 'IDE 插件'] },
+        { name: '规约与渲染层', items: ['DeckSchema', 'PptxGenJS 引擎', 'Prompt 编译器'] },
+        { name: '设计资产层', items: ['28 组语义调色盘', '23 种商业组件', '11 套视觉配方'] },
+      ],
+      note: '系统全景图',
+    },
+    {
       type: 'content',
       title: '核心设计原则',
       lead: '设计服务于信息传达，而非无意义的视觉装饰',
@@ -166,7 +216,7 @@ try {
 
   const zip = readZip(await readFile(outPath));
   const slideFiles = [...zip.keys()].filter(p => /^ppt\/slides\/slide\d+\.xml$/.test(p));
-  assert.equal(slideFiles.length, 12, '生成的 PPTX 应包含全部 12 页');
+  assert.equal(slideFiles.length, 16, '生成的 PPTX 应包含全部 16 页');
 
   for (const file of slideFiles) {
     const parsed = parseSlide(Buffer.from(zip.get(file)).toString());
@@ -177,7 +227,7 @@ try {
     }
   }
 
-  console.log(`✅ deck-renderer end-to-end test PASS: 12 native slides rendered and verified cleanly`);
+  console.log(`✅ deck-renderer end-to-end test PASS: 16 native slides rendered and verified cleanly`);
 } finally {
   await rm(tmpDir, { recursive: true, force: true });
 }

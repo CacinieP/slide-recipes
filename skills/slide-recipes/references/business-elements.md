@@ -15,6 +15,10 @@
 | team | people[{name,role,bio,initials?,image?}], note? | 2–3 人；无头像时使用字母标识，不能伪造真实人物 |
 | pricing | plans[{name,price,period,features[],recommended?}], note | 2–3 方案，每项 2–3 特性；price 为含币种字符串；note 明确税费/例外 |
 | testimonial | quote, author, role, source | 来源必填；演示引文应标明虚构；正式交付使用可核实原话 |
+| milestoneTimeline | milestones[{date,title,body?,status?}], note? | 3–5 个关键里程碑；status 支持 done/doing/todo 状态指示 |
+| featureGrid | features[{title,desc?,badge?}], note? | 4–6 个特性/能力卡片；自动按 2x2 或 3x2 网格整齐排布 |
+| statCallout | stat, label, takeaway, details[]?, note? | 单个超大数字（56pt+）强调；右侧搭配核心结论与论据列表 |
+| architectureStack | layers[{name,items[]}], note? | 3–4 层分层技术/业务架构体系；胶囊徽章展示子模块 |
 
 `note`/`source` 的数据说明必填约束仅检查存在，不能替代事实核实。
 KPI、报价、证言不自动做数学或真实性判断。矩阵点过近会遮挡，渲染后应调整标签/拆页，不改动原始评分。
@@ -33,7 +37,7 @@ r.funnel({
 ## 配色 API
 
 `palette` 接受预设 ID，或部分语义角色映射。实现为 `lib/business-palette.js`。
-预设：navy-teal / forest-sand / cobalt-white / burgundy-cream / graphite-orange。
+预设：28 套商业合规预设（如 navy-teal、nordic-sage、consulting-navy、tokyo-cherry、desert-dune 等）。
 角色：paper、ink、muted、accent、highlight、line、dark、light。HEX 可含一个 `#`，内部统一大写六位值。
 任何拼错的角色、非法颜色、关键文字低对比度都会报错。
 对比度检查覆盖 ink/paper、muted/paper、accent/paper、light/dark、highlight/dark、light/ink、light/accent。
@@ -42,4 +46,4 @@ r.funnel({
 完整提示词与配色示例位于仓库中英文 README；独立安装后的使用者可以直接要求：
 “按[受众/目的/材料]生成[页数]页 PPT，使用[recipe]与[palette]，包含[元素列表]，保留真实数据和可编辑对象，生成后渲染 QA。”
 
-完整 20 套预设及角色值见 [palette-catalog.md](palette-catalog.md)。
+完整 28 套预设及角色值见 [palette-catalog.md](palette-catalog.md)。

@@ -19,6 +19,8 @@ const RECIPE_MAPPING = {
   'product-story': { base: 'investor-signal', defaultPalette: 'forest-sand' },
   'magazine-story': { base: 'editorial-proposal', defaultPalette: 'burgundy-cream' },
   'roadmap-brief': { base: 'editorial-proposal', defaultPalette: 'cobalt-white' },
+  'consulting-dense': { base: 'editorial-proposal', defaultPalette: 'consulting-navy' },
+  'tech-keynote': { base: 'studio-monochrome', defaultPalette: 'electric-violet' },
 };
 
 /**
@@ -267,6 +269,48 @@ export async function renderDeckToPptx(deck, { pres: customPres, PptxGenJS: Cust
         r.scope({
           title: slide.title,
           items: slide.items,
+          note: slide.note || '',
+          page: pageNum,
+        });
+        break;
+
+      case 'milestoneTimeline':
+        r.milestoneTimeline({
+          title: slide.title,
+          milestones: slide.milestones,
+          note: slide.note || '',
+          page: pageNum,
+        });
+        break;
+
+      case 'featureGrid':
+        r.featureGrid({
+          title: slide.title,
+          features: slide.features,
+          kicker: slide.kicker || 'CORE CAPABILITIES',
+          note: slide.note || '',
+          page: pageNum,
+        });
+        break;
+
+      case 'statCallout':
+        r.statCallout({
+          title: slide.title,
+          stat: slide.stat,
+          label: slide.label,
+          takeaway: slide.takeaway,
+          details: slide.details || [],
+          kicker: slide.kicker || 'IMPACT SIGNAL',
+          note: slide.note || '',
+          page: pageNum,
+        });
+        break;
+
+      case 'architectureStack':
+        r.architectureStack({
+          title: slide.title,
+          layers: slide.layers,
+          kicker: slide.kicker || 'SYSTEM ARCHITECTURE',
           note: slide.note || '',
           page: pageNum,
         });

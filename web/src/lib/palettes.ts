@@ -127,6 +127,54 @@ export const PALETTES: Palette[] = [
     theme: { primary: "0a0a0a", secondary: "f5f5f5", accent: "0070F3", light: "D4AF37", bg: "ffffff" },
     useCases: "Agent 产品、企业官网、金融科技、奢侈品",
   },
+  {
+    id: "nordic-sage",
+    name: "Nordic Sage",
+    theme: { primary: "233228", secondary: "54695B", accent: "2E5E43", light: "CDE4D4", bg: "F4F6F0" },
+    useCases: "北欧极简、可持续发展、ESG报告、自然家居",
+  },
+  {
+    id: "consulting-navy",
+    name: "Consulting Navy",
+    theme: { primary: "111E2E", secondary: "4B5B6D", accent: "0B4F8A", light: "D0E4F7", bg: "F8F9FA" },
+    useCases: "战略咨询、投行研报、董事会汇报、企业战略",
+  },
+  {
+    id: "tokyo-cherry",
+    name: "Tokyo Cherry",
+    theme: { primary: "2B2326", secondary: "6B575D", accent: "B82645", light: "FBD2DB", bg: "F9F8F6" },
+    useCases: "新消费品牌、时尚文化、创意提案、艺术展",
+  },
+  {
+    id: "desert-dune",
+    name: "Desert Dune",
+    theme: { primary: "382A20", secondary: "6B5748", accent: "8C4724", light: "F5D5C2", bg: "F8F5EE" },
+    useCases: "建筑空间、文旅地产、历史人文、咖啡与烘焙",
+  },
+  {
+    id: "electric-violet",
+    name: "Electric Violet",
+    theme: { primary: "221D38", secondary: "595078", accent: "5C32A8", light: "E2D4FD", bg: "F7F6FB" },
+    useCases: "AI原生产品、Web3科技、未来数字平台、前沿发布会",
+  },
+  {
+    id: "alpine-cyan",
+    name: "Alpine Cyan",
+    theme: { primary: "1A2C38", secondary: "536573", accent: "1B6B8A", light: "CDE7F2", bg: "F6F9FA" },
+    useCases: "清洁能源、云原生计算、高端硬件、水务环保",
+  },
+  {
+    id: "bamboo-teal",
+    name: "Bamboo Teal",
+    theme: { primary: "1D3328", secondary: "50695B", accent: "1C6E4A", light: "C6E8D6", bg: "F5F8F6" },
+    useCases: "东方美学、茶文化、绿色科技、新中式消费",
+  },
+  {
+    id: "amber-coal",
+    name: "Amber Coal",
+    theme: { primary: "282725", secondary: "6B665E", accent: "9E5D10", light: "FCE5C3", bg: "FAF8F4" },
+    useCases: "精密制造、工匠精神、经典商业、工业软件",
+  },
 ];
 
 export const DEFAULT_PALETTE_ID = "luxury-mysterious";

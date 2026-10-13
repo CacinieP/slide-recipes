@@ -24,7 +24,11 @@ export type SlideType =
   | "metrics"
   | "comparison"
   | "caseStudy"
-  | "scope";
+  | "scope"
+  | "milestoneTimeline"
+  | "featureGrid"
+  | "statCallout"
+  | "architectureStack";
 
 /**
  * The theme object contract — MANDATORY shape.
@@ -87,6 +91,12 @@ export interface SlidePlan {
   action?: string;
   contact?: string;
   imagePrompt?: string | ImagePromptSchema;
+  milestones?: Array<{ date: string; title: string; body?: string; status?: "done" | "doing" | "todo" }>;
+  features?: Array<{ title: string; desc?: string; body?: string; badge?: string; icon?: string }>;
+  stat?: string;
+  takeaway?: string;
+  details?: string[];
+  layers?: Array<{ name: string; items: string[]; note?: string }>;
 }
 
 /** Structured AI image generation prompt schema. */

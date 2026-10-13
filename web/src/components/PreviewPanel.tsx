@@ -27,6 +27,10 @@ const TYPE_META: Record<string, { label: string; color: string }> = {
   metrics: { label: "指标图表", color: "text-cyan-400" },
   caseStudy: { label: "客户案例", color: "text-blue-400" },
   scope: { label: "交付范围", color: "text-indigo-400" },
+  milestoneTimeline: { label: "里程碑", color: "text-purple-400" },
+  featureGrid: { label: "特性栅格", color: "text-blue-400" },
+  statCallout: { label: "指标信号", color: "text-amber-400" },
+  architectureStack: { label: "架构堆叠", color: "text-indigo-400" },
   content: { label: "核心要点", color: "text-zinc-400" },
   summary: { label: "总结", color: "text-amber-400" },
   closing: { label: "收尾行动", color: "text-amber-400" },
@@ -72,6 +76,34 @@ function renderSlideDetails(s: SlidePlan) {
     return (
       <div className="mt-1 text-xs text-zinc-400 truncate">
         对比: {s.columns.join(" vs ")} ({s.rows.length} 维度)
+      </div>
+    );
+  }
+  if (s.milestones && Array.isArray(s.milestones)) {
+    return (
+      <div className="mt-1 text-xs text-purple-300 truncate">
+        里程碑: {s.milestones.map((m) => `${m.date} ${m.title}`).join(" → ")}
+      </div>
+    );
+  }
+  if (s.features && Array.isArray(s.features)) {
+    return (
+      <div className="mt-1 text-xs text-blue-300 truncate">
+        特性: {s.features.map((f) => f.title).join(", ")}
+      </div>
+    );
+  }
+  if (s.stat) {
+    return (
+      <div className="mt-1 text-xs text-amber-300 truncate">
+        指标: <span className="font-bold">{s.stat}</span> {s.takeaway ? `— ${s.takeaway}` : ""}
+      </div>
+    );
+  }
+  if (s.layers && Array.isArray(s.layers)) {
+    return (
+      <div className="mt-1 text-xs text-indigo-300 truncate">
+        层级: {s.layers.map((l) => l.name).join(" / ")}
       </div>
     );
   }

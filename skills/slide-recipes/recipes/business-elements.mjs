@@ -119,5 +119,75 @@ export function createBusinessElements({ pres, t, base, text, rect, rule, image,
       text(s,author,1.85,3.93,6.8,.37,18,t.accent,true);
       text(s,role,1.85,4.39,6.8,.24,12,t.muted);source(s,evidence);return s;
     },
+    milestoneTimeline({ title, milestones, note = '', page }) {
+      count(milestones, 3, 5, 'Milestones');
+      const s = base({ title, kicker: 'MILESTONES & ROADMAP', page });
+      const w = 8.9 / milestones.length;
+      rule(s, .55, 2.7, 8.9, t.line);
+      milestones.forEach((m, i) => {
+        const x = .55 + i * w;
+        text(s, m.date, x, 1.9, w - .25, .32, 13, t.accent, true);
+        const fill = m.status === 'done' ? t.accent : (m.status === 'doing' ? t.highlight : t.paper);
+        const border = m.status === 'done' ? t.accent : t.muted;
+        s.addShape(pres.ShapeType.ellipse, { x: x + .05, y: 2.58, w: .24, h: .24, fill: { color: fill }, line: { color: border, width: 1.5 } });
+        text(s, m.title, x, 3.1, w - .25, .48, 17, t.ink, true);
+        if (m.body) text(s, m.body, x, 3.65, w - .25, .9, 12, t.muted);
+      });
+      source(s, note); return s;
+    },
+    featureGrid({ title, features, kicker = 'CORE CAPABILITIES', note = '', page }) {
+      count(features, 4, 6, 'Features');
+      const s = base({ title, kicker, page });
+      const cols = features.length <= 4 ? 2 : 3;
+      const rows = Math.ceil(features.length / cols);
+      const w = 8.9 / cols;
+      const h = 2.8 / rows;
+      features.forEach((f, i) => {
+        const col = i % cols;
+        const row = Math.floor(i / cols);
+        const x = .55 + col * w;
+        const y = 1.88 + row * (h + .15);
+        rect(s, x, y, w - .25, h, t.paper, { line: { color: t.line, width: .8 } });
+        rule(s, x, y, w - .25, t.accent);
+        const badge = f.badge || String(i + 1).padStart(2, '0');
+        text(s, badge, x + .15, y + .15, w - .55, .25, 11, t.accent, true);
+        text(s, f.title, x + .15, y + .45, w - .55, .4, 16, t.ink, true);
+        text(s, f.desc || f.body || '', x + .15, y + .9, w - .55, h - 1.0, 12, t.muted);
+      });
+      source(s, note); return s;
+    },
+    statCallout({ title, stat, label, takeaway, details = [], kicker = 'IMPACT SIGNAL', note = '', page }) {
+      const s = base({ title, kicker, page });
+      // 左侧超大数字卡片
+      rect(s, .55, 1.88, 3.6, 2.7, t.dark);
+      text(s, stat, .8, 2.15, 3.1, 1.1, 56, t.highlight, true);
+      text(s, label, .8, 3.4, 3.1, .4, 15, t.light, true);
+      // 右侧核心结论与论据
+      text(s, takeaway, 4.55, 1.9, 4.9, .8, 22, t.ink, true);
+      rule(s, 4.55, 2.85, 4.9);
+      if (Array.isArray(details) && details.length > 0) {
+        text(s, details.map(d => '• ' + d).join('\n\n'), 4.55, 3.05, 4.9, 1.5, 14, t.muted);
+      }
+      source(s, note); return s;
+    },
+    architectureStack({ title, layers, kicker = 'SYSTEM ARCHITECTURE', note = '', page }) {
+      count(layers, 3, 4, 'Architecture layers');
+      const s = base({ title, kicker, page });
+      const h = 2.8 / layers.length;
+      layers.forEach((l, i) => {
+        const y = 1.88 + i * (h + .08);
+        rect(s, .55, y, 2.2, h, t.dark);
+        text(s, l.name, .7, y + h * .3, 1.9, h * .5, 15, t.light, true);
+        rect(s, 2.85, y, 6.6, h, t.paper, { line: { color: t.line, width: .8 } });
+        const items = l.items || [];
+        const itemW = 6.4 / Math.max(items.length, 1);
+        items.forEach((it, j) => {
+          const ix = 2.95 + j * itemW;
+          rect(s, ix, y + .1, itemW - .12, h - .2, t.highlight);
+          text(s, it, ix + .05, y + .15, itemW - .22, h - .3, 11, t.ink, true, { align: 'center', valign: 'mid' });
+        });
+      });
+      source(s, note); return s;
+    },
   };
 }

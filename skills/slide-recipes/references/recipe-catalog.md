@@ -11,6 +11,8 @@
 | roadmap-brief | 计划、里程碑、执行汇报 | 2–4 个等距节点；日期、成果、责任内容分层 | 默认不用装饰图 | 无时间顺序的比较 |
 | editorial-grid | 决策简报、中文信息汇总 | 发丝线、网格、克制色彩 | 少量卡片图 | 戏剧化发布会 |
 | dark-launch | 新品发布、演讲开场 | 深底、大标题、hero、收尾 CTA | 为标题保留负空间 | 连续密集长文 |
+| consulting-dense | 顶级战略咨询、研报汇报 | 高信息密度网格、结构化结论、三段式证明 | 极简矢量图表优先 | 纯营销大图空洞文案 |
+| tech-keynote | 前沿科技大会、发布会 | 深色高对比、荧光点缀、超大视觉中心 | 概念渲染图保留负空间 | 密集文字合同条款 |
 
 ```js
 import pptxgen from 'pptxgenjs';
@@ -28,9 +30,10 @@ await pres.writeFile({ fileName: 'product.pptx' });
 `content` 可接收 `source`；时间线使用 `items: [{date, title, body}]`，2–4 项。
 配图不会承载正文、数据标签或二维码。生成后仍需做静态及渲染 QA。
 
-## 商业提案扩展（新增三套，总计九套）
+## 商业与专业提案扩展（现已支持 11 套 Recipes）
 
-`recipes/recipe-commercial.mjs` 提供 `investor-signal`、`editorial-proposal`、`studio-monochrome`。
+`recipes/recipe-commercial.mjs` 提供 `investor-signal`、`editorial-proposal`、`studio-monochrome` 等专业方案。
 每套包含封面、议程、章节、原生指标图表、双方案比较、案例、服务范围、收尾八类页面。
+新增 `consulting-dense` 与 `tech-keynote`，支持多层级商业架构与高管汇报。
 详见 [commercial-recipes.md](commercial-recipes.md) 的参数契约与 [design-research.md](design-research.md) 的 Pinterest/商业模板参考。
 建议需要完整提案时优先使用这组；旧四套轻量 recipe 保持兼容，用于短简报。
