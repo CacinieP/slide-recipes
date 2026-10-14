@@ -1,12 +1,12 @@
-# 国内 EdgeOne Pages / 海外 Vercel
+# 国内 EdgeOne Pages / 全球 Vercel
 
-两个部署使用同一个 `CacinieP/slide-recipes-web` 仓库的 `main` 分支，项目根目录均为 `web`。现有海外入口保留为 `https://slide-recipes-web.vercel.app/`；国内入口为 `https://slides.linguistwantstech.online/`。两站已完成真实模型调用、大纲编辑、PPTX 与 Markdown 导出验收；PPTX 已在 Keynote 打开并核验可编辑文本。公开主仓库 `CacinieP/slide-recipes` 同步 Web 源码，实际生产部署源仍为 `slide-recipes-web`。
+两个部署使用同一个 `CacinieP/slide-recipes-web` 仓库的 `main` 分支，项目根目录均为 `web`。现有全球入口保留为 `https://slide-recipes-web.vercel.app/`；国内入口为 `https://slides.linguistwantstech.online/`。两站已完成真实模型调用、大纲编辑、PPTX 与 Markdown 导出验收；PPTX 已在 Keynote 打开并核验可编辑文本。公开主仓库 `CacinieP/slide-recipes` 同步 Web 源码，实际生产部署源仍为 `slide-recipes-web`。
 
 ## EdgeOne 构建
 
 选择全栈 Next.js 框架，安装 `npm ci`、构建 `npm run build`、输出 `.next`，构建 Node 版本为 24.5.0。`web/edgeone.json` 声明这些配置，以及 Cloud Functions 的 120 秒超时。根目录已设为 `web` 后不能再 `cd web`。
 
-不要使用 `BUILD_TARGET=pages` 或静态 `out` 输出；国内站也需要 Node.js 动态 `/api/proxy`，以复用 HTTPS 上游白名单、DNS 校验与连接绑定、禁止重定向、大小/超时限制及共享限流。UI 的代理模式使用当前站点的同源地址，不调用海外 Vercel。
+不要使用 `BUILD_TARGET=pages` 或静态 `out` 输出；国内站也需要 Node.js 动态 `/api/proxy`，以复用 HTTPS 上游白名单、DNS 校验与连接绑定、禁止重定向、大小/超时限制及共享限流。UI 的代理模式使用当前站点的同源地址，不调用全球 Vercel。
 
 ## 服务端变量与限流
 

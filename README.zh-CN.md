@@ -3,7 +3,7 @@
 [English](README.md) | **简体中文**
 
 [🇨🇳 国内入口 · EdgeOne](https://slides.linguistwantstech.online/)  
-[🌍 海外入口 · Vercel](https://slide-recipes-web.vercel.app/)
+[🌍 全球入口 · Vercel](https://slide-recipes-web.vercel.app/)
 
 [提示词指南](#prompt-guide)
 
@@ -13,7 +13,7 @@
 
 <p align="center">
   <a href="https://slides.linguistwantstech.online/"><img src="https://img.shields.io/badge/China-EdgeOne%20Studio-0052D9?style=for-the-badge" alt="国内入口 · EdgeOne" /></a><br />
-  <a href="https://slide-recipes-web.vercel.app/"><img src="https://img.shields.io/badge/Overseas-Vercel%20Studio-000000?style=for-the-badge" alt="海外入口 · Vercel" /></a>
+  <a href="https://slide-recipes-web.vercel.app/"><img src="https://img.shields.io/badge/Global-Vercel%20Studio-000000?style=for-the-badge" alt="全球入口 · Vercel" /></a>
 </p>
 
 <p align="center">
@@ -35,7 +35,7 @@
 | 部署区域 | 在线入口 |
 |---|---|
 | 国内 · EdgeOne Pages | **[slides.linguistwantstech.online](https://slides.linguistwantstech.online/)** |
-| 海外 · Vercel | **[slide-recipes-web.vercel.app](https://slide-recipes-web.vercel.app/)** |
+| 全球 · Vercel | **[slide-recipes-web.vercel.app](https://slide-recipes-web.vercel.app/)** |
 
 两个入口均支持同源模型代理、普通文本生成大纲、自由编辑，以及 PPTX 和 Markdown 下载。使用自己的模型 Key，调用费用由供应商计收。
 
@@ -43,7 +43,7 @@
 
 ### 💡 在线 Web 工作台与 API 配置
 
-在线入口：[海外 Vercel](https://slide-recipes-web.vercel.app/) · [国内 EdgeOne](https://slides.linguistwantstech.online/)。[GitHub Pages](https://caciniep.github.io/slide-recipes/) 是静态客户端，浏览器直连能否调用取决于供应商的 CORS 策略。
+在线入口：[全球 Vercel](https://slide-recipes-web.vercel.app/) · [国内 EdgeOne](https://slides.linguistwantstech.online/)。[GitHub Pages](https://caciniep.github.io/slide-recipes/) 是静态客户端，浏览器直连能否调用取决于供应商的 CORS 策略。
 
 支持主题、任意普通文本、Markdown、笔记和结构化 JSON。AI 生成大纲后，可以自由修改内容、增删及调整页面顺序，再下载可编辑 PPTX 与配套 Markdown 大纲。修改后的重新导出不会再次调用模型。
 

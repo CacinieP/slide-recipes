@@ -3,7 +3,7 @@
 **English** | [简体中文](README.zh-CN.md)
 
 [🇨🇳 China · EdgeOne](https://slides.linguistwantstech.online/)  
-[🌍 Overseas · Vercel](https://slide-recipes-web.vercel.app/)
+[🌍 Global · Vercel](https://slide-recipes-web.vercel.app/)
 
 [Prompt guide](#prompt-guide)
 
@@ -13,7 +13,7 @@
 
 <p align="center">
   <a href="https://slides.linguistwantstech.online/"><img src="https://img.shields.io/badge/China-EdgeOne%20Studio-0052D9?style=for-the-badge" alt="国内入口 · EdgeOne" /></a><br />
-  <a href="https://slide-recipes-web.vercel.app/"><img src="https://img.shields.io/badge/Overseas-Vercel%20Studio-000000?style=for-the-badge" alt="海外入口 · Vercel" /></a>
+  <a href="https://slide-recipes-web.vercel.app/"><img src="https://img.shields.io/badge/Global-Vercel%20Studio-000000?style=for-the-badge" alt="全球入口 · Vercel" /></a>
 </p>
 
 <p align="center">
@@ -35,7 +35,7 @@ For business reviews, client proposals, investor updates and brand presentations
 | Deployment | Live URL |
 |---|---|
 | China · EdgeOne Pages | **[slides.linguistwantstech.online](https://slides.linguistwantstech.online/)** |
-| Overseas · Vercel | **[slide-recipes-web.vercel.app](https://slide-recipes-web.vercel.app/)** |
+| Global · Vercel | **[slide-recipes-web.vercel.app](https://slide-recipes-web.vercel.app/)** |
 
 Both deployments support a same-origin model proxy, text-to-outline generation, outline editing, and PPTX + Markdown downloads. Bring your own model API key; provider usage charges apply.
 
@@ -43,7 +43,7 @@ Both deployments support a same-origin model proxy, text-to-outline generation, 
 
 ### 💡 Web Studio & Model API Quickstart
 
-Live demos: [Vercel (overseas)](https://slide-recipes-web.vercel.app/) · [EdgeOne (China)](https://slides.linguistwantstech.online/). [GitHub Pages](https://caciniep.github.io/slide-recipes/) is a static client; direct model requests depend on the provider's CORS policy.
+Live demos: [Vercel (global)](https://slide-recipes-web.vercel.app/) · [EdgeOne (China)](https://slides.linguistwantstech.online/). [GitHub Pages](https://caciniep.github.io/slide-recipes/) is a static client; direct model requests depend on the provider's CORS policy.
 
 Enter a topic, ordinary text, Markdown or notes to generate an AI outline. Edit the outline, add or reorder pages, then download an editable PPTX and matching Markdown outline. Re-exporting edits does not call the model again. Structured JSON input is also supported.
 
