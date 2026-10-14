@@ -2,15 +2,21 @@
 
 **English** | [简体中文](README.zh-CN.md)
 
-[🇨🇳 China · EdgeOne](https://slides.linguistwantstech.online/) · [🌍 Overseas · Vercel](https://slide-recipes-web.vercel.app/) · [Prompt guide](#prompt-guide)
+[🇨🇳 China · EdgeOne](https://slides.linguistwantstech.online/)  
+[🌍 Overseas · Vercel](https://slide-recipes-web.vercel.app/)
+
+[Prompt guide](#prompt-guide)
 
 <p align="center">
   <img src="docs/img/hero-commercial.jpg" alt="Slide Recipes — investor, consulting and studio presentation samples" width="820" />
 </p>
 
 <p align="center">
-  <a href="https://slides.linguistwantstech.online/"><img src="https://img.shields.io/badge/China-EdgeOne%20Studio-0052D9?style=for-the-badge" alt="国内入口 · EdgeOne" /></a>
+  <a href="https://slides.linguistwantstech.online/"><img src="https://img.shields.io/badge/China-EdgeOne%20Studio-0052D9?style=for-the-badge" alt="国内入口 · EdgeOne" /></a><br />
   <a href="https://slide-recipes-web.vercel.app/"><img src="https://img.shields.io/badge/Overseas-Vercel%20Studio-000000?style=for-the-badge" alt="海外入口 · Vercel" /></a>
+</p>
+
+<p align="center">
   <a href="LICENSE"><img src="https://img.shields.io/github/license/CacinieP/slide-recipes?style=flat-square" alt="License" /></a>
   <a href="https://github.com/CacinieP/slide-recipes/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/CacinieP/slide-recipes/ci.yml?branch=main&label=CI&style=flat-square" alt="CI" /></a>
   <img src="https://img.shields.io/badge/skills-1%20released-39c5bb?style=flat-square" alt="Skills" />
