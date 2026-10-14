@@ -1,5 +1,7 @@
 # Slide Recipes
 
+**在线入口：[🇨🇳 国内 EdgeOne](https://slides.linguistwantstech.online/) · [🌍 海外 Vercel](https://slide-recipes-web.vercel.app/)**
+
 [`slide-recipes`](https://github.com/CacinieP/slide-recipes/) skill 的本地可视化入口:在浏览器里填表单,本机用 PptxGenJS 按 skill 的设计系统生成真正的 `.pptx` 文件。
 
 当前版本使用用户填写的模型 API Key。浏览器经本站 `/api/proxy` 调用批准的模型服务，随后在浏览器生成、预览和下载 PPTX。部署为在线服务时，Key 和模型请求会经过本站服务器。
