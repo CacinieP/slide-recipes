@@ -2,16 +2,20 @@
 
 import { useState, useEffect } from "react";
 import ConfigPanel from "@/components/ConfigPanel";
+import OutlineEditor from "@/components/OutlineEditor";
 import PreviewPanel from "@/components/PreviewPanel";
 import DownloadCard from "@/components/DownloadCard";
-import { requestLlmPlan, renderDeckPlanToBlob } from "@/lib/client-generator";
-import type { DeckPlan, FontPairId, ModelConfig, StyleRecipe } from "@/lib/types";
+import { requestLlmPlan, renderDeckPlanToBlob, DEFAULT_REQUEST_MODE, DEFAULT_PROXY_URL } from "@/lib/client-generator";
+import { deckPlanToMarkdown } from "@/lib/outline-markdown";
+import type { DeckPlan, FontPairId, ModelConfig, StyleRecipe, InputMode } from "@/lib/types";
 
 interface Result {
   blobUrl: string;
   fileName: string;
   sizeKb: number;
   plan: DeckPlan;
+  outlineUrl: string;
+  outlineFileName: string;
 }
 
 const EXAMPLES = [
@@ -24,8 +28,10 @@ const EXAMPLES = [
 
 const DEFAULT_MODEL_CONFIG: ModelConfig = {
   baseUrl: "https://api.modelbest.cn/v1",
-  model: "MiniCPM-V-4.7-35B-A3B",
+  model: "MiniCPM-V-4.7-1B",
   apiKey: "",
+  mode: DEFAULT_REQUEST_MODE,
+  proxyUrl: DEFAULT_PROXY_URL,
 };
 
 export default function Home() {
@@ -44,13 +50,18 @@ export default function Home() {
   const [modelConfig, setModelConfig] = useState<ModelConfig>(DEFAULT_MODEL_CONFIG);
 
   // 自定义大纲模式
-  const [useCustomOutline, setUseCustomOutline] = useState(false);
+  const [inputMode, setInputMode] = useState<InputMode>("topic");
+  const [sourceText, setSourceText] = useState("");
   const [customOutlineJson, setCustomOutlineJson] = useState("");
 
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [plan, setPlan] = useState<DeckPlan | null>(null);
   const [result, setResult] = useState<Result | null>(null);
+
+  useEffect(() => () => {
+    if (result) { URL.revokeObjectURL(result.blobUrl); URL.revokeObjectURL(result.outlineUrl); }
+  }, [result]);
 
   // 读取 localStorage 历史配置
   useEffect(() => {
@@ -84,7 +95,8 @@ export default function Home() {
     includeChart: boolean;
     modelConfig: ModelConfig;
     customOutlineJson: string;
-    useCustomOutline: boolean;
+    inputMode: InputMode;
+    sourceText: string;
   };
 
   const set = (patch: Partial<ConfigState>) => {
@@ -100,7 +112,8 @@ export default function Home() {
     if (patch.includeChart !== undefined) setIncludeChart(patch.includeChart);
     if (patch.modelConfig !== undefined) updateModelConfig(patch.modelConfig);
     if (patch.customOutlineJson !== undefined) setCustomOutlineJson(patch.customOutlineJson);
-    if (patch.useCustomOutline !== undefined) setUseCustomOutline(patch.useCustomOutline);
+    if (patch.inputMode !== undefined) setInputMode(patch.inputMode);
+    if (patch.sourceText !== undefined) setSourceText(patch.sourceText);
   };
 
   async function handleGenerate() {
@@ -112,7 +125,7 @@ export default function Home() {
     try {
       let finalPlan: DeckPlan;
 
-      if (useCustomOutline) {
+      if (inputMode === "json") {
         // 自定义大纲模式: 直接解析用户输入的 JSON
         if (!customOutlineJson.trim()) {
           throw new Error("请在左侧填入自定义大纲与内容的 JSON 数据。");
@@ -130,13 +143,14 @@ export default function Home() {
           throw new Error(`自定义 JSON 解析失败: ${e instanceof Error ? e.message : String(e)}`);
         }
       } else {
-        // AI 规划模式: 调用纯前端直连的大模型服务
-        if (!topic.trim()) {
+        // AI 规划模式: 使用所选请求方式调用模型
+        if (inputMode === "topic" && !topic.trim()) {
           throw new Error("请输入演示文稿主题。");
         }
         finalPlan = await requestLlmPlan(
           {
-            topic,
+            topic: inputMode === "text" ? "根据所提供文案整理演示文稿" : topic,
+            sourceText: inputMode === "text" ? sourceText : undefined,
             audience,
             tone,
             slideCount,
@@ -153,25 +167,41 @@ export default function Home() {
 
       setPlan(finalPlan);
 
-      // 浏览器纯前端直接生成可编辑 PPTX 二进制
-      const genResult = await renderDeckPlanToBlob(finalPlan, {
-        paletteId,
-        fontPair,
-        styleRecipe,
-        language,
-      });
-
-      setResult({
-        blobUrl: genResult.blobUrl,
-        fileName: genResult.fileName,
-        sizeKb: genResult.sizeKb,
-        plan: finalPlan,
-      });
+      await exportPlan(finalPlan);
     } catch (err) {
       setError(err instanceof Error ? err.message : "生成失败，请重试。");
     } finally {
       setIsLoading(false);
     }
+  }
+
+  async function exportPlan(finalPlan: DeckPlan) {
+    if (!finalPlan.title.trim() || finalPlan.slides.some(slide => !slide.title.trim())) {
+      throw new Error("请填写演示文稿标题和每页标题后再导出。");
+    }
+    const markdown = deckPlanToMarkdown(finalPlan);
+    const genResult = await renderDeckPlanToBlob(finalPlan, { paletteId, fontPair, styleRecipe, language });
+    setResult({
+      blobUrl: genResult.blobUrl, fileName: genResult.fileName, sizeKb: genResult.sizeKb, plan: finalPlan,
+      outlineUrl: URL.createObjectURL(new Blob([markdown], { type: "text/markdown;charset=utf-8" })),
+      outlineFileName: genResult.fileName.replace(/\.pptx$/i, ".md"),
+    });
+  }
+
+  function handlePlanChange(next: DeckPlan) {
+    setPlan(next);
+    setResult(null);
+    setError("");
+  }
+
+  async function handleExportEdited() {
+    if (!plan || isLoading) return;
+    setError("");
+    setIsLoading(true);
+    setResult(null);
+    try { await exportPlan(plan); }
+    catch (err) { setError(err instanceof Error ? err.message : "导出失败，请检查大纲。"); }
+    finally { setIsLoading(false); }
   }
 
   function handleReset() {
@@ -195,14 +225,14 @@ export default function Home() {
                   Slide Recipes Web Studio
                 </h1>
                 <span className="rounded bg-azure/20 text-azure px-1.5 py-0.2 text-[10px] font-mono border border-azure/40">
-                  Vercel Ready · Native CORS Proxy
+                  Web Studio · 模型连接可配置
                 </span>
               </div>
               <p className="mono-label">28 PALETTES · 23 SLIDE TYPES · BROWSER-NATIVE PPTX</p>
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {!useCustomOutline && (
+            {inputMode === "topic" && (
               <button
                 type="button"
                 onClick={() => setTopic(EXAMPLES[Math.floor(Math.random() * EXAMPLES.length)])}
@@ -214,10 +244,10 @@ export default function Home() {
             <button
               type="button"
               onClick={handleGenerate}
-              disabled={isLoading || (!useCustomOutline && !topic.trim())}
+              disabled={isLoading || (inputMode === "topic" ? !topic.trim() : inputMode === "text" ? !sourceText.trim() : !customOutlineJson.trim())}
               className="rounded-md bg-gold px-4 py-1.5 text-xs font-semibold text-canvas transition hover:brightness-110 disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-mute"
             >
-              {isLoading ? "处理与渲染中…" : "生成 .pptx"}
+              {isLoading ? "处理与渲染中…" : plan && inputMode !== "json" ? "重新调用 AI 生成" : "生成大纲与 PPTX"}
             </button>
           </div>
         </div>
@@ -244,18 +274,25 @@ export default function Home() {
             includeChart={includeChart}
             modelConfig={modelConfig}
             customOutlineJson={customOutlineJson}
-            useCustomOutline={useCustomOutline}
+            inputMode={inputMode}
+            sourceText={sourceText}
             set={set}
           />
         </section>
 
         {/* Right: preview + download */}
         <section className="flex min-h-[60vh] flex-col gap-4">
+          {plan && (
+            <OutlineEditor plan={plan} isLoading={isLoading} dirty={!result}
+              onChange={handlePlanChange} onExport={handleExportEdited} />
+          )}
           {result && (
             <DownloadCard
               fileName={result.fileName}
               blobUrl={result.blobUrl}
               sizeKb={result.sizeKb}
+              outlineUrl={result.outlineUrl}
+              outlineFileName={result.outlineFileName}
               onReset={handleReset}
             />
           )}
@@ -267,7 +304,7 @@ export default function Home() {
 
       <footer className="border-t border-line px-6 py-4">
         <div className="mx-auto flex max-w-7xl items-center justify-between text-xs text-ink-mute">
-          <span className="mono-label">100% 浏览器客户端渲染 · 无中间服务器中转 · 密码学安全</span>
+          <span className="mono-label">PPTX 在浏览器渲染 · 代理模式下模型请求与 Key 经过部署服务</span>
           <a
             href="https://github.com/CacinieP/slide-recipes"
             target="_blank"

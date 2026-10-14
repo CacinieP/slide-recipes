@@ -4,10 +4,12 @@ interface Props {
   fileName: string;
   blobUrl: string;
   sizeKb: number;
+  outlineUrl: string;
+  outlineFileName: string;
   onReset: () => void;
 }
 
-export default function DownloadCard({ fileName, blobUrl, sizeKb, onReset }: Props) {
+export default function DownloadCard({ fileName, blobUrl, sizeKb, outlineUrl, outlineFileName, onReset }: Props) {
   return (
     <div className="rounded-lg border border-gold/40 bg-gold-soft px-4 py-3.5">
       <div className="flex items-center gap-3">
@@ -33,9 +35,10 @@ export default function DownloadCard({ fileName, blobUrl, sizeKb, onReset }: Pro
           download={fileName}
           className="shrink-0 rounded-md bg-gold px-4 py-2 text-sm font-semibold text-canvas transition hover:brightness-110"
         >
-          下载
+          下载 PPTX
         </a>
       </div>
+      <a href={outlineUrl} download={outlineFileName} className="mt-3 inline-block text-sm text-gold hover:underline">下载 Markdown 大纲 (.md)</a>
       <button
         type="button"
         onClick={onReset}

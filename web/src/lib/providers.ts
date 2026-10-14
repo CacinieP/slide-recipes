@@ -17,10 +17,9 @@ export const PROVIDER_PRESETS: ProviderPreset[] = [
     name: "ModelBest (面壁智能)",
     badge: "MiniCPM",
     baseUrl: "https://api.modelbest.cn/v1",
-    defaultModel: "MiniCPM-V-4.7-35B-A3B",
+    defaultModel: "MiniCPM-V-4.7-1B",
     models: [
-      { id: "MiniCPM-V-4.7-35B-A3B", name: "MiniCPM-V-4.7-35B-A3B", desc: "高性价比、结构化规划精准" },
-      { id: "MiniCPM-4-35B-A3B", name: "MiniCPM-4-35B-A3B", desc: "35B 密集推理" },
+      { id: "MiniCPM-V-4.7-1B", name: "MiniCPM-V-4.7-1B", desc: "网站选定模型" },
     ],
     keyPlaceholder: "sk-live-...",
     docUrl: "https://platform.modelbest.cn/console/login?ref=A93DCA73",

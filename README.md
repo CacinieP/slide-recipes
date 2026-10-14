@@ -25,21 +25,15 @@ For business reviews, client proposals, investor updates and brand presentations
 
 ---
 
-### 💡 Web Studio & Model API Quickstart (Supports 1-Click Vercel Deploy · Native CORS Bypass)
+### 💡 Web Studio & Model API Quickstart
 
-Click the **Deploy with Vercel** button above to deploy your own private Web Studio in 1 minute. It includes a built-in serverless `/api/proxy` route that transparently handles LLM requests and natively bypasses all browser CORS restrictions.
+Live demos: [Vercel (overseas)](https://slide-recipes-web.vercel.app/) · [EdgeOne (China)](https://slides.linguistwantstech.online/). [GitHub Pages](https://caciniep.github.io/slide-recipes/) is a static client; direct model requests depend on the provider's CORS policy.
 
-We recommend **ModelBest (MiniCPM)** for its high reasoning accuracy and precise structured JSON output:
+Enter a topic, ordinary text, Markdown or notes to generate an AI outline. Edit the outline, add or reorder pages, then download an editable PPTX and matching Markdown outline. Re-exporting edits does not call the model again. Structured JSON input is also supported.
 
-1. **Sign Up & Get Free Credits**: Register via the referral link 👉 **[platform.modelbest.cn (Invite Code: A93DCA73)](https://platform.modelbest.cn/console/login?ref=A93DCA73)**
-2. **Create API Key**: Go to the console "API Keys" section and copy your key (starts with `sk-live-...`).
-3. **Fill in the 3 Essentials in Web Studio**:
-   - **Base URL**: `https://api.modelbest.cn/v1`
-   - **Model**: Click **「🔍 Auto-Detect Models」** to automatically list and select `MiniCPM-V-4.7-35B-A3B`
-   - **API Key**: Paste your key (*stored in browser, routed directly to model provider*).
-4. **Generate**: Enter any presentation topic or switch to "Custom Outline (JSON)" mode to preview and download native vector PPTX.
+Choose a provider, API base URL, your own API key and model name. Model detection and generation use the same request mode. In proxy mode, the key and content pass through the deployment's same-origin `/api/proxy` service. Network failures do not silently switch to direct requests or retry generation. Model usage may incur provider charges.
 
-*(Also comes with presets for StepFun, Moonshot Kimi, Zhipu GLM, MiniMax, Alibaba Qwen, and any custom OpenAI-compatible endpoint)*
+To self-deploy, use root directory `web`, Node 24, `npm ci` and `npm run build`. Production proxy requests require server-only Upstash REST credentials for shared rate limiting. Custom endpoints require an explicit server allowlist; arbitrary forwarding is refused. See [Web setup](web/README.md), [proxy security](web/docs/PROXY_SECURITY.md) and [EdgeOne deployment](web/docs/EDGEONE.md).
 
 ---
 

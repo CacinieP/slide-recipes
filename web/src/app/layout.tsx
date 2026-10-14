@@ -4,7 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Slide Recipes — AI .pptx generator",
   description:
-    "Turn a topic into a real .pptx. Server-side PptxGenJS rendering with a 5-page-type design system.",
+    "Turn a topic into a real .pptx. Model outline generation with editable PPTX rendering in your browser.",
 };
 
 export default function RootLayout({
