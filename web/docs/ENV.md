@@ -1,154 +1,50 @@
-# 环境变量配置手册
+# 部署与模型配置
 
-本项目只需要 3 个环境变量,**仅 `OPENAI_API_KEY` 必填**。任何 OpenAI 兼容的聊天补全服务都能用。
+## 当前行为
 
-> 所有变量都在**服务端**(`/api/generate` route handler)读取,从不暴露给浏览器。前端代码无法访问这些值。
+当前版本仍使用用户填写的 API Key。浏览器请求本站 `/api/proxy`，服务端将 Key 转发至用户选择的、已批准的模型服务。PPTX 的生成和下载在浏览器内完成。
 
----
+当前没有 `/api/generate`，也不读取 `OPENAI_API_KEY`、`OPENAI_BASE_URL` 或 `OPENAI_MODEL`。网站统一模型、账号注册和每天 5 次额度是后续改造，尚未实现。
 
-## 变量总览
+网站模型已选定为 `MiniCPM-V-4.7-1B`，固定 `https://api.modelbest.cn/v1`。服务端配置准备模块读取 `MODELBEST_API_KEY`，但未接入公开代理；它不能在账号鉴权与额度控制完成前用于匿名调用。详见 [MODEL_CONFIG.md](./MODEL_CONFIG.md)。
 
-| 变量 | 必填 | 默认值 | 作用 |
-|---|:---:|---|---|
-| `OPENAI_API_KEY` | ✅ | — | 模型服务的 API 密钥 |
-| `OPENAI_BASE_URL` | ❌ | `https://open.bigmodel.cn/api/paas/v4` | OpenAI 兼容接口的根地址 |
-| `OPENAI_MODEL` | ❌ | `glm-4-plus` | 调用的模型名,必须支持 `response_format: json_object` |
+浏览器会保存模型配置（包含用户 Key）至 localStorage。不要在共享电脑上使用此功能；不要把网站统一模型的 Key 填入前端或 `NEXT_PUBLIC_*` 环境变量。
 
-代码里实际拼出的请求地址是:`${OPENAI_BASE_URL}/chat/completions`。所以 `OPENAI_BASE_URL` 填到 `/v4` 或 `/v1` 这一级,**不要**带末尾的 `/chat/completions`。
+## 服务端环境变量
 
----
+生产环境（`NODE_ENV=production` 或在 Vercel 运行）要求：
 
-## 一、本地开发(macOS / Linux)
+| 变量 | 作用 |
+|---|---|
+| `UPSTASH_REDIS_REST_URL` | Upstash Redis 的官方 HTTPS REST 地址 |
+| `UPSTASH_REDIS_REST_TOKEN` | 服务端 Redis 访问凭证 |
 
-### 步骤
+凭证放入平台的 Secret/Environment Variables，或者被 Git 忽略的本地 `.env.local`。禁止提交真实凭证。Redis 未配置或异常时，代理返回 503，且不会请求模型服务。仅本地开发可以使用进程内限流；它不提供跨实例保证。
 
-```bash
-cd /path/to/slide-recipes/web
+## 模型服务边界
 
-# 1) 复制示例文件
-cp .env.example .env.local
+仅允许现有预设服务商的精确 HTTPS base URL，并仅开放 `GET /models` 与 `POST /chat/completions`。任意 URL 下载、图片转发、内网端点、HTTP 端点、自动重定向及流式响应均不支持。
 
-# 2) 编辑 .env.local,填入你的 key
-#    （用任意编辑器,下面用 cat 展示格式）
-```
+前端填写自定义地址不能扩大服务器允许的范围。新的可信服务商需要部署者通过服务端允许列表显式批准。没有隐式浏览器直连；代理异常或拒绝不会触发第二次上游调用。
 
-`.env.local` 格式(**等号两边不要加引号**):
+## 错误处理
 
-```bash
-OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxx
-OPENAI_BASE_URL=https://api.openai.com/v1
-OPENAI_MODEL=gpt-4o-mini
-```
+| 状态 | 处理 |
+|---|---|
+| 400 / 403 | 检查请求格式、Key 和目标是否属于已批准端点 |
+| 413 | 缩短输入；请求体超出上限 |
+| 429 | 等待 `Retry-After` 后再提交，禁止立即循环重试 |
+| 503 | 检查生产共享限流的配置与可用性 |
+| 502 / 504 | 模型服务响应异常或超时，检查服务状态后重试 |
 
-```bash
-# 3) 启动开发服务器（Next 会自动读取 .env.local）
-npm run dev
-```
+不要通过安装关闭浏览器跨域保护的插件绕过错误。
 
-改完 `.env.local` 后**必须重启 dev server**(Ctrl+C 后重新 `npm run dev`),环境变量不会热更新。
+完整威胁边界及回归验证见 [PROXY_SECURITY.md](./PROXY_SECURITY.md)。
 
-### 验证是否生效
+## Vercel 与 GitHub Pages
 
-启动后访问 `http://localhost:3210`,填主题点「生成」:
+Vercel: Root Directory 为 web，安装 npm ci，构建 npm run build，Next.js 框架，Node 24.x。不要再次 cd web。web/vercel.json 提供根目录配置。
 
-- 返回 `服务器未配置 OPENAI_API_KEY` → key 没被读到(检查文件名是不是 `.env.local`、是否在项目根目录)
-- 返回 `模型调用失败 (401)` → key 错误或过期
-- 返回 `模型调用失败 (404)` → `OPENAI_BASE_URL` 或 `OPENAI_MODEL` 填错
-- 开始下载 `.pptx` → 配置成功 ✅
+Pages: 在 web 执行 npm run build:pages，发布 out。默认 basePath 为 /slide-recipes，可用 PAGES_BASE_PATH 设置。默认浏览器直连，受供应商 CORS 策略限制。NEXT_PUBLIC_MODEL_PROXY_URL 可显式指定外部代理；该服务须自行配置来源访问控制。网络异常不会自动切换请求方式。
 
-### ⚠️ 关于代理(中国大陆网络)
-
-如果你的 `.npmrc` 或 shell 里设了 HTTP 代理(`127.0.0.1:7890` 之类),可能影响服务端对模型的调用:
-
-- **调 bigmodel(智谱)**:这是国内主机,**不要走代理**。启动前确认代理关闭:
-  ```bash
-  unset HTTP_PROXY HTTPS_PROXY ALL_PROXY http_proxy https_proxy all_proxy
-  npm run dev
-  ```
-- **调 OpenAI / Anthropic 等境外服务**:**需要代理**。反过来要确保代理开启:
-  ```bash
-  export HTTPS_PROXY=http://127.0.0.1:7890
-  npm run dev
-  ```
-
-判断方法:看 `npm run dev` 启动后,点生成时终端日志里如果卡住很久没响应,多半是代理方向搞反了。
-
----
-
-## 二、各家服务商怎么填
-
-所有填写都遵循同一规则:`OPENAI_BASE_URL` 填到版本号那一级,**不带** `/chat/completions`。
-
-### 智谱 BigModel(默认,推荐国内用户)
-
-```bash
-OPENAI_API_KEY=你的智谱key        # 在 bigmodel.cn 控制台获取
-OPENAI_BASE_URL=https://open.bigmodel.cn/api/paas/v4
-OPENAI_MODEL=glm-4-plus           # 或 glm-4-flash(更快/更便宜)
-```
-
-### OpenAI 官方
-
-```bash
-OPENAI_API_KEY=sk-...             # platform.openai.com 获取
-OPENAI_BASE_URL=https://api.openai.com/v1
-OPENAI_MODEL=gpt-4o-mini          # 或 gpt-4o
-```
-
-### DeepSeek
-
-```bash
-OPENAI_API_KEY=sk-...             # platform.deepseek.com 获取
-OPENAI_BASE_URL=https://api.deepseek.com/v1
-OPENAI_MODEL=deepseek-chat
-```
-
-### 月之暗面 Moonshot (Kimi)
-
-```bash
-OPENAI_API_KEY=sk-...             # platform.moonshot.cn 获取
-OPENAI_BASE_URL=https://api.moonshot.cn/v1
-OPENAI_MODEL=moonshot-v1-8k       # 或 moonshot-v1-32k / moonshot-v1-128k
-```
-
-### 阿里通义千问 DashScope
-
-```bash
-OPENAI_API_KEY=sk-...             # bailian.console.aliyun.com 获取
-OPENAI_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
-OPENAI_MODEL=qwen-plus            # 或 qwen-turbo / qwen-max
-```
-
-### 本地模型(Ollama / vLLM / LM Studio)
-
-```bash
-OPENAI_API_KEY=ollama             # 占位符,本地服务通常不校验,但不能为空
-OPENAI_BASE_URL=http://localhost:11434/v1   # Ollama 默认端口
-OPENAI_MODEL=qwen2.5:7b           # 你本地 pull 的模型名
-```
-
-> 本地模型必须支持 `response_format: json_object`(JSON 模式),否则会返回纯文本导致解析失败。Ollama 较新版本支持;不支持的话换云端模型。
-
----
-
-## 三、常见报错对照
-
-| 报错信息 | 原因 | 解决 |
-|---|---|---|
-| `服务器未配置 OPENAI_API_KEY` | 环境变量没读到 | 检查 `.env.local` 文件名/位置;重启 dev server |
-| `模型调用失败 (401)` | key 错误/过期 | 重新生成 key |
-| `模型调用失败 (403)` | key 无该模型权限,或被风控 | 换模型或检查账户 |
-| `模型调用失败 (404)` | base_url 或 model 名拼错 | 对照上方服务商表 |
-| `模型调用失败 (429)` | 并发/额度超限 | 稍后重试或升级套餐 |
-| 超时 / 长时间无响应 | 代理方向反了,或模型太慢 | 见「关于代理」一节;或换更快模型 |
-| `生成的大纲无效` | 模型没返回合法 JSON | 该模型可能不支持 JSON 模式,换一个 |
-| `渲染失败: ...` | PptxGenJS 出错(罕见) | 检查 slideCount 是否在 3–20 |
-
----
-
-## 四、安全须知
-
-- `.env.local` 已在 `.gitignore` 里,**不会被提交**——切勿把真实 key 写进 `.env.example` 或代码。
-- `OPENAI_API_KEY` 只在服务端 route handler 里通过 `process.env` 读取,前端拿不到。
-- Vercel 上的环境变量可设为只对 Production 生效,或对所有环境生效,按需勾选。
-- key 泄露后**立即在服务商控制台吊销并重新生成**。
+自定义供应商由部署者通过服务端 MODEL_PROXY_ALLOWED_BASE_URLS 显式批准，以逗号分隔精确 HTTPS base URL。路径、公网 DNS、重定向限制仍生效。

@@ -8,3 +8,5 @@
 out/
 next-env.d.ts
 *.tsbuildinfo
+
+.pages-build-*/

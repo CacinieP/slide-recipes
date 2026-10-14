@@ -1,10 +1,10 @@
-import { buildPrompt, clampSlideCount, validatePlan } from "./prompt";
+import { buildPrompt, clampSlideCount, normalizeModelPlan, parseModelResponse } from "./prompt";
 import { resolveTheme, resolveFontPair, resolveStyleMetrics } from "./palettes";
 import { renderPptx } from "./render";
 import type { DeckPlan, GenerateOptions, ModelConfig } from "./types";
 
 const DEFAULT_BASE_URL = "https://api.modelbest.cn/v1";
-const DEFAULT_MODEL = "MiniCPM-V-4.7-35B-A3B";
+const DEFAULT_MODEL = "MiniCPM-V-4.7-1B";
 
 export interface GenerateDeckResult {
   blob: Blob;
@@ -14,42 +14,40 @@ export interface GenerateDeckResult {
   plan: DeckPlan;
 }
 
-/**
- * 智能网络请求：
- * 1. 优先通过同源 /api/proxy 进行服务端中转 (彻底杜绝浏览器跨域 CORS 拦截)
- * 2. 若当前环境无代理服务端，自动回退到浏览器直连
- */
+export type RequestMode = "proxy" | "direct";
+export interface RequestConfig { mode?: RequestMode; proxyUrl?: string }
+export const DEFAULT_REQUEST_MODE: RequestMode = process.env.NEXT_PUBLIC_MODEL_REQUEST_MODE === "direct" ? "direct" : "proxy";
+export const DEFAULT_PROXY_URL = process.env.NEXT_PUBLIC_MODEL_PROXY_URL || "/api/proxy";
+
+/** One explicitly selected transport; network failures never switch transport. */
 export async function smartFetch(
   targetUrl: string,
   init: RequestInit = {},
+  config: RequestConfig = {},
 ): Promise<Response> {
+  const mode = config.mode || DEFAULT_REQUEST_MODE;
+  const headers = new Headers(init.headers || {});
+  headers.delete("x-target-url");
+  if (mode === "proxy") headers.set("x-target-url", targetUrl);
   try {
-    const headers = new Headers(init.headers || {});
-    headers.set("x-target-url", targetUrl);
-
-    const proxyResp = await fetch("/api/proxy", {
-      ...init,
-      headers,
+    return await fetch(mode === "proxy" ? config.proxyUrl || DEFAULT_PROXY_URL : targetUrl, {
+      ...init, headers, redirect: "error", credentials: "omit",
     });
-
-    if (proxyResp.status !== 404 && proxyResp.status !== 405) {
-      return proxyResp;
-    }
   } catch {
-    // 代理网络异常，回退直连
+    throw new Error(mode === "proxy"
+      ? "无法连接本站模型代理，请检查网络、代理部署或稍后重试。"
+      : "浏览器直连失败：可能是网络、端点或供应商 CORS 策略限制。请检查服务状态或使用已配置的代理。");
   }
-
-  return fetch(targetUrl, init);
 }
 
 /**
- * Call the user's OpenAI-compatible model service directly from the browser.
+ * Call the user's approved OpenAI-compatible service through the site proxy.
  */
 export async function requestLlmPlan(
   opts: GenerateOptions,
   config: ModelConfig,
 ): Promise<DeckPlan> {
-  const baseUrl = (config.baseUrl || DEFAULT_BASE_URL).replace(/\/+$/, "");
+  const baseUrl = (config.baseUrl || DEFAULT_BASE_URL).trim().replace(/\/+$/, "");
   const model = config.model || DEFAULT_MODEL;
   const apiKey = (config.apiKey || "").trim();
 
@@ -58,12 +56,21 @@ export async function requestLlmPlan(
   }
 
   const count = clampSlideCount(opts.slideCount);
-  const { system, user } = buildPrompt(opts);
+  const { system, user } = buildPrompt(opts, model);
 
-  // Request body with response_format json_object; fallback without if rejected
-  const reqBody: any = {
+  // Retry only when the site's proxy classifies a response_format rejection.
+  const reqBody: {
+    model: string;
+    temperature: number;
+    stream: false;
+    max_tokens: number;
+    response_format?: { type: "json_object" };
+    messages: Array<{ role: "system" | "user"; content: string }>;
+  } = {
     model,
     temperature: 0.4,
+    stream: false,
+    max_tokens: 6000,
     response_format: { type: "json_object" },
     messages: [
       { role: "system", content: system },
@@ -71,41 +78,31 @@ export async function requestLlmPlan(
     ],
   };
 
-  let resp: Response;
-  try {
-    resp = await smartFetch(`${baseUrl}/chat/completions`, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(reqBody),
-    });
+  let resp = await smartFetch(`${baseUrl}/chat/completions`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(reqBody),
+  }, config);
 
-    // If 400 with response_format unsupported message, retry once without it
-    if (resp.status === 400) {
-      const errClone = resp.clone();
-      const errText = await errClone.text().catch(() => "");
-      if (errText.includes("response_format") || errText.includes("json_object")) {
-        delete reqBody.response_format;
-        resp = await smartFetch(`${baseUrl}/chat/completions`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(reqBody),
-        });
-      }
+  if (resp.status === 400 || resp.status === 422) {
+    const proxyError: unknown = await resp.clone().json().catch(() => null);
+    if (
+      proxyError && typeof proxyError === "object" &&
+      "code" in proxyError && proxyError.code === "unsupported_response_format"
+    ) {
+      delete reqBody.response_format;
+      resp = await smartFetch(`${baseUrl}/chat/completions`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(reqBody),
+      }, config);
     }
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    if (msg.includes("Failed to fetch") || msg.includes("NetworkError") || msg.includes("Network request failed")) {
-      throw new Error(
-        `网络请求失败: Failed to fetch (浏览器跨域受阻 CORS)。服务商 API (${baseUrl}) 未向浏览器返回 Access-Control-Allow-Origin 跨域头。请开启浏览器「Allow CORS」插件直连，或切换为左侧免 API 的自定义大纲模式。`,
-      );
-    }
-    throw new Error(`网络请求失败: ${msg}`);
   }
 
   if (!resp.ok) {
@@ -121,16 +118,8 @@ export async function requestLlmPlan(
     throw new Error("模型返回为空，请重试。");
   }
 
-  let planJson: unknown;
-  try {
-    planJson = JSON.parse(content);
-  } catch (e) {
-    // If wrapped in ```json ... ```, strip markdown fences
-    const clean = content.replace(/^```json\s*/i, "").replace(/```$/, "").trim();
-    planJson = JSON.parse(clean);
-  }
-
-  const { plan, error } = validatePlan(planJson, count);
+  const planJson = parseModelResponse(content, model);
+  const { plan, error } = normalizeModelPlan(planJson, count, model);
   if (!plan) {
     throw new Error(error || "生成的大纲格式无效。");
   }

@@ -25,21 +25,15 @@
 
 ---
 
-### 💡 在线 Web 工作台与 API 快速配置 (支持 Vercel 一键部署 · 原生解决跨域)
+### 💡 在线 Web 工作台与 API 配置
 
-你可以点击上方 **Deploy with Vercel** 按钮 1 分钟免费部署你自己的专属 PPT 在线工作台（内置 `/api/proxy` 服务端中转，原生彻底解决国内各大模型的浏览器 CORS 跨域问题）。
+在线入口：[海外 Vercel](https://slide-recipes-web.vercel.app/) · [国内 EdgeOne](https://slides.linguistwantstech.online/)。[GitHub Pages](https://caciniep.github.io/slide-recipes/) 是静态客户端，浏览器直连能否调用取决于供应商的 CORS 策略。
 
-推荐使用 **ModelBest (MiniCPM)**，其在大纲推理与商业 PPT 结构化规划上表现尤为出色：
+支持主题、任意普通文本、Markdown、笔记和结构化 JSON。AI 生成大纲后，可以自由修改内容、增删及调整页面顺序，再下载可编辑 PPTX 与配套 Markdown 大纲。修改后的重新导出不会再次调用模型。
 
-1. **注册领取免费额度**：通过专属邀请链接注册进入控制台 👉 **[platform.modelbest.cn (专属邀请码 A93DCA73)](https://platform.modelbest.cn/console/login?ref=A93DCA73)**
-2. **创建 API Key**：在控制台「API 密钥」中创建并复制 `sk-live-...` 密钥。
-3. **在工作台填入三要素**：
-   - **Base URL**：`https://api.modelbest.cn/v1`
-   - **Model**：点击 **「🔍 自动检测模型」** 即可自动检测并选择 `MiniCPM-V-4.7-35B-A3B`
-   - **API Key**：填入你申请的密钥（*仅在本地前端填入，通过同源服务直达模型官方，安全无泄漏*）。
-4. **一键生成**：输入任意主题，或切换为「自定义大纲与内容 (JSON)」免 API 模式，即可实时预览并秒级下载原生矢量 PPTX。
+填写供应商、API 地址、自己的 Key 和模型名。模型检测与生成使用相同请求模式；代理模式下 Key 和内容会经过当前部署的同源 `/api/proxy` 服务。网络失败不会悄悄切换直连或重新生成，模型调用费用由供应商计收。
 
-*(同时预设覆盖 StepFun 阶跃、Kimi、智谱 GLM、MiniMax、通义千问 Qwen 及任意自定义兼容端点)*
+自行部署选择根目录 `web`、Node 24、安装 `npm ci`、构建 `npm run build`。生产代理需配置仅服务端可见的 Upstash REST 凭据进行共享限流。自定义端点必须由部署者显式加入允许列表，不允许任意转发。详见 [Web 配置](web/README.md)、[代理安全](web/docs/PROXY_SECURITY.md) 和 [EdgeOne 部署](web/docs/EDGEONE.md)。
 
 ---
 

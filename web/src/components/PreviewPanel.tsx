@@ -151,52 +151,9 @@ export default function PreviewPanel({ plan, isLoading, error }: Props) {
               <div>{error}</div>
             </div>
 
-            {(error.includes("CORS") || error.includes("Failed to fetch")) && (
-              <div className="rounded-lg border border-amber-500/40 bg-canvas/90 p-4 text-xs text-ink shadow-lg">
-                <div className="flex items-center gap-2 mb-2 font-semibold text-amber-300">
-                  <span>💡 为什么会出现跨域错误？如何解决？</span>
-                </div>
-                <p className="text-ink-dim leading-relaxed mb-3">
-                  国内大模型服务商（如 ModelBest、阶跃星辰、智谱 GLM、Kimi 等）的官方服务端暂未配置允许浏览器直接调用的 <code className="text-gold font-mono">Access-Control-Allow-Origin: *</code> 跨域头。在纯静态网页（如 GitHub Pages）中通过浏览器直连时，会被浏览器的安全同源策略拦截。
-                </p>
-
-                <div className="space-y-2.5 text-ink-dim border-t border-line pt-3">
-                  <div className="rounded border border-line bg-elev/60 p-2.5">
-                    <div className="font-medium text-azure mb-1">
-                      ✅ 方案一（最推荐 · 10秒解决）：安装 Chrome 跨域插件直连
-                    </div>
-                    <div className="text-[11px] leading-relaxed">
-                      在浏览器扩展商店安装并启用
-                      <a
-                        href="https://chromewebstore.google.com/search/allow%20cors"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-azure underline font-medium mx-1"
-                      >
-                        「Allow CORS: Access-Control-Allow-Origin」
-                      </a>
-                      或「CORS Unblock」插件。开启后浏览器将直接畅通请求 ModelBest 等各大平台，API Key 仅留在本地，安全保密。
-                    </div>
-                  </div>
-
-                  <div className="rounded border border-line bg-elev/60 p-2.5">
-                    <div className="font-medium text-emerald-400 mb-1">
-                      📄 方案二（免 API · 纯前端直出）：使用「自定义大纲」模式
-                    </div>
-                    <div className="text-[11px] leading-relaxed">
-                      直接在左侧将创作模式切换为「自定义大纲与内容 (JSON)」，无需任何外部模型与网络调用，浏览器即可纯本地秒级渲染高质量商业 PPT 并直接下载！
-                    </div>
-                  </div>
-
-                  <div className="rounded border border-line bg-elev/60 p-2.5">
-                    <div className="font-medium text-amber-400 mb-1">
-                      🌐 方案三（自建反代）：使用 Cloudflare Worker 代理
-                    </div>
-                    <div className="text-[11px] leading-relaxed">
-                      配置一个轻量的 Cloudflare Worker 自动追加 CORS 响应头，随后将 Base URL 改为你的 Worker 地址即可。
-                    </div>
-                  </div>
-                </div>
+            {(error.includes("CORS") || error.includes("无法连接")) && (
+              <div className="rounded border border-amber-500/30 p-3 text-xs text-ink-dim">
+                连接失败可能来自网络、端点、代理配置或供应商的跨域策略。代理模式请检查部署日志和允许列表；直连模式需要供应商允许浏览器跨域请求。也可切换至自定义大纲模式，在浏览器生成 PPTX。
               </div>
             )}
           </div>

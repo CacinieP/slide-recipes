@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import type { FontPairId, ModelConfig, StyleRecipe } from "@/lib/types";
+import type { FontPairId, ModelConfig, StyleRecipe, InputMode } from "@/lib/types";
 import { FONT_PAIRS } from "@/lib/palettes";
 import { PROVIDER_PRESETS } from "@/lib/providers";
-import { smartFetch } from "@/lib/client-generator";
+import { smartFetch, DEFAULT_REQUEST_MODE } from "@/lib/client-generator";
+import { MAX_SOURCE_TEXT_LENGTH } from "@/lib/prompt";
 import PalettePicker from "./PalettePicker";
 
 interface Props {
@@ -20,7 +21,8 @@ interface Props {
   includeChart: boolean;
   modelConfig: ModelConfig;
   customOutlineJson: string;
-  useCustomOutline: boolean;
+  inputMode: InputMode;
+  sourceText: string;
   set: (patch: Partial<Props>) => void;
 }
 
@@ -56,13 +58,16 @@ export default function ConfigPanel(props: Props) {
   const matchedPreset = PROVIDER_PRESETS.find(
     (p) => p.id !== "custom" && p.baseUrl === props.modelConfig.baseUrl,
   );
-  const currentProviderId = matchedPreset ? matchedPreset.id : "custom";
+  const [customProvider, setCustomProvider] = useState(false);
+  const currentProviderId = !customProvider && matchedPreset ? matchedPreset.id : "custom";
+  const requestMode = props.modelConfig.mode || DEFAULT_REQUEST_MODE;
 
   const handleSelectProvider = (presetId: string) => {
     const preset = PROVIDER_PRESETS.find((p) => p.id === presetId);
     if (!preset) return;
     setDetectedModels([]);
     setDetectStatus("");
+    setCustomProvider(preset.id === "custom");
     if (preset.id === "custom") {
       set({
         modelConfig: {
@@ -89,6 +94,10 @@ export default function ConfigPanel(props: Props) {
       setDetectStatus("请先填写 API Base URL");
       return;
     }
+    if (!apiKey) {
+      setDetectStatus("请先填写 API Key 后再检测模型");
+      return;
+    }
 
     setIsDetecting(true);
     setDetectStatus("正在检测端点与模型列表...");
@@ -98,10 +107,10 @@ export default function ConfigPanel(props: Props) {
       const resp = await smartFetch(`${baseUrl}/models`, {
         method: "GET",
         headers: {
-          Authorization: apiKey ? `Bearer ${apiKey}` : "",
+          Authorization: `Bearer ${apiKey}`,
           "Content-Type": "application/json",
         },
-      });
+      }, props.modelConfig);
 
       if (!resp.ok) {
         const text = await resp.text().catch(() => "");
@@ -127,23 +136,17 @@ export default function ConfigPanel(props: Props) {
       setDetectedModels(modelIds);
       setDetectStatus(`✅ 检测成功！探测到 ${modelIds.length} 个可用模型`);
 
-      // 若当前填写的模型不在列表里，默认选中第一个
-      if (!modelIds.includes(props.modelConfig.model)) {
+      // Preserve a chosen model; detection must not silently switch its cost tier.
+      if (!props.modelConfig.model.trim()) {
         set({
           modelConfig: { ...props.modelConfig, model: modelIds[0] },
         });
+      } else if (!modelIds.includes(props.modelConfig.model)) {
+        setDetectStatus(`⚠️ 已获取 ${modelIds.length} 个模型，但当前型号未出现在列表中；已保留设置，请确认服务商支持该型号。`);
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      if (msg.includes("Failed to fetch") || msg.includes("NetworkError")) {
-        setDetectStatus(
-          "⚠️ 跨域受阻 (CORS): 服务商接口未开放浏览器跨域。建议开启 Chrome 扩展「Allow CORS」直连，或直接在下方手动输入/保留预设模型。",
-        );
-      } else {
-        setDetectStatus(
-          `❌ 检测失败: ${msg}`,
-        );
-      }
+      setDetectStatus(`❌ 检测失败: ${msg}`);
     } finally {
       setIsDetecting(false);
     }
@@ -169,6 +172,15 @@ export default function ConfigPanel(props: Props) {
 
         {showModelConfig && (
           <div className="flex flex-col gap-3">
+            <label className="text-xs text-ink-dim">请求方式
+              <select className={inputCls} value={requestMode} onChange={(e) => {
+                setDetectedModels([]); setDetectStatus("");
+                set({ modelConfig: { ...props.modelConfig, mode: e.target.value as "proxy" | "direct" } });
+              }}>
+                <option value="proxy">代理（同源 /api/proxy）</option>
+                <option value="direct">浏览器直连（受供应商 CORS 策略限制）</option>
+              </select>
+            </label>
             {/* 常见服务商快速切换按钮 */}
             <div>
               <div className="text-[11px] text-ink-dim mb-1.5">预设服务商快捷选择：</div>
@@ -211,18 +223,20 @@ export default function ConfigPanel(props: Props) {
               <input
                 className={inputCls}
                 value={props.modelConfig.baseUrl}
-                onChange={(e) =>
-                  set({
-                    modelConfig: { ...props.modelConfig, baseUrl: e.target.value },
-                  })
-                }
+                onChange={(e) => {
+                  setDetectedModels([]); setDetectStatus("");
+                  set({ modelConfig: { ...props.modelConfig, baseUrl: e.target.value } });
+                }}
                 placeholder="例如: https://api.modelbest.cn/v1 或 自定义端点"
               />
+              <div className="mt-1 text-[10px] text-ink-mute">
+                {requestMode === "proxy" ? "自定义地址需由部署者在允许列表中显式批准。" : "直连是否可用取决于供应商的 CORS 策略。"}
+              </div>
             </div>
 
             {/* API Key */}
             <div>
-              <div className="text-[11px] text-ink-dim mb-1">2. API Key (仅保存在本地浏览器)</div>
+              <div className="text-[11px] text-ink-dim mb-1">2. API Key (用于指定模型服务认证)</div>
               <div className="flex gap-2">
                 <input
                   type="password"
@@ -240,7 +254,7 @@ export default function ConfigPanel(props: Props) {
                   onClick={handleDetectModels}
                   disabled={isDetecting || !props.modelConfig.baseUrl}
                   className="shrink-0 rounded-md border border-azure/60 bg-azure/10 px-3 py-2 text-xs font-medium text-azure transition hover:bg-azure/20 disabled:cursor-not-allowed disabled:opacity-50"
-                  title="根据输入的 Base URL 与 API Key 自动请求 /v1/models 探测可用模型"
+                  title="使用当前请求方式查询 /models"
                 >
                   {isDetecting ? "检测中…" : "🔍 自动检测模型"}
                 </button>
@@ -279,6 +293,11 @@ export default function ConfigPanel(props: Props) {
                       })
                     }
                   >
+                    {props.modelConfig.model.trim() && !detectedModels.includes(props.modelConfig.model) && (
+                      <option value={props.modelConfig.model}>
+                        当前模型: {props.modelConfig.model} (未在列表中)
+                      </option>
+                    )}
                     {detectedModels.map((id) => (
                       <option key={id} value={id}>
                         {id}
@@ -308,18 +327,10 @@ export default function ConfigPanel(props: Props) {
                     <option value={props.modelConfig.model}>自定义型号: {props.modelConfig.model}</option>
                   </select>
                 </div>
-              ) : (
-                <input
-                  className={inputCls}
-                  value={props.modelConfig.model}
-                  onChange={(e) =>
-                    set({
-                      modelConfig: { ...props.modelConfig, model: e.target.value },
-                    })
-                  }
-                  placeholder="输入模型 ID，如 MiniCPM-V-4.7-35B-A3B, qwen-max..."
-                />
-              )}
+              ) : null}
+              <input aria-label="自定义模型名" className={`${inputCls} mt-1.5`} value={props.modelConfig.model}
+                onChange={(e) => set({ modelConfig: { ...props.modelConfig, model: e.target.value } })}
+                placeholder="手动输入自定义模型 ID" />
             </div>
 
             {/* ModelBest 注册教程与专属邀请入口 */}
@@ -350,26 +361,18 @@ export default function ConfigPanel(props: Props) {
                 <br />
                 2. 进入控制台「API 密钥」创建并复制以 <code className="text-gold font-mono">sk-live-</code> 开头的密钥填入上方。
                 <br />
-                3. 点击「🔍 自动检测模型」按钮，系统即可自动拉取并选择 <code className="text-azure font-mono">MiniCPM-V-4.7-35B-A3B</code>！
+                3. 当前默认模型为 <code className="text-azure font-mono">MiniCPM-V-4.7-1B</code>。可点击「🔍 自动检测模型」检查你填写的 Key 是否可用。
               </p>
             </div>
 
             <div className="space-y-1 text-[10px] text-ink-mute">
+              <div>API Key 保存在当前浏览器。请勿在共享电脑保存敏感配置。</div>
               <div>
-                * 填入任意兼容 OpenAI 的 Endpoint 和 API Key 后，点击「🔍 自动检测模型」即可自动获取端点支持的模型并选择填入。所有请求仅在本地浏览器发起，安全无泄漏。
+                {requestMode === "proxy" ? "代理模式：API Key 会经过你自己的部署服务，再转发给已批准的供应商。仅使用你信任的部署。" : "直连模式：API Key 由浏览器直接发送给供应商；供应商须允许跨域请求。"}
               </div>
               <div className="rounded border border-amber-500/30 bg-amber-500/10 p-2 text-amber-300">
-                <span className="font-semibold">💡 浏览器跨域 (CORS) 必读：</span>
-                国内各大模型（如 ModelBest、阶跃、智谱等）官方 API 默认未开启浏览器跨域许可。若在 GitHub Pages 直连报错 Failed to fetch，推荐安装 Chrome / Edge 插件
-                <a
-                  href="https://chromewebstore.google.com/search/allow%20cors"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mx-1 underline text-amber-200 hover:text-white"
-                >
-                  「Allow CORS」
-                </a>
-                并开启，即可免代理直连！或直接切换至下方「自定义大纲」模式，免 API 秒出 PPT。
+                <span className="font-semibold">💡 模型连接说明：</span>
+                {requestMode === "proxy" ? "代理只转发已批准地址。被拒绝时请检查部署允许列表；503 请检查共享限流配置。" : "静态站未配置外部代理时使用直连；供应商可能因 CORS 策略拒绝浏览器请求。"} 服务不可用时可稍后重试，或切换至 JSON 大纲模式。
               </div>
             </div>
           </div>
@@ -379,43 +382,40 @@ export default function ConfigPanel(props: Props) {
       {/* 2. 创作模式切换: AI 自动规划 vs 自定义大纲 */}
       <div>
         <div className="mono-label mb-2">MODE / 创作模式</div>
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            onClick={() => set({ useCustomOutline: false })}
-            className={`rounded-md border px-3 py-2 text-center text-xs transition ${
-              !props.useCustomOutline
+        <div className="grid grid-cols-3 gap-2">
+          {([
+            ["topic", "主题生成"],
+            ["text", "粘贴文案 → AI"],
+            ["json", "JSON 大纲"],
+          ] as const).map(([mode, label]) => (
+            <button key={mode} type="button" aria-pressed={props.inputMode === mode}
+              onClick={() => set({ inputMode: mode })}
+              className={`rounded-md border px-3 py-2 text-center text-xs transition ${props.inputMode === mode
                 ? "border-gold bg-gold-soft text-gold font-medium"
-                : "border-line bg-elev text-ink-dim hover:border-line-strong hover:text-ink"
-            }`}
-          >
-            AI 智能大纲生成
-          </button>
-          <button
-            type="button"
-            onClick={() => set({ useCustomOutline: true })}
-            className={`rounded-md border px-3 py-2 text-center text-xs transition ${
-              props.useCustomOutline
-                ? "border-azure bg-blue-soft text-azure font-medium"
-                : "border-line bg-elev text-ink-dim hover:border-line-strong hover:text-ink"
-            }`}
-          >
-            自定义大纲与内容 (JSON)
-          </button>
+                : "border-line bg-elev text-ink-dim hover:border-line-strong hover:text-ink"}`}>
+              {label}
+            </button>
+          ))}
         </div>
       </div>
 
       {/* 3. 主题 / 自定义大纲内容 */}
-      {!props.useCustomOutline ? (
+      {props.inputMode !== "json" ? (
         <>
-          <Field label="TOPIC / 主题">
-            <textarea
-              className={`${inputCls} min-h-20 resize-y`}
-              value={props.topic}
-              onChange={(e) => set({ topic: e.target.value })}
-              placeholder="例如:AI 驱动的年度战略汇报"
-            />
-          </Field>
+          {props.inputMode === "text" ? (
+            <Field label="SOURCE TEXT / 粘贴原始文案">
+              <textarea aria-label="原始文案" className={`${inputCls} min-h-48 resize-y`}
+                value={props.sourceText} maxLength={MAX_SOURCE_TEXT_LENGTH}
+                onChange={(e) => set({ sourceText: e.target.value })}
+                placeholder="粘贴文章、会议笔记、Markdown、列表或表格文本，无需转换为 JSON。AI 会整理为大纲并生成 PPTX。" />
+              <span className="mt-1 block text-xs text-ink-mute">{props.sourceText.length.toLocaleString()} / 20,000 字符 · 文案会发送给所选模型。生成后可下载 PPTX 和 Markdown 大纲。</span>
+            </Field>
+          ) : (
+            <Field label="TOPIC / 主题">
+              <textarea className={`${inputCls} min-h-20 resize-y`} value={props.topic}
+                onChange={(e) => set({ topic: e.target.value })} placeholder="例如:AI 驱动的年度战略汇报" />
+            </Field>
+          )}
 
           <div className="grid grid-cols-2 gap-3">
             <Field label="AUDIENCE / 受众">
@@ -557,7 +557,7 @@ export default function ConfigPanel(props: Props) {
       </Field>
 
       {/* 6. 内容偏好 */}
-      {!props.useCustomOutline && (
+      {props.inputMode !== "json" && (
         <Field label="PREFERENCES / 内容偏好">
           <div className="flex gap-2">
             {([

@@ -1,0 +1,11 @@
+{
+  "installCommand": "npm ci",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "nodeVersion": "24.5.0",
+  "cloudFunctions": {
+    "nodejs": {
+      "maxDuration": 120
+    }
+  }
+}

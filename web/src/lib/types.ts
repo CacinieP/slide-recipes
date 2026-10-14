@@ -149,6 +149,8 @@ export interface FontPair {
 
 /** LLM service connection parameters (three essentials). */
 export interface ModelConfig {
+  mode?: "proxy" | "direct";
+  proxyUrl?: string;
   baseUrl: string;
   apiKey: string;
   model: string;
@@ -157,6 +159,7 @@ export interface ModelConfig {
 /** Form payload sent from the client to generate. */
 export interface GenerateOptions {
   topic: string;
+  sourceText?: string;
   audience: string;
   tone: string;
   slideCount: number;
@@ -169,6 +172,8 @@ export interface GenerateOptions {
   modelConfig?: ModelConfig;
   customOutlineJson?: string;
 }
+
+export type InputMode = "topic" | "text" | "json";
 
 /** Numeric layout knobs derived from StyleRecipe (units: inches). */
 export interface StyleMetrics {
