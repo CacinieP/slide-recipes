@@ -1,0 +1,36 @@
+name: Web security and build checks
+
+on:
+  pull_request:
+    paths:
+      - 'web/**'
+      - 'vercel.json'
+      - '.github/workflows/web-security.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - 'vercel.json'
+      - '.github/workflows/web-security.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci --ignore-scripts
+      - run: npm test
+      - run: npx tsc --noEmit --incremental false
+      - run: npm run build
+      - run: npm run build:pages
