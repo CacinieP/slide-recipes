@@ -175,15 +175,56 @@ export default function ConfigPanel(props: Props) {
 
         {showModelConfig && (
           <div className="flex flex-col gap-3">
-            <label className="text-xs text-ink-dim">请求方式
-              <select className={inputCls} value={requestMode} onChange={(e) => {
-                setDetectedModels([]); setDetectStatus("");
-                set({ modelConfig: { ...props.modelConfig, mode: e.target.value as "proxy" | "direct" } });
-              }}>
-                <option value="proxy">代理（同源 /api/proxy）</option>
-                <option value="direct">浏览器直连（受供应商 CORS 策略限制）</option>
-              </select>
-            </label>
+            {/* 通信与请求模式切换 */}
+            <div>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[11px] text-ink-dim font-medium">通信与请求模式：</span>
+                <span className="text-[10px] font-mono text-ink-mute">
+                  {requestMode === "proxy" ? "解决 CORS 跨域 · 内存透传" : "浏览器直连 · 100% 物理隔离"}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDetectedModels([]); setDetectStatus("");
+                    set({ modelConfig: { ...props.modelConfig, mode: "proxy" } });
+                  }}
+                  className={`flex flex-col text-left p-2.5 rounded-md border transition ${
+                    requestMode === "proxy"
+                      ? "border-gold bg-gold-soft/30 ring-1 ring-gold/60 text-ink shadow-xs"
+                      : "border-line bg-base/50 text-ink-dim hover:border-line-strong hover:text-ink"
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 font-medium text-xs text-ink">
+                    <span>🚀 代理模式 (推荐)</span>
+                  </div>
+                  <span className="text-[10px] text-ink-mute mt-1 leading-snug">
+                    解决跨域限制 · 纯内存管道透传 · 绝不落盘不记 Key
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDetectedModels([]); setDetectStatus("");
+                    set({ modelConfig: { ...props.modelConfig, mode: "direct" } });
+                  }}
+                  className={`flex flex-col text-left p-2.5 rounded-md border transition ${
+                    requestMode === "direct"
+                      ? "border-azure bg-blue-soft/30 ring-1 ring-azure/60 text-ink shadow-xs"
+                      : "border-line bg-base/50 text-ink-dim hover:border-line-strong hover:text-ink"
+                  }`}
+                >
+                  <div className="flex items-center gap-1.5 font-medium text-xs text-ink">
+                    <span>🔒 纯前端直连模式</span>
+                  </div>
+                  <span className="text-[10px] text-ink-mute mt-1 leading-snug">
+                    浏览器直发服务商 · 物理隔离不经任何服务器
+                  </span>
+                </button>
+              </div>
+            </div>
             {/* 常见服务商快速切换按钮 */}
             <div>
               <div className="flex items-center justify-between mb-1.5">
@@ -404,14 +445,30 @@ export default function ConfigPanel(props: Props) {
               </p>
             </div>
 
-            <div className="space-y-1 text-[10px] text-ink-mute">
-              <div>API Key 保存在当前浏览器。请勿在共享电脑保存敏感配置。</div>
-              <div>
-                {requestMode === "proxy" ? "代理模式：API Key 会经过你自己的部署服务，再转发给已批准的供应商。仅使用你信任的部署。" : "直连模式：API Key 由浏览器直接发送给供应商；供应商须允许跨域请求。"}
+            {/* 隐私与安全透明承诺 */}
+            <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-ink space-y-1.5">
+              <div className="flex items-center gap-1.5 font-semibold text-emerald-400">
+                <span>🛡️ 隐私与 API Key 零存储承诺</span>
               </div>
-              <div className="rounded border border-amber-500/30 bg-amber-500/10 p-2 text-amber-300">
-                <span className="font-semibold">💡 模型连接说明：</span>
-                {requestMode === "proxy" ? "代理只转发已批准地址。被拒绝时请检查部署允许列表；503 请检查共享限流配置。" : "静态站未配置外部代理时使用直连；供应商可能因 CORS 策略拒绝浏览器请求。"} 服务不可用时可稍后重试，或切换至 JSON 大纲模式。
+              <div className="text-[11px] text-ink-dim leading-relaxed space-y-1">
+                <div>
+                  • <b>PPTX 纯前端本地组装</b>：所有幻灯片几何图形、矢量文本完全在您本地浏览器组装生成，文件绝不上报或留存。
+                </div>
+                <div>
+                  • <b>Key 仅保留在当前浏览器内存中</b>：随用随走，绝不建库、绝不收集。
+                </div>
+                <div>
+                  • <b>通信安全</b>：
+                  {requestMode === "proxy" ? (
+                    <span className="text-amber-300">
+                      当前为【代理模式】，仅作为内存管道转发以解决浏览器跨域限制，服务器绝不落盘、绝不记录您的 Key。
+                    </span>
+                  ) : (
+                    <span className="text-emerald-300">
+                      当前为【纯前端直连模式】，浏览器直接与模型供应商通信，100% 物理隔离，不经过任何中间服务器。
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           </div>

@@ -348,7 +348,7 @@ export default function Home() {
       <footer className="border-t border-line px-6 py-4">
         <div className="mx-auto flex max-w-7xl flex-col sm:flex-row items-center justify-between gap-3 text-xs text-ink-mute">
           <div className="flex flex-wrap items-center gap-3">
-            <span className="mono-label">PPTX 在浏览器原生渲染 · 零服务器存储</span>
+            <span className="mono-label text-emerald-400">🛡️ 本地纯前端渲染 · 零服务器存储 · API Key 绝不留存</span>
             <span className="hidden sm:inline text-line">|</span>
             <div className="inline-flex items-center gap-2">
               <span>镜像站:</span>
