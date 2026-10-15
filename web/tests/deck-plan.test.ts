@@ -322,3 +322,21 @@ test("requestLlmPlan recovers and returns full deck when generic model outputs 2
   assert.equal(result.slides[23].type, "closing");
 });
 
+test("requestLlmPlan recovers and returns valid deck when 1B response is missing page_6_title", async (t) => {
+  const raw: Record<string, unknown> = validFlatPlan(6);
+  delete raw.page_6_title;
+  t.mock.method(globalThis, "fetch", async () => {
+    return Response.json({ choices: [{ message: { content: JSON.stringify(raw) } }] });
+  });
+
+  const result = await requestLlmPlan(options, {
+    baseUrl: "https://api.modelbest.cn/v1",
+    model: "MiniCPM-V-4.7-1B",
+    apiKey: "test-api-key",
+  });
+
+  assert.ok(result.slides.length >= 5);
+  assert.equal(result.slides[0].type, "cover");
+  assert.equal(result.slides.at(-1)?.type, "closing");
+});
+

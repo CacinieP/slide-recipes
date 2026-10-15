@@ -250,61 +250,113 @@ export function healModelPlan(raw: unknown, requestedCount?: number): DeckPlan |
   const obj = raw as Record<string, unknown>;
   const title = typeof obj.title === "string" && obj.title.trim() ? obj.title.trim() : "演示文稿";
   const slidesRaw = Array.isArray(obj.slides) ? obj.slides : null;
-  if (!slidesRaw || slidesRaw.length === 0) return null;
+  // 如果包含标准的 slides 数组，按嵌套格式自愈
+  if (slidesRaw && slidesRaw.length > 0) {
+    const validTypes = new Set([
+      "cover", "toc", "section", "content", "summary", "agenda", "closing",
+      "executiveSummary", "kpiDashboard", "funnel", "gantt", "processFlow",
+      "quadrant", "swot", "team", "pricing", "testimonial", "metrics",
+      "comparison", "caseStudy", "scope",
+      "milestoneTimeline", "featureGrid", "statCallout", "architectureStack",
+      "marketSize", "faq"
+    ]);
 
-  const validTypes = new Set([
-    "cover", "toc", "section", "content", "summary", "agenda", "closing",
-    "executiveSummary", "kpiDashboard", "funnel", "gantt", "processFlow",
-    "quadrant", "swot", "team", "pricing", "testimonial", "metrics",
-    "comparison", "caseStudy", "scope",
-    "milestoneTimeline", "featureGrid", "statCallout", "architectureStack",
-    "marketSize", "faq"
-  ]);
+    const cleanSlides: SlidePlan[] = [];
+    for (let i = 0; i < slidesRaw.length; i++) {
+      const rawSlide = slidesRaw[i];
+      if (!rawSlide || typeof rawSlide !== "object") continue;
+      const s = rawSlide as Record<string, unknown>;
+      const typeStr = typeof s.type === "string" ? s.type : "content";
+      const type = (validTypes.has(typeStr) ? typeStr : "content") as SlideType;
+      const t = typeof s.title === "string" && s.title.trim() ? s.title.trim() : `第 ${cleanSlides.length + 1} 页`;
+      const bulletsList = Array.isArray(s.bullets) ? s.bullets : [];
+      const b = bulletsList
+        .filter((x: unknown): x is string => typeof x === "string")
+        .map((x: string) => x.trim())
+        .filter(Boolean);
 
-  const cleanSlides: SlidePlan[] = [];
-  for (let i = 0; i < slidesRaw.length; i++) {
-    const rawSlide = slidesRaw[i];
-    if (!rawSlide || typeof rawSlide !== "object") continue;
-    const s = rawSlide as Record<string, unknown>;
-    const typeStr = typeof s.type === "string" ? s.type : "content";
-    const type = (validTypes.has(typeStr) ? typeStr : "content") as SlideType;
-    const t = typeof s.title === "string" && s.title.trim() ? s.title.trim() : `第 ${cleanSlides.length + 1} 页`;
-    const bulletsList = Array.isArray(s.bullets) ? s.bullets : [];
-    const b = bulletsList
-      .filter((x: unknown): x is string => typeof x === "string")
-      .map((x: string) => x.trim())
-      .filter(Boolean);
+      cleanSlides.push({
+        ...s,
+        type,
+        title: t,
+        bullets: b.length > 0 ? b : undefined,
+      } as SlidePlan);
+    }
 
-    cleanSlides.push({
-      ...s,
-      type,
-      title: t,
-      bullets: b.length > 0 ? b : undefined,
-    } as SlidePlan);
+    if (cleanSlides.length >= 2) {
+      // 1. 保证第一页必须是 cover
+      if (cleanSlides[0].type !== "cover") {
+        cleanSlides[0] = {
+          ...cleanSlides[0],
+          type: "cover",
+        };
+      }
+
+      // 2. 保证最后一页必须是 closing
+      const lastIndex = cleanSlides.length - 1;
+      if (lastIndex > 0 && cleanSlides[lastIndex].type !== "closing") {
+        const lastObj = cleanSlides[lastIndex] as unknown as Record<string, unknown>;
+        cleanSlides[lastIndex] = {
+          ...cleanSlides[lastIndex],
+          type: "closing",
+          action: (typeof lastObj.action === "string" && lastObj.action) || cleanSlides[lastIndex].title || "推进落地执行",
+        };
+      }
+
+      return { title, slides: cleanSlides };
+    }
   }
 
-  if (cleanSlides.length === 0) return null;
-
-  // 1. 保证第一页必须是 cover
-  if (cleanSlides[0].type !== "cover") {
-    cleanSlides[0] = {
-      ...cleanSlides[0],
-      type: "cover",
-    };
+  // 如果不包含 slides 数组，检查是否为 1B 平铺格式（page_1_title, page_1_body, ...）
+  let maxPage = 0;
+  for (let i = 1; i <= 30; i++) {
+    if (obj[`page_${i}_title`] !== undefined || obj[`page_${i}_body`] !== undefined) {
+      maxPage = i;
+    }
   }
 
-  // 2. 保证最后一页必须是 closing
-  const lastIndex = cleanSlides.length - 1;
-  if (lastIndex > 0 && cleanSlides[lastIndex].type !== "closing") {
-    const lastObj = cleanSlides[lastIndex] as unknown as Record<string, unknown>;
-    cleanSlides[lastIndex] = {
-      ...cleanSlides[lastIndex],
-      type: "closing",
-      action: (typeof lastObj.action === "string" && lastObj.action) || cleanSlides[lastIndex].title || "推进落地执行",
-    };
+  if (maxPage >= 2) {
+    const flatSlides: SlidePlan[] = [];
+    for (let i = 1; i <= maxPage; i++) {
+      const rawTitle = obj[`page_${i}_title`];
+      const rawBody = obj[`page_${i}_body`];
+
+      if (rawTitle === undefined && rawBody === undefined) continue;
+
+      const t = typeof rawTitle === "string" && rawTitle.trim()
+        ? rawTitle.trim()
+        : typeof rawBody === "string" && rawBody.trim()
+        ? rawBody.trim().slice(0, 30)
+        : `第 ${flatSlides.length + 1} 页`;
+
+      const b = typeof rawBody === "string" && rawBody.trim() ? rawBody.trim() : t;
+
+      flatSlides.push({
+        type: "content",
+        title: t,
+        body: b,
+      });
+    }
+
+    if (flatSlides.length >= 2) {
+      flatSlides[0] = {
+        type: "cover",
+        title: flatSlides[0].title || title,
+        bullets: flatSlides[0].body ? [flatSlides[0].body] : undefined,
+      };
+
+      const last = flatSlides.length - 1;
+      flatSlides[last] = {
+        type: "closing",
+        title: flatSlides[last].title || "总结与行动",
+        action: flatSlides[last].body || "推进落地执行",
+      };
+
+      return { title, slides: flatSlides };
+    }
   }
 
-  return { title, slides: cleanSlides };
+  return null;
 }
 
 /**

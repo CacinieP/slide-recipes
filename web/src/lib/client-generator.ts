@@ -121,8 +121,8 @@ export async function requestLlmPlan(
   const planJson = parseModelResponse(content, model);
   let { plan, error } = normalizeModelPlan(planJson, count, model);
 
-  // 通用模型大纲自愈：若因模型输出页数与要求微偏（如要求 20 页实际返回 24 页）或非致命格式偏差未通过严格校验，自动启动容错修复
-  if (!plan && model !== "MiniCPM-V-4.7-1B") {
+  // 大纲容错自愈：若因页数偏差或部分字段缺失未通过严格校验，且非明确的“超出固定模板”硬性越界错误，自动提取有效页面
+  if (!plan && error !== "模型大纲包含超出固定模板的字段。") {
     const healed = healModelPlan(planJson, count);
     if (healed && healed.slides.length >= 2) {
       plan = healed;
