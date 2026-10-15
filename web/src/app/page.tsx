@@ -7,7 +7,7 @@ import PreviewPanel from "@/components/PreviewPanel";
 import DownloadCard from "@/components/DownloadCard";
 import { requestLlmPlan, renderDeckPlanToBlob, DEFAULT_REQUEST_MODE, DEFAULT_PROXY_URL } from "@/lib/client-generator";
 import { deckPlanToMarkdown } from "@/lib/outline-markdown";
-import type { DeckPlan, FontPairId, ModelConfig, StyleRecipe, InputMode } from "@/lib/types";
+import type { DeckPlan, FontPairId, ModelConfig, StyleRecipe, InputMode, OccasionId } from "@/lib/types";
 
 interface Result {
   blobUrl: string;
@@ -35,6 +35,7 @@ const DEFAULT_MODEL_CONFIG: ModelConfig = {
 };
 
 export default function Home() {
+  const [occasion, setOccasion] = useState<OccasionId>("01-business-report");
   const [topic, setTopic] = useState(EXAMPLES[0]);
   const [audience, setAudience] = useState("产品团队与管理层");
   const [tone, setTone] = useState("专业、清晰、简洁");
@@ -58,6 +59,13 @@ export default function Home() {
   const [error, setError] = useState("");
   const [plan, setPlan] = useState<DeckPlan | null>(null);
   const [result, setResult] = useState<Result | null>(null);
+  const [currentHost, setCurrentHost] = useState("");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setCurrentHost(window.location.hostname);
+    }
+  }, []);
 
   useEffect(() => () => {
     if (result) { URL.revokeObjectURL(result.blobUrl); URL.revokeObjectURL(result.outlineUrl); }
@@ -97,6 +105,7 @@ export default function Home() {
     customOutlineJson: string;
     inputMode: InputMode;
     sourceText: string;
+    occasion?: OccasionId;
   };
 
   const set = (patch: Partial<ConfigState>) => {
@@ -114,6 +123,7 @@ export default function Home() {
     if (patch.customOutlineJson !== undefined) setCustomOutlineJson(patch.customOutlineJson);
     if (patch.inputMode !== undefined) setInputMode(patch.inputMode);
     if (patch.sourceText !== undefined) setSourceText(patch.sourceText);
+    if (patch.occasion !== undefined) setOccasion(patch.occasion);
   };
 
   async function handleGenerate() {
@@ -160,6 +170,7 @@ export default function Home() {
             styleRecipe,
             includeCode,
             includeChart,
+            occasion,
           },
           modelConfig,
         );
@@ -228,10 +239,36 @@ export default function Home() {
                   Web Studio · 模型连接可配置
                 </span>
               </div>
-              <p className="mono-label">28 PALETTES · 23 SLIDE TYPES · BROWSER-NATIVE PPTX</p>
+              <p className="mono-label">28 PALETTES · 25 SLIDE TYPES · 15 OCCASIONS · BROWSER-NATIVE PPTX</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
+            <div className="hidden md:flex items-center gap-1 rounded-full border border-line bg-elev/70 px-2 py-1 text-[11px]">
+              <span className="text-ink-dim pl-1">网络节点:</span>
+              <a
+                href="https://slides.linguistwantstech.online/"
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 transition ${
+                  currentHost.includes("linguistwantstech.online")
+                    ? "bg-gold-soft text-gold font-medium border border-gold/40"
+                    : "text-ink-dim hover:text-ink hover:bg-base"
+                }`}
+                title="国内直连 EdgeOne CDN"
+              >
+                <span>🇨🇳 国内节点</span>
+              </a>
+              <span className="text-line">|</span>
+              <a
+                href="https://slide-recipes-web.vercel.app/"
+                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 transition ${
+                  currentHost.includes("vercel.app")
+                    ? "bg-azure/20 text-azure font-medium border border-azure/40"
+                    : "text-ink-dim hover:text-ink hover:bg-base"
+                }`}
+                title="全球海外 Vercel Anycast"
+              >
+                <span>🌍 全球节点</span>
+              </a>
+            </div>
             {inputMode === "topic" && (
               <button
                 type="button"
@@ -276,6 +313,7 @@ export default function Home() {
             customOutlineJson={customOutlineJson}
             inputMode={inputMode}
             sourceText={sourceText}
+            occasion={occasion}
             set={set}
           />
         </section>
@@ -303,8 +341,27 @@ export default function Home() {
       </main>
 
       <footer className="border-t border-line px-6 py-4">
-        <div className="mx-auto flex max-w-7xl items-center justify-between text-xs text-ink-mute">
-          <span className="mono-label">PPTX 在浏览器渲染 · 代理模式下模型请求与 Key 经过部署服务</span>
+        <div className="mx-auto flex max-w-7xl flex-col sm:flex-row items-center justify-between gap-3 text-xs text-ink-mute">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="mono-label">PPTX 在浏览器原生渲染 · 零服务器存储</span>
+            <span className="hidden sm:inline text-line">|</span>
+            <div className="inline-flex items-center gap-2">
+              <span>镜像站:</span>
+              <a
+                href="https://slides.linguistwantstech.online/"
+                className="text-ink-dim hover:text-gold hover:underline transition"
+              >
+                🇨🇳 腾讯云 EdgeOne (国内)
+              </a>
+              <span className="text-line">·</span>
+              <a
+                href="https://slide-recipes-web.vercel.app/"
+                className="text-ink-dim hover:text-azure hover:underline transition"
+              >
+                🌍 Vercel Anycast (全球)
+              </a>
+            </div>
+          </div>
           <a
             href="https://github.com/CacinieP/slide-recipes"
             target="_blank"

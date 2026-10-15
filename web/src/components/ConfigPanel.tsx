@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import type { FontPairId, ModelConfig, StyleRecipe, InputMode } from "@/lib/types";
-import { FONT_PAIRS } from "@/lib/palettes";
+import type { FontPairId, ModelConfig, StyleRecipe, InputMode, OccasionId } from "@/lib/types";
+import { FONT_PAIRS, OCCASION_PRESETS } from "@/lib/palettes";
 import { PROVIDER_PRESETS } from "@/lib/providers";
 import { smartFetch, DEFAULT_REQUEST_MODE } from "@/lib/client-generator";
 import { MAX_SOURCE_TEXT_LENGTH } from "@/lib/prompt";
@@ -23,6 +23,7 @@ interface Props {
   customOutlineJson: string;
   inputMode: InputMode;
   sourceText: string;
+  occasion?: OccasionId;
   set: (patch: Partial<Props>) => void;
 }
 
@@ -53,6 +54,7 @@ export default function ConfigPanel(props: Props) {
   const [isDetecting, setIsDetecting] = useState(false);
   const [detectedModels, setDetectedModels] = useState<string[]>([]);
   const [detectStatus, setDetectStatus] = useState<string>("");
+  const [providerRegion, setProviderRegion] = useState<"all" | "cn" | "global">("all");
 
   // 根据当前的 baseUrl 匹配预设渠道，若没有匹配到则是 custom
   const matchedPreset = PROVIDER_PRESETS.find(
@@ -183,22 +185,58 @@ export default function ConfigPanel(props: Props) {
             </label>
             {/* 常见服务商快速切换按钮 */}
             <div>
-              <div className="text-[11px] text-ink-dim mb-1.5">预设服务商快捷选择：</div>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-[11px] text-ink-dim">预设服务商快捷选择：</span>
+                <div className="inline-flex rounded border border-line bg-base p-0.5 text-[10px]">
+                  <button
+                    type="button"
+                    onClick={() => setProviderRegion("all")}
+                    className={`px-1.5 py-0.5 rounded transition ${
+                      providerRegion === "all" ? "bg-elev font-medium text-ink shadow-xs" : "text-ink-mute hover:text-ink"
+                    }`}
+                  >
+                    全部
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setProviderRegion("cn")}
+                    className={`px-1.5 py-0.5 rounded transition ${
+                      providerRegion === "cn" ? "bg-elev font-medium text-ink shadow-xs" : "text-ink-mute hover:text-ink"
+                    }`}
+                  >
+                    🇨🇳 国内直连 (免梯)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setProviderRegion("global")}
+                    className={`px-1.5 py-0.5 rounded transition ${
+                      providerRegion === "global" ? "bg-elev font-medium text-ink shadow-xs" : "text-ink-mute hover:text-ink"
+                    }`}
+                  >
+                    🌍 国际海外
+                  </button>
+                </div>
+              </div>
               <div className="flex flex-wrap gap-1.5">
-                {PROVIDER_PRESETS.map((p) => {
+                {PROVIDER_PRESETS.filter(
+                  (p) => providerRegion === "all" || p.id === "custom" || p.region === providerRegion
+                ).map((p) => {
                   const active = currentProviderId === p.id;
+                  const regionBadge = p.region === "cn" ? "🇨🇳" : p.region === "global" ? "🌍" : "⚙️";
                   return (
                     <button
                       key={p.id}
                       type="button"
                       onClick={() => handleSelectProvider(p.id)}
-                      className={`rounded px-2.5 py-1 text-xs transition border ${
+                      className={`inline-flex items-center gap-1 rounded px-2.5 py-1 text-xs transition border ${
                         active
                           ? "border-gold bg-gold-soft text-gold font-medium"
                           : "border-line bg-elev text-ink-dim hover:border-line-strong hover:text-ink"
                       }`}
                     >
-                      {p.name.split(" ")[0]} ({p.badge})
+                      <span className="text-[10px] opacity-70">{regionBadge}</span>
+                      <span>{p.name.split(" ")[0]}</span>
+                      <span className="text-[10px] opacity-60">({p.badge})</span>
                     </button>
                   );
                 })}
@@ -377,6 +415,45 @@ export default function ConfigPanel(props: Props) {
             </div>
           </div>
         )}
+      </div>
+
+      {/* 演示场合 / 场景预设 */}
+      <div>
+        <div className="flex items-center justify-between mb-2">
+          <span className="mono-label">OCCASION / 演示场景</span>
+          <span className="text-[10px] text-ink-mute">15 类主流场景联动</span>
+        </div>
+        <div className="grid grid-cols-3 gap-1.5 max-h-36 overflow-y-auto pr-1">
+          {OCCASION_PRESETS.map((o) => {
+            const active = props.occasion === o.id;
+            return (
+              <button
+                key={o.id}
+                type="button"
+                onClick={() => {
+                  set({
+                    occasion: o.id,
+                    tone: o.recommendedTone,
+                    paletteId: o.recommendedPalette,
+                    styleRecipe: o.recommendedStyle,
+                    fontPair: o.recommendedFont,
+                    topic: props.topic ? props.topic : o.sampleTopic,
+                  });
+                }}
+                className={`rounded border p-1.5 text-left transition flex flex-col justify-between ${
+                  active
+                    ? "border-gold bg-gold-soft text-gold font-medium"
+                    : "border-line bg-elev/60 text-ink hover:border-line-strong hover:bg-elev"
+                }`}
+              >
+                <div className="flex items-center justify-between w-full">
+                  <span className="text-xs font-medium truncate">{o.name.split(" / ")[0]}</span>
+                </div>
+                <span className="text-[10px] text-ink-mute truncate mt-0.5">{o.desc.split("、")[0]}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* 2. 创作模式切换: AI 自动规划 vs 自定义大纲 */}

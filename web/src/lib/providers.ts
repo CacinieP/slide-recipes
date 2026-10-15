@@ -4,6 +4,7 @@ export interface ProviderPreset {
   id: string;
   name: string;
   badge: string;
+  region: "cn" | "global";
   baseUrl: string;
   defaultModel: string;
   models: { id: string; name: string; desc?: string }[];
@@ -16,6 +17,7 @@ export const PROVIDER_PRESETS: ProviderPreset[] = [
     id: "modelbest",
     name: "ModelBest (面壁智能)",
     badge: "MiniCPM",
+    region: "cn",
     baseUrl: "https://api.modelbest.cn/v1",
     defaultModel: "MiniCPM-V-4.7-1B",
     models: [
@@ -28,6 +30,7 @@ export const PROVIDER_PRESETS: ProviderPreset[] = [
     id: "stepfun",
     name: "StepFun (阶跃星辰)",
     badge: "Step",
+    region: "cn",
     baseUrl: "https://api.stepfun.com/v1",
     defaultModel: "step-2-16k",
     models: [
@@ -42,6 +45,7 @@ export const PROVIDER_PRESETS: ProviderPreset[] = [
     id: "kimi",
     name: "Moonshot AI (Kimi)",
     badge: "Kimi",
+    region: "cn",
     baseUrl: "https://api.moonshot.cn/v1",
     defaultModel: "moonshot-v1-8k",
     models: [
@@ -56,6 +60,7 @@ export const PROVIDER_PRESETS: ProviderPreset[] = [
     id: "zhipu",
     name: "Zhipu AI (智谱清言)",
     badge: "GLM",
+    region: "cn",
     baseUrl: "https://open.bigmodel.cn/api/paas/v4",
     defaultModel: "glm-4-plus",
     models: [
@@ -70,6 +75,7 @@ export const PROVIDER_PRESETS: ProviderPreset[] = [
     id: "minimax",
     name: "MiniMax (稀宇科技)",
     badge: "abab",
+    region: "cn",
     baseUrl: "https://api.minimax.chat/v1",
     defaultModel: "abab6.5s-chat",
     models: [
@@ -83,6 +89,7 @@ export const PROVIDER_PRESETS: ProviderPreset[] = [
     id: "qwen",
     name: "Alibaba Cloud (通义千问 / 百炼)",
     badge: "Qwen",
+    region: "cn",
     baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1",
     defaultModel: "qwen-max",
     models: [
@@ -98,6 +105,7 @@ export const PROVIDER_PRESETS: ProviderPreset[] = [
     id: "openai",
     name: "OpenAI / 兼容中转",
     badge: "GPT",
+    region: "global",
     baseUrl: "https://api.openai.com/v1",
     defaultModel: "gpt-4o",
     models: [
@@ -111,6 +119,7 @@ export const PROVIDER_PRESETS: ProviderPreset[] = [
     id: "custom",
     name: "Custom (自定义 Endpoint)",
     badge: "Self-Host",
+    region: "global",
     baseUrl: "",
     defaultModel: "",
     models: [],

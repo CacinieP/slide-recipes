@@ -28,7 +28,9 @@ export type SlideType =
   | "milestoneTimeline"
   | "featureGrid"
   | "statCallout"
-  | "architectureStack";
+  | "architectureStack"
+  | "marketSize"
+  | "faq";
 
 /**
  * The theme object contract — MANDATORY shape.
@@ -97,6 +99,8 @@ export interface SlidePlan {
   takeaway?: string;
   details?: string[];
   layers?: Array<{ name: string; items: string[]; note?: string }>;
+  tiers?: Array<{ name: string; value: string; desc?: string; body?: string }>;
+  questions?: Array<{ question: string; answer: string }>;
 }
 
 /** Structured AI image generation prompt schema. */
@@ -171,6 +175,36 @@ export interface GenerateOptions {
   includeChart: boolean;
   modelConfig?: ModelConfig;
   customOutlineJson?: string;
+  occasion?: OccasionId;
+}
+
+export type OccasionId =
+  | "01-business-report"
+  | "02-pitch-deck"
+  | "03-academic-defense"
+  | "04-education-course"
+  | "05-product-launch"
+  | "06-creative-portfolio"
+  | "07-annual-review"
+  | "08-minimal-swiss"
+  | "09-event-wedding"
+  | "10-tech-dark"
+  | "11-consulting"
+  | "12-marketing-plan"
+  | "13-training-hr"
+  | "14-medical-healthcare"
+  | "15-kids-playful";
+
+export interface OccasionPreset {
+  id: OccasionId;
+  name: string;
+  badge: string;
+  desc: string;
+  recommendedPalette: string;
+  recommendedStyle: StyleRecipe;
+  recommendedFont: FontPairId;
+  recommendedTone: string;
+  sampleTopic: string;
 }
 
 export type InputMode = "topic" | "text" | "json";

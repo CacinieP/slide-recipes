@@ -316,6 +316,26 @@ export async function renderDeckToPptx(deck, { pres: customPres, PptxGenJS: Cust
         });
         break;
 
+      case 'marketSize':
+        r.marketSize({
+          title: slide.title,
+          tiers: slide.tiers,
+          note: slide.note || '',
+          kicker: slide.kicker || 'MARKET OPPORTUNITY',
+          page: pageNum,
+        });
+        break;
+
+      case 'faq':
+        r.faq({
+          title: slide.title,
+          questions: slide.questions,
+          note: slide.note || '',
+          kicker: slide.kicker || 'Q & A',
+          page: pageNum,
+        });
+        break;
+
       case 'content':
       default:
         renderContent(payload, pageNum);

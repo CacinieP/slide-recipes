@@ -137,6 +137,16 @@ function renderSlide(pres: AnyPptx, slide: SlidePlan, idx: number, ctx: RenderCt
       addBadge(pres, s, pageNum, ctx);
       break;
 
+    case "marketSize":
+      renderMarketSize(pres, s, slide, ctx);
+      addBadge(pres, s, pageNum, ctx);
+      break;
+
+    case "faq":
+      renderFaq(pres, s, slide, ctx);
+      addBadge(pres, s, pageNum, ctx);
+      break;
+
     case "closing":
     case "summary":
       renderClosing(pres, s, slide, ctx);
@@ -807,6 +817,68 @@ function renderArchitectureStack(pres: AnyPptx, s: AnyPptx, slide: SlidePlan, ct
     });
   });
 
+  renderSource(s, slide.note || slide.source, ctx);
+}
+
+function renderMarketSize(pres: AnyPptx, s: AnyPptx, slide: SlidePlan, ctx: RenderCtx): void {
+  const { theme, fonts, style } = ctx;
+  renderHeader(pres, s, "MARKET OPPORTUNITY", slide.title, ctx);
+  const tiers = slide.tiers || [
+    { name: "TAM 全球潜在市场", value: "$45B", desc: "总潜在市场空间" },
+    { name: "SAM 可服务市场", value: "$12B", desc: "可服务核心市场份额" },
+    { name: "SOM 目标可渗透市场", value: "$2.5B", desc: "前三年可直接渗透份额" },
+  ];
+  const w = 8.9 / tiers.length;
+  tiers.forEach((tier, i) => {
+    const x = 0.55 + i * w;
+    s.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+      x, y: 1.88, w: w - 0.25, h: 2.7,
+      fill: { color: i === 0 ? theme.bg : "FFFFFF" },
+      line: { color: i === 0 ? theme.accent : theme.secondary, width: 1 },
+      rectRadius: style.radiusMd,
+    });
+    s.addText(tier.name, {
+      x: x + 0.15, y: 2.05, w: w - 0.55, h: 0.35,
+      fontSize: 15, fontFace: fonts.header, color: theme.secondary, bold: true,
+    });
+    s.addText(tier.value, {
+      x: x + 0.15, y: 2.5, w: w - 0.55, h: 0.8,
+      fontSize: 32, fontFace: fonts.header, color: theme.accent, bold: true,
+    });
+    s.addText(tier.desc || tier.body || "", {
+      x: x + 0.15, y: 3.4, w: w - 0.55, h: 1.0,
+      fontSize: 12, fontFace: fonts.body, color: theme.primary,
+    });
+  });
+  renderSource(s, slide.note || slide.source, ctx);
+}
+
+function renderFaq(pres: AnyPptx, s: AnyPptx, slide: SlidePlan, ctx: RenderCtx): void {
+  const { theme, fonts, style } = ctx;
+  renderHeader(pres, s, "FREQUENTLY ASKED QUESTIONS", slide.title, ctx);
+  const qs = slide.questions || [];
+  const h = 2.6 / Math.max(qs.length, 1);
+  qs.forEach((q, i) => {
+    const y = 1.88 + i * (h + 0.08);
+    s.addShape(pres.shapes.ROUNDED_RECTANGLE, {
+      x: 0.55, y, w: 8.9, h,
+      fill: { color: "FFFFFF" },
+      line: { color: theme.secondary, width: 0.5 },
+      rectRadius: style.radiusSm,
+    });
+    s.addShape(pres.shapes.RECTANGLE, {
+      x: 0.55, y, w: 0.08, h,
+      fill: { color: theme.accent },
+    });
+    s.addText(`Q: ${q.question}`, {
+      x: 0.75, y: y + 0.08, w: 8.5, h: 0.3,
+      fontSize: 14, fontFace: fonts.header, color: theme.primary, bold: true,
+    });
+    s.addText(`A: ${q.answer}`, {
+      x: 0.75, y: y + 0.38, w: 8.5, h: h - 0.44,
+      fontSize: 12, fontFace: fonts.body, color: theme.secondary,
+    });
+  });
   renderSource(s, slide.note || slide.source, ctx);
 }
 

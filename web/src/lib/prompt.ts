@@ -72,14 +72,19 @@ export function buildPrompt(opts: GenerateOptions, model?: string): { system: st
     "16. featureGrid: { title, features: [{ title: string, desc?: string, badge?: string }][4..6], note?: string } — 2x2 or 3x2 capability card grid.",
     "17. statCallout: { title, stat: string, label: string, takeaway: string, details?: string[], note?: string } — Giant statistic with executive takeaway.",
     "18. architectureStack: { title, layers: [{ name: string, items: string[] }][3..4], note?: string } — System or business tiered architecture.",
-    "19. closing: { title, action: string, contact?: string } — Call-to-action closing.",
+    "19. marketSize: { title, tiers: [{ name: string, value: string, desc: string }][2..3], note?: string } — TAM / SAM / SOM market size.",
+    "20. faq: { title, questions: [{ question: string, answer: string }][2..4], note?: string } — Key questions and answers.",
+    "21. closing: { title, action: string, contact?: string } — Call-to-action closing.",
     "",
     "STRUCTURAL REQUIREMENTS:",
     `- Total slides: exactly ${count}.`,
     "- slides[0].type MUST be 'cover'.",
     "- slides[last].type MUST be 'closing'.",
     "- If count >= 6, slide 2 should be 'agenda' or 'executiveSummary'.",
-    "- Pick suitable rich business layouts (kpiDashboard, funnel, gantt, processFlow, comparison, swot, quadrant) whenever relevant to the topic instead of boring bullet lists.",
+    ...(opts.occasion ? [
+      `- OCCASION CONTEXT (${opts.occasion}): Prioritize relevant narrative structures (e.g. pitch decks should include marketSize/comparison/milestones; business reports should include kpiDashboard/gantt; tech decks should include architectureStack/statCallout).`
+    ] : []),
+    "- Pick suitable rich business layouts (kpiDashboard, funnel, gantt, processFlow, comparison, swot, quadrant, marketSize, faq) whenever relevant to the topic instead of boring bullet lists.",
     sourceText ? "- Use only facts and numbers supported by the source text; do not invent missing data." : "- NEVER use generic placeholder text; provide clear takeaways without inventing facts or numbers.",
     "- All text in the requested language; titles must state clear conclusions.",
   ].join("\n");
@@ -205,7 +210,8 @@ export function validatePlan(raw: unknown, count: number): {
     "executiveSummary", "kpiDashboard", "funnel", "gantt", "processFlow",
     "quadrant", "swot", "team", "pricing", "testimonial", "metrics",
     "comparison", "caseStudy", "scope",
-    "milestoneTimeline", "featureGrid", "statCallout", "architectureStack"
+    "milestoneTimeline", "featureGrid", "statCallout", "architectureStack",
+    "marketSize", "faq"
   ]);
 
   const slides: SlidePlan[] = slidesRaw

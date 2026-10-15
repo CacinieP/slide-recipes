@@ -47,6 +47,8 @@ export const SLIDE_TYPES = [
   'pricing',
   'team',
   'testimonial',
+  'marketSize',
+  'faq',
 ];
 
 function isNonEmptyString(v) {
@@ -250,15 +252,40 @@ export function validateSlide(slide, index = 0) {
       break;
 
     case 'comparison':
-      if (!Array.isArray(slide.columns) || slide.columns.length !== 2) {
-        errors.push(`${prefix} comparison 需要正好 2 个对比方案 columns`);
+      if (!Array.isArray(slide.columns) || slide.columns.length < 2 || slide.columns.length > 3) {
+        errors.push(`${prefix} comparison 需要 2–3 个对比方案 columns`);
       }
       if (!Array.isArray(slide.rows) || slide.rows.length < 2 || slide.rows.length > 4) {
         errors.push(`${prefix} comparison 需要 2–4 行对比维度 rows`);
-      } else {
+      } else if (Array.isArray(slide.columns)) {
+        const colCount = slide.columns.length;
         slide.rows.forEach((row, i) => {
-          if (!Array.isArray(row?.values) || row.values.length !== 2) {
-            errors.push(`${prefix} row[${i}] 需要对应 2 列的值 values`);
+          if (!Array.isArray(row?.values) || row.values.length !== colCount) {
+            errors.push(`${prefix} row[${i}] 需要对应 ${colCount} 列的值 values`);
+          }
+        });
+      }
+      break;
+
+    case 'marketSize':
+      if (!Array.isArray(slide.tiers) || slide.tiers.length < 2 || slide.tiers.length > 3) {
+        errors.push(`${prefix} marketSize 需要 2–3 个 tiers 层级 (如 TAM, SAM, SOM)`);
+      } else {
+        slide.tiers.forEach((tier, i) => {
+          if (!isNonEmptyString(tier?.name) || !isNonEmptyString(tier?.value)) {
+            errors.push(`${prefix} tier[${i}] 需要 name 与 value`);
+          }
+        });
+      }
+      break;
+
+    case 'faq':
+      if (!Array.isArray(slide.questions) || slide.questions.length < 2 || slide.questions.length > 4) {
+        errors.push(`${prefix} faq 需要 2–4 个 questions 问答项`);
+      } else {
+        slide.questions.forEach((q, i) => {
+          if (!isNonEmptyString(q?.question) || !isNonEmptyString(q?.answer)) {
+            errors.push(`${prefix} question[${i}] 需要 question 与 answer`);
           }
         });
       }

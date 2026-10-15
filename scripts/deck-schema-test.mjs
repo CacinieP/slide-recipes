@@ -10,7 +10,7 @@ import { parseSlide } from '../skills/slide-recipes/lib/pptx-shapes.js';
 console.log('Testing deck-schema.js & deck-renderer.js...');
 
 // 1. 基本常数检查
-assert.equal(SLIDE_TYPES.length, 23);
+assert.equal(SLIDE_TYPES.length, 25);
 assert.ok(SLIDE_TYPES.includes('kpiDashboard'));
 assert.ok(SLIDE_TYPES.includes('funnel'));
 assert.ok(SLIDE_TYPES.includes('gantt'));
@@ -19,6 +19,8 @@ assert.ok(SLIDE_TYPES.includes('milestoneTimeline'));
 assert.ok(SLIDE_TYPES.includes('featureGrid'));
 assert.ok(SLIDE_TYPES.includes('statCallout'));
 assert.ok(SLIDE_TYPES.includes('architectureStack'));
+assert.ok(SLIDE_TYPES.includes('marketSize'));
+assert.ok(SLIDE_TYPES.includes('faq'));
 assert.equal(SUPPORTED_RECIPE_IDS.length, 11);
 assert.ok(SUPPORTED_RECIPE_IDS.includes('investor-signal'));
 assert.ok(SUPPORTED_RECIPE_IDS.includes('consulting-dense'));
@@ -182,6 +184,25 @@ const sampleDeck = {
       note: '系统全景图',
     },
     {
+      type: 'marketSize',
+      title: '潜在市场空间测算',
+      tiers: [
+        { name: 'TAM 全球潜在市场', value: '$45B', desc: '全球企业级演示文稿与自动化设计市场总额' },
+        { name: 'SAM 可服务市场', value: '$12B', desc: '中大型企业智能办公与统一品牌视觉生成' },
+        { name: 'SOM 目标渗透市场', value: '$2.5B', desc: '前三年亚太及出海业务可直接触达份额' },
+      ],
+      note: '数据源: Gartner 2026 企业软件分析',
+    },
+    {
+      type: 'faq',
+      title: '常见疑问与回答',
+      questions: [
+        { question: '导出的 PPTX 是否支持二次编辑？', answer: '100% 原生矢量形状与文本框，所有图表与文字均可自由修改。' },
+        { question: '如何保证在跨平台投影时不乱码？', answer: '使用系统内置的标准 CJK 安全字体阶梯，并经自动化渲染门禁核验。' },
+      ],
+      note: '更多细节请查阅技术白皮书',
+    },
+    {
       type: 'content',
       title: '核心设计原则',
       lead: '设计服务于信息传达，而非无意义的视觉装饰',
@@ -216,7 +237,7 @@ try {
 
   const zip = readZip(await readFile(outPath));
   const slideFiles = [...zip.keys()].filter(p => /^ppt\/slides\/slide\d+\.xml$/.test(p));
-  assert.equal(slideFiles.length, 16, '生成的 PPTX 应包含全部 16 页');
+  assert.equal(slideFiles.length, 18, '生成的 PPTX 应包含全部 18 页');
 
   for (const file of slideFiles) {
     const parsed = parseSlide(Buffer.from(zip.get(file)).toString());
@@ -227,7 +248,7 @@ try {
     }
   }
 
-  console.log(`✅ deck-renderer end-to-end test PASS: 16 native slides rendered and verified cleanly`);
+  console.log(`✅ deck-renderer end-to-end test PASS: 18 native slides rendered and verified cleanly`);
 } finally {
   await rm(tmpDir, { recursive: true, force: true });
 }

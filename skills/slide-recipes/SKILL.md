@@ -41,8 +41,9 @@ description: >-
 ## 安装后入口与 recipe 扩展
 
 - 配图、自定义 endpoint、模型 ID、Codex 原生生图路由：先读 [references/image-providers.md](references/image-providers.md)。API 配置以该文档为准。
+- 场合与场景匹配（融资路演、学术答辩、经营汇报、产品发布、极简瑞士等 15 大类场景）：先读 [references/occasions-guide.md](references/occasions-guide.md)。
 - 选版式：先读 [references/recipe-catalog.md](references/recipe-catalog.md)，九套 recipe 覆盖短简报与完整商业提案。商业提案先读 [commercial-recipes.md](references/commercial-recipes.md)，参考研究见 [design-research.md](references/design-research.md)。
-- 常见商业元素（KPI、漏斗、甘特、SWOT、团队、报价等）与语义配色见 [business-elements.md](references/business-elements.md)。
+- 常见商业元素（KPI、漏斗、甘特、SWOT、团队、报价、市场空间 TAM/SAM、FAQ 等 25 类）与语义配色见 [business-elements.md](references/business-elements.md)。
 - 审美决策读 [references/aesthetic-rules.md](references/aesthetic-rules.md)。页脚、条纹、下划线按 recipe 选择，不要求每页叠满；演讲正文优先 16–20pt。
 - 所有安装后命令使用 `$SKILL_DIR/scripts/`，不依赖仓库根目录；生图 CLI 为 `node "$SKILL_DIR/scripts/generate-image.mjs" request.json`。
 

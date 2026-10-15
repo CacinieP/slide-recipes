@@ -149,15 +149,19 @@ export function createCommercialRecipe(pres, id, { fontFace = 'Microsoft YaHei',
       text(s, source, 3.7, 4.66, 5.7, .22, 9, t.muted); return s;
     },
     comparison({ title, columns, rows, verdict = '', page }) {
-      count(columns, 2, 2, 'Comparison columns'); count(rows, 2, 4, 'Comparison rows');
+      count(columns, 2, 3, 'Comparison columns'); count(rows, 2, 4, 'Comparison rows');
       const s = base({ title, kicker: 'DECISION', page });
+      const numCols = columns.length;
+      const colWidth = 6.1 / numCols;
       rect(s, 3.35, 1.82, 6.1, .48, t.ink);
-      columns.forEach((c,i) => text(s, c, 3.52 + i * 3.04, 1.87, 2.7, .3, 14, t.light, true));
+      columns.forEach((c,i) => text(s, c, 3.35 + i * colWidth + .15, 1.87, colWidth - .3, .3, 14, t.light, true));
       rows.forEach((r,i) => {
         const y = 2.47 + i * .49;
-        if (!Array.isArray(r.values) || r.values.length !== 2) throw new Error('Each comparison row needs two values');
+        if (!Array.isArray(r.values) || r.values.length !== numCols) {
+          throw new Error(numCols === 2 ? 'Each comparison row needs two values' : `Each comparison row needs ${numCols} values`);
+        }
         text(s, r.label, .55, y, 2.5, .33, 13, t.muted);
-        r.values.forEach((v,j) => text(s, v, 3.52 + j * 3.04, y, 2.7, .33, 14, t.ink, j === 1));
+        r.values.forEach((v,j) => text(s, v, 3.35 + j * colWidth + .15, y, colWidth - .3, .33, 14, t.ink, j === numCols - 1));
         rule(s, .55, y + .41, 8.9);
       });
       text(s, verdict, .55, 4.64, 8.9, .29, 12, t.accent, true); return s;

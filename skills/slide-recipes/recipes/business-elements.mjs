@@ -188,5 +188,32 @@ export function createBusinessElements({ pres, t, base, text, rect, rule, image,
       });
       source(s, note); return s;
     },
+    marketSize({ title, tiers, note = '', kicker = 'MARKET OPPORTUNITY', page }) {
+      count(tiers, 2, 3, 'Market tiers');
+      const s = base({ title, kicker, page });
+      const w = 8.9 / tiers.length;
+      tiers.forEach((tier, i) => {
+        const x = .55 + i * w;
+        rect(s, x, 1.88, w - .25, 2.7, t.paper, { line: { color: t.line, width: .8 } });
+        rule(s, x, 1.88, w - .25, i === 0 ? t.accent : t.line);
+        text(s, tier.name, x + .15, 2.05, w - .55, .35, 15, t.muted, true);
+        text(s, tier.value, x + .15, 2.5, w - .55, .8, 32, t.accent, true);
+        text(s, tier.desc || tier.body || '', x + .15, 3.4, w - .55, 1.0, 12, t.ink);
+      });
+      source(s, note); return s;
+    },
+    faq({ title, questions, note = '', kicker = 'Q & A', page }) {
+      count(questions, 2, 4, 'FAQ questions');
+      const s = base({ title, kicker, page });
+      const h = 2.6 / questions.length;
+      questions.forEach((q, i) => {
+        const y = 1.88 + i * (h + .06);
+        rect(s, .55, y, 8.9, h, t.paper, { line: { color: t.line, width: .6 } });
+        rule(s, .55, y, .08, t.accent);
+        text(s, `Q: ${q.question}`, .75, y + .08, 8.5, .3, 14, t.ink, true);
+        text(s, `A: ${q.answer}`, .75, y + .4, 8.5, h - .48, 12, t.muted);
+      });
+      source(s, note); return s;
+    },
   };
 }
