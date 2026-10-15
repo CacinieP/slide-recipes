@@ -326,6 +326,7 @@ export default function Home() {
         <section className="flex min-h-[60vh] flex-col gap-4">
           {plan && (
             <OutlineEditor plan={plan} isLoading={isLoading} dirty={!result}
+              targetCount={slideCount}
               onChange={handlePlanChange} onExport={handleExportEdited} />
           )}
           {result && (

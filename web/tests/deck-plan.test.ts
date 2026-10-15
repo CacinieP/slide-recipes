@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { requestLlmPlan } from "../src/lib/client-generator";
-import { buildPrompt, normalizeModelPlan, parseModelResponse, validatePlan } from "../src/lib/prompt";
+import { buildPrompt, normalizeModelPlan, parseModelResponse, validatePlan, healModelPlan, trimDeckPlan } from "../src/lib/prompt";
 import type { DeckPlan, GenerateOptions } from "../src/lib/types";
 
 const options: GenerateOptions = {
@@ -61,7 +61,7 @@ test("other models and unspecified models retain the full design-system prompt",
     assert.match(system, /SUPPORTED SLIDE TYPES/);
     assert.match(system, /kpiDashboard/);
     assert.match(system, /architectureStack/);
-    assert.match(system, /Total slides: exactly 6/);
+    assert.match(system, /Target length: approximately 6 slides/);
     assert.match(system, /slides\[last\]\.type MUST be 'closing'/);
   }
 });
@@ -76,16 +76,23 @@ for (const count of [3, 6]) {
   });
 }
 
-for (const actualCount of [5, 7]) {
-  test(`validatePlan rejects ${actualCount} pages when six were requested`, () => {
+for (const actualCount of [5, 7, 24]) {
+  test(`validatePlan flexibly accepts ${actualCount} pages when six were requested (approximate count)`, () => {
     const raw = validPlan(actualCount);
     const snapshot = structuredClone(raw);
     const { plan, error } = validatePlan(raw, 6);
-    assert.equal(plan, null);
-    assert.match(error || "", new RegExp(`要求 6 页，实际 ${actualCount} 页`));
+    assert.equal(error, undefined);
+    assert.equal(plan?.slides.length, actualCount);
     assert.deepEqual(raw, snapshot);
   });
 }
+
+test("validatePlan rejects when fewer than 2 slides are provided", () => {
+  const raw = { title: "单页文稿", slides: [{ type: "cover", title: "单页封面" }] };
+  const { plan, error } = validatePlan(raw, 6);
+  assert.equal(plan, null);
+  assert.match(error || "", /大纲页面数量过少/);
+});
 
 test("validatePlan rejects the observed seven-page 1B output instead of trimming it", () => {
   const raw = {
@@ -263,3 +270,55 @@ test("the client repairs the observed double-closing-brace 1B response locally w
   assert.equal(result.slides[1].body, raw.page_2_body);
   assert.deepEqual(calls, ["/api/proxy"]);
 });
+
+test("healModelPlan gracefully recovers 24 slides when 20 were requested", () => {
+  const raw = validPlan(24);
+  const healed = healModelPlan(raw, 20);
+  assert.ok(healed);
+  assert.equal(healed.slides.length, 24);
+  assert.equal(healed.slides[0].type, "cover");
+  assert.equal(healed.slides.at(-1)?.type, "closing");
+});
+
+test("healModelPlan corrects missing cover opening and missing closing tail", () => {
+  const raw = {
+    title: "自愈测试演示",
+    slides: [
+      { type: "content", title: "第一页本应为封面", body: "导言内容" },
+      { type: "kpiDashboard", title: "核心指标", items: [{ label: "ARR", value: "10M" }] },
+      { type: "content", title: "最后一页本应为结语", body: "后续行动" },
+    ],
+  };
+  const healed = healModelPlan(raw, 3);
+  assert.ok(healed);
+  assert.equal(healed.slides[0].type, "cover");
+  assert.equal(healed.slides[2].type, "closing");
+});
+
+test("trimDeckPlan trims 24 slides to 20 slides while preserving cover and closing", () => {
+  const raw = validPlan(24);
+  const trimmed = trimDeckPlan(raw, 20);
+  assert.equal(trimmed.slides.length, 20);
+  assert.equal(trimmed.slides[0].type, "cover");
+  assert.equal(trimmed.slides[19].type, "closing");
+  assert.equal(trimmed.slides[0].title, raw.slides[0].title);
+  assert.equal(trimmed.slides[19].title, raw.slides[23].title);
+});
+
+test("requestLlmPlan recovers and returns full deck when generic model outputs 24 slides for 20 requested", async (t) => {
+  const raw = validPlan(24);
+  t.mock.method(globalThis, "fetch", async () => {
+    return Response.json({ choices: [{ message: { content: JSON.stringify(raw) } }] });
+  });
+
+  const result = await requestLlmPlan({ ...options, slideCount: 20 }, {
+    baseUrl: "https://api.openai.com/v1",
+    model: "gpt-4o",
+    apiKey: "test-openai-key",
+  });
+
+  assert.equal(result.slides.length, 24);
+  assert.equal(result.slides[0].type, "cover");
+  assert.equal(result.slides[23].type, "closing");
+});
+

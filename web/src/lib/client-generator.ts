@@ -1,4 +1,4 @@
-import { buildPrompt, clampSlideCount, normalizeModelPlan, parseModelResponse } from "./prompt";
+import { buildPrompt, clampSlideCount, normalizeModelPlan, parseModelResponse, healModelPlan } from "./prompt";
 import { resolveTheme, resolveFontPair, resolveStyleMetrics } from "./palettes";
 import { renderPptx } from "./render";
 import type { DeckPlan, GenerateOptions, ModelConfig, Theme } from "./types";
@@ -119,7 +119,17 @@ export async function requestLlmPlan(
   }
 
   const planJson = parseModelResponse(content, model);
-  const { plan, error } = normalizeModelPlan(planJson, count, model);
+  let { plan, error } = normalizeModelPlan(planJson, count, model);
+
+  // 通用模型大纲自愈：若因模型输出页数与要求微偏（如要求 20 页实际返回 24 页）或非致命格式偏差未通过严格校验，自动启动容错修复
+  if (!plan && model !== "MiniCPM-V-4.7-1B") {
+    const healed = healModelPlan(planJson, count);
+    if (healed && healed.slides.length >= 2) {
+      plan = healed;
+      error = undefined;
+    }
+  }
+
   if (!plan) {
     throw new Error(error || "生成的大纲格式无效。");
   }

@@ -2,6 +2,7 @@
 
 import type { DeckPlan, SlidePlan } from "@/lib/types";
 import { OUTLINE_FIELD_LABELS } from "@/lib/outline-markdown";
+import { trimDeckPlan } from "@/lib/prompt";
 
 const inputClass = "w-full rounded-md border border-line bg-canvas px-3 py-2 text-sm text-ink focus:border-gold focus:outline-none";
 const buttonClass = "rounded border border-line px-2 py-1 text-xs text-ink-dim hover:border-gold disabled:opacity-40";
@@ -52,8 +53,8 @@ function ValueEditor({ value, label, onChange }: { value: unknown; label: string
   );
 }
 
-export default function OutlineEditor({ plan, isLoading, dirty, onChange, onExport }: {
-  plan: DeckPlan; isLoading: boolean; dirty: boolean;
+export default function OutlineEditor({ plan, isLoading, dirty, targetCount, onChange, onExport }: {
+  plan: DeckPlan; isLoading: boolean; dirty: boolean; targetCount?: number;
   onChange: (plan: DeckPlan) => void; onExport: () => void;
 }) {
   const updateSlide = (index: number, next: SlidePlan) => onChange({ ...plan, slides: plan.slides.map((slide, i) => i === index ? next : slide) });
@@ -65,12 +66,36 @@ export default function OutlineEditor({ plan, isLoading, dirty, onChange, onExpo
   return (
     <section className="rounded-lg border border-line bg-elev p-4">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-        <h2 className="text-sm font-medium text-ink">编辑大纲</h2>
+        <div className="flex items-center gap-2">
+          <h2 className="text-sm font-medium text-ink">编辑大纲</h2>
+          <span className="rounded bg-canvas px-1.5 py-0.5 text-xs font-mono text-ink-dim border border-line">
+            共 {plan.slides.length} 页
+          </span>
+        </div>
         <button type="button" disabled={isLoading} onClick={onExport}
           className="rounded-md bg-gold px-3 py-2 text-xs font-semibold text-canvas disabled:opacity-40">
           {isLoading ? "正在导出…" : "按当前大纲导出 PPTX + MD"}
         </button>
       </div>
+
+      {targetCount && plan.slides.length !== targetCount && (
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-md bg-amber-500/10 border border-amber-500/25 px-3 py-2 text-xs text-ink">
+          <span>
+            💡 模型完整生成了 <b>{plan.slides.length}</b> 页（原设定 {targetCount} 页），所有内容已完整保留。
+          </span>
+          {plan.slides.length > targetCount && (
+            <button
+              type="button"
+              onClick={() => onChange(trimDeckPlan(plan, targetCount))}
+              className="rounded bg-gold/20 hover:bg-gold/30 text-gold px-2 py-0.5 font-medium border border-gold/40 transition"
+              title="保留首页封面与尾页结语，精简为原设定页数"
+            >
+              一键精简为 {targetCount} 页
+            </button>
+          )}
+        </div>
+      )}
+
       <p className="mb-4 text-xs text-ink-mute">可修改标题、正文和数据，增删或调整页面顺序。修改后请重新导出，PPTX 与 Markdown 会同步更新；不再调用 AI。{dirty ? " 当前修改尚未导出。" : ""}</p>
       <fieldset disabled={isLoading} className="space-y-4">
         <label className="block space-y-1"><span className="text-xs text-ink-dim">演示文稿标题</span>
@@ -96,7 +121,7 @@ export default function OutlineEditor({ plan, isLoading, dirty, onChange, onExpo
             ))}
           </section>
         ))}
-        <button type="button" className={buttonClass} disabled={plan.slides.length >= 20} onClick={() => {
+        <button type="button" className={buttonClass} disabled={plan.slides.length >= 35} onClick={() => {
           const slides = [...plan.slides];
           slides.splice(slides.at(-1)?.type === "closing" ? slides.length - 1 : slides.length, 0,
             { type: "content", title: "新增页面", body: "请填写正文。" });

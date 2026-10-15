@@ -516,14 +516,16 @@ export default function ConfigPanel(props: Props) {
           </div>
 
           <div className="grid grid-cols-3 gap-3">
-            <Field label="SLIDES / 页数">
+            <Field label="SLIDES / 大致页数 (预估篇幅)">
               <input
                 type="number"
                 min={3}
-                max={20}
+                max={30}
                 className={inputCls}
                 value={props.slideCount}
-                onChange={(e) => set({ slideCount: Number(e.target.value) })}
+                onChange={(e) => set({ slideCount: Math.max(3, Math.min(30, Number(e.target.value) || 8)) })}
+                placeholder="约 8 页"
+                title="设定大致目标页数（AI 会围绕主题自适应组织 3~30 页，不再做生硬的严格校验）"
               />
             </Field>
             <Field label="LANGUAGE / 语言">

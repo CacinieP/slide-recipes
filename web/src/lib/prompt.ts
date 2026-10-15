@@ -77,10 +77,10 @@ export function buildPrompt(opts: GenerateOptions, model?: string): { system: st
     "21. closing: { title, action: string, contact?: string } — Call-to-action closing.",
     "",
     "STRUCTURAL REQUIREMENTS:",
-    `- Total slides: exactly ${count}.`,
+    `- Target length: approximately ${count} slides (aim for ~${count} slides to cover the topic thoroughly; content depth and narrative coherence take precedence over exact count).`,
     "- slides[0].type MUST be 'cover'.",
     "- slides[last].type MUST be 'closing'.",
-    "- If count >= 6, slide 2 should be 'agenda' or 'executiveSummary'.",
+    "- If slide count >= 6, slide 2 should be 'agenda' or 'executiveSummary'.",
     ...(opts.occasion ? [
       `- OCCASION CONTEXT (${opts.occasion}): Prioritize relevant narrative structures (e.g. pitch decks should include marketSize/comparison/milestones; business reports should include kpiDashboard/gantt; tech decks should include architectureStack/statCallout).`
     ] : []),
@@ -184,8 +184,9 @@ export function normalizeModelPlan(raw: unknown, count: number, model?: string):
 
 /**
  * Validate + normalize a raw parsed LLM JSON object into a DeckPlan.
+ * 移除了严格页数相等校验，改为大致篇幅，支持自适应页数容差。
  */
-export function validatePlan(raw: unknown, count: number): {
+export function validatePlan(raw: unknown, count?: number): {
   plan: DeckPlan | null;
   error?: string;
 } {
@@ -194,8 +195,8 @@ export function validatePlan(raw: unknown, count: number): {
   const title = typeof obj.title === "string" ? obj.title : "Untitled";
   const slidesRaw = Array.isArray(obj.slides) ? obj.slides : null;
   if (!slidesRaw) return { plan: null, error: "Missing 'slides' array." };
-  if (slidesRaw.length !== count) {
-    return { plan: null, error: `模型返回页数不符：要求 ${count} 页，实际 ${slidesRaw.length} 页。` };
+  if (slidesRaw.length < 2) {
+    return { plan: null, error: "大纲页面数量过少（至少需要封面与结语 2 页）。" };
   }
   if (!slidesRaw[0] || typeof slidesRaw[0] !== "object" || slidesRaw[0].type !== "cover") {
     return { plan: null, error: "模型大纲的第一页必须是 cover。" };
@@ -232,10 +233,93 @@ export function validatePlan(raw: unknown, count: number): {
     })
     .filter((s) => s.title || (s.bullets && s.bullets.length > 0) || s.decision);
 
-  if (slides.length === 0) return { plan: null, error: "No usable slides in plan." };
-  if (slides.length !== count) {
-    return { plan: null, error: `模型大纲包含无效页面：要求 ${count} 页可用内容，实际 ${slides.length} 页。` };
+  if (slides.length < 2) return { plan: null, error: "No usable slides in plan." };
+  if (slides.length !== slidesRaw.length) {
+    return { plan: null, error: `模型大纲包含无效页面：传入 ${slidesRaw.length} 页，其中存在无有效标题或内容的页面。` };
   }
 
   return { plan: { title, slides } };
 }
+
+/**
+ * 容错自愈器：当通用模型大纲因页数偏差（如要求 20 页实际返回 24 页）或微小格式偏差而未通过严格校验时，
+ * 自动清洗各页数据、自动矫正 cover 首页和 closing 尾页，确保用户无需重试即可获得完整有效大纲。
+ */
+export function healModelPlan(raw: unknown, requestedCount?: number): DeckPlan | null {
+  if (!raw || typeof raw !== "object") return null;
+  const obj = raw as Record<string, unknown>;
+  const title = typeof obj.title === "string" && obj.title.trim() ? obj.title.trim() : "演示文稿";
+  const slidesRaw = Array.isArray(obj.slides) ? obj.slides : null;
+  if (!slidesRaw || slidesRaw.length === 0) return null;
+
+  const validTypes = new Set([
+    "cover", "toc", "section", "content", "summary", "agenda", "closing",
+    "executiveSummary", "kpiDashboard", "funnel", "gantt", "processFlow",
+    "quadrant", "swot", "team", "pricing", "testimonial", "metrics",
+    "comparison", "caseStudy", "scope",
+    "milestoneTimeline", "featureGrid", "statCallout", "architectureStack",
+    "marketSize", "faq"
+  ]);
+
+  const cleanSlides: SlidePlan[] = [];
+  for (let i = 0; i < slidesRaw.length; i++) {
+    const rawSlide = slidesRaw[i];
+    if (!rawSlide || typeof rawSlide !== "object") continue;
+    const s = rawSlide as Record<string, unknown>;
+    const typeStr = typeof s.type === "string" ? s.type : "content";
+    const type = (validTypes.has(typeStr) ? typeStr : "content") as SlideType;
+    const t = typeof s.title === "string" && s.title.trim() ? s.title.trim() : `第 ${cleanSlides.length + 1} 页`;
+    const bulletsList = Array.isArray(s.bullets) ? s.bullets : [];
+    const b = bulletsList
+      .filter((x: unknown): x is string => typeof x === "string")
+      .map((x: string) => x.trim())
+      .filter(Boolean);
+
+    cleanSlides.push({
+      ...s,
+      type,
+      title: t,
+      bullets: b.length > 0 ? b : undefined,
+    } as SlidePlan);
+  }
+
+  if (cleanSlides.length === 0) return null;
+
+  // 1. 保证第一页必须是 cover
+  if (cleanSlides[0].type !== "cover") {
+    cleanSlides[0] = {
+      ...cleanSlides[0],
+      type: "cover",
+    };
+  }
+
+  // 2. 保证最后一页必须是 closing
+  const lastIndex = cleanSlides.length - 1;
+  if (lastIndex > 0 && cleanSlides[lastIndex].type !== "closing") {
+    const lastObj = cleanSlides[lastIndex] as unknown as Record<string, unknown>;
+    cleanSlides[lastIndex] = {
+      ...cleanSlides[lastIndex],
+      type: "closing",
+      action: (typeof lastObj.action === "string" && lastObj.action) || cleanSlides[lastIndex].title || "推进落地执行",
+    };
+  }
+
+  return { title, slides: cleanSlides };
+}
+
+/**
+ * 将超出目标页数的大纲精简为指定页数（保留第 1 页 cover 与最后一页 closing，截取前序核心内页）
+ */
+export function trimDeckPlan(plan: DeckPlan, targetCount: number): DeckPlan {
+  if (plan.slides.length <= targetCount || targetCount < 3) return plan;
+  const cover = plan.slides[0];
+  const closing = plan.slides[plan.slides.length - 1];
+  const interior = plan.slides.slice(1, -1);
+  const neededInterior = targetCount - 2;
+  const trimmedInterior = interior.slice(0, neededInterior);
+  return {
+    ...plan,
+    slides: [cover, ...trimmedInterior, closing],
+  };
+}
+
