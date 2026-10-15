@@ -19,6 +19,162 @@ export const SUPPORTED_RECIPE_IDS = [
   'tech-keynote',
 ];
 
+export const SUPPORTED_OCCASIONS = [
+  '01-business-report',
+  '02-pitch-deck',
+  '03-academic-defense',
+  '04-education-course',
+  '05-product-launch',
+  '06-creative-portfolio',
+  '07-annual-summary',
+  '08-minimal-swiss',
+  '09-event-wedding',
+  '10-tech-dark',
+  '11-consulting',
+  '12-marketing-plan',
+  '13-hr-training',
+  '14-healthcare-medical',
+  '15-kids-playful',
+];
+
+export const OCCASION_PRESETS = [
+  {
+    id: '01-business-report',
+    name: '商业汇报 / 经营复盘',
+    badge: 'BUSINESS',
+    recipeId: 'editorial-proposal',
+    recommendedPalette: 'consulting-navy',
+    recommendedTone: '专业严谨、数据导向、清晰客观',
+    sampleTopic: '2026 第一季度业务经营复盘与关键指标汇报',
+  },
+  {
+    id: '02-pitch-deck',
+    name: '商业计划书 / 融资路演',
+    badge: 'PITCH',
+    recipeId: 'investor-signal',
+    recommendedPalette: 'indigo-saffron',
+    recommendedTone: '具有商业说服力、聚焦市场潜力与竞争壁垒、高昂感染力',
+    sampleTopic: '新一代智能协作办公平台种子轮商业计划书',
+  },
+  {
+    id: '03-academic-defense',
+    name: '学术答辩 / 科研结题',
+    badge: 'ACADEMIC',
+    recipeId: 'research-report',
+    recommendedPalette: 'cobalt-white',
+    recommendedTone: '学术严密、论断证据对应、逻辑自洽',
+    sampleTopic: '基于大语言模型的自适应代码生成优化方法研究',
+  },
+  {
+    id: '04-education-course',
+    name: '教学课件 / 知识培训',
+    badge: 'EDUCATION',
+    recipeId: 'roadmap-brief',
+    recommendedPalette: 'forest-sand',
+    recommendedTone: '深入浅出、启发式教学、生动清晰',
+    sampleTopic: '现代分布式系统架构核心原理与工程实战',
+  },
+  {
+    id: '05-product-launch',
+    name: '产品发布 / 功能推介',
+    badge: 'LAUNCH',
+    recipeId: 'dark-launch',
+    recommendedPalette: 'graphite-orange',
+    recommendedTone: '震撼有力、极速发布、突出核心技术突破与用户价值',
+    sampleTopic: '全新企业级云原生实时数据引擎 V3.0 发布会',
+  },
+  {
+    id: '06-creative-portfolio',
+    name: '设计作品集 / 创意提案',
+    badge: 'CREATIVE',
+    recipeId: 'magazine-story',
+    recommendedPalette: 'burgundy-cream',
+    recommendedTone: '富有美感、克制高级、注重视觉留白与艺术品味',
+    sampleTopic: '2026 建筑空间与品牌体验设计作品集精选',
+  },
+  {
+    id: '07-annual-summary',
+    name: '年终总结 / 表彰盛典',
+    badge: 'ANNUAL',
+    recipeId: 'editorial-proposal',
+    recommendedPalette: 'tokyo-cherry',
+    recommendedTone: '喜庆庄重、催人奋进、提振士气',
+    sampleTopic: '2026 年度企业发展总结表彰暨新年战略部署大会',
+  },
+  {
+    id: '08-minimal-swiss',
+    name: '极简瑞士 / 严谨排印',
+    badge: 'SWISS',
+    recipeId: 'editorial-grid',
+    recommendedPalette: 'navy-teal',
+    recommendedTone: '克制冷峻、极简精准、以排版为核心力量',
+    sampleTopic: '数字化转型顶层设计战略原则与规范指南',
+  },
+  {
+    id: '09-event-wedding',
+    name: '活动策划 / 典礼庆典',
+    badge: 'EVENT',
+    recipeId: 'magazine-story',
+    recommendedPalette: 'plum-celadon',
+    recommendedTone: '优雅温情、浪漫仪式感、详尽周密',
+    sampleTopic: '2026 春季国际艺术交流节开幕盛典全案策划',
+  },
+  {
+    id: '10-tech-dark',
+    name: '科技发布 / 暗黑极客',
+    badge: 'TECH',
+    recipeId: 'tech-keynote',
+    recommendedPalette: 'electric-violet',
+    recommendedTone: '极客硬核、极高信息密度、前沿科技感',
+    sampleTopic: '次世代高性能 AI 推理基础设施架构深度剖析',
+  },
+  {
+    id: '11-consulting',
+    name: '战略咨询 / 麦肯锡风',
+    badge: 'CONSULTING',
+    recipeId: 'consulting-dense',
+    recommendedPalette: 'consulting-navy',
+    recommendedTone: '高管决策视角、逻辑缜密、结构化推演',
+    sampleTopic: '某行业领军企业全球供应链韧性重塑战略咨询建议',
+  },
+  {
+    id: '12-marketing-plan',
+    name: '营销增长 / 推广方案',
+    badge: 'GROWTH',
+    recipeId: 'product-story',
+    recommendedPalette: 'terracotta-glacier',
+    recommendedTone: '目标清晰、打法敏捷、转化导向',
+    sampleTopic: '新消费品牌 Q2 整合营销全域获客与裂变增长全案',
+  },
+  {
+    id: '13-hr-training',
+    name: 'HR培训 / 企业文化',
+    badge: 'HR & CULTURE',
+    recipeId: 'roadmap-brief',
+    recommendedPalette: 'bamboo-teal',
+    recommendedTone: '温馨亲切、赋能成长、增强归属感',
+    sampleTopic: '2026 届新员工入职培训手册与组织文化指南',
+  },
+  {
+    id: '14-healthcare-medical',
+    name: '医疗健康 / 临床报告',
+    badge: 'HEALTHCARE',
+    recipeId: 'editorial-proposal',
+    recommendedPalette: 'alpine-cyan',
+    recommendedTone: '权威可信、严谨求实、以患者为中心',
+    sampleTopic: '创新靶向生物制药临床三期试验进展与疗效分析',
+  },
+  {
+    id: '15-kids-playful',
+    name: '童趣创意 / 亲子活动',
+    badge: 'PLAYFUL',
+    recipeId: 'studio-monochrome',
+    recommendedPalette: 'amber-coal',
+    recommendedTone: '童趣盎然、生动好玩、鼓舞激励',
+    sampleTopic: '奇妙科学探索营：少儿编程与机器人体验日',
+  },
+];
+
 export const SLIDE_TYPES = [
   // 基础架构页
   'cover',
@@ -383,6 +539,10 @@ export function validateDeckSchema(deck, { throwOnError = false } = {}) {
 
   if (deck.design?.recipeId && !SUPPORTED_RECIPE_IDS.includes(deck.design.recipeId)) {
     errors.push(`不支持的 recipeId "${deck.design.recipeId}"。支持的有: ${SUPPORTED_RECIPE_IDS.join(', ')}`);
+  }
+
+  if (deck.design?.occasion && !SUPPORTED_OCCASIONS.includes(deck.design.occasion)) {
+    errors.push(`不支持的 occasion "${deck.design.occasion}"。支持的有: ${SUPPORTED_OCCASIONS.join(', ')}`);
   }
 
   if (Array.isArray(deck.slides)) {

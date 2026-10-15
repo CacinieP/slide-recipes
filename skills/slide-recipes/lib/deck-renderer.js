@@ -5,7 +5,7 @@
  */
 
 import pptxgen from 'pptxgenjs';
-import { validateDeckSchema } from './deck-schema.js';
+import { validateDeckSchema, OCCASION_PRESETS } from './deck-schema.js';
 import { createCommercialRecipe, commercialRecipes } from '../recipes/recipe-commercial.mjs';
 
 /** Recipe ID 到商业底座的映射与推荐色板 */
@@ -36,11 +36,21 @@ export async function renderDeckToPptx(deck, { pres: customPres, PptxGenJS: Cust
   const PptxClass = CustomPptxClass || pptxgen;
   const pres = customPres || new PptxClass();
 
-  // 2. 解析设计系统与 Recipe
-  const recipeId = deck.design?.recipeId || 'editorial-proposal';
+  // 2. 解析设计系统与 Recipe（支持从 occasion 场合预设自动推导）
+  let recipeId = deck.design?.recipeId;
+  let paletteId = deck.design?.paletteId;
+  const occasionId = deck.design?.occasion;
+  if (occasionId) {
+    const occ = OCCASION_PRESETS.find(o => o.id === occasionId);
+    if (occ) {
+      if (!recipeId) recipeId = occ.recipeId;
+      if (!paletteId) paletteId = occ.recommendedPalette;
+    }
+  }
+  if (!recipeId) recipeId = 'editorial-proposal';
   const mapping = RECIPE_MAPPING[recipeId] || RECIPE_MAPPING['editorial-proposal'];
   const baseRecipeId = mapping.base;
-  const paletteId = deck.design?.paletteId || mapping.defaultPalette;
+  if (!paletteId) paletteId = mapping.defaultPalette;
   const fontFace = deck.design?.fontFace || 'Microsoft YaHei';
   const mode = deck.design?.mode || 'presentation';
   const deckTitle = deck.meta?.title || '';

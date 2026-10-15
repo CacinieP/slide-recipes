@@ -560,7 +560,7 @@ export default function ConfigPanel(props: Props) {
             />
           </Field>
           <div className="flex justify-between items-center text-[11px] text-ink-mute">
-            <span>支持 23 种原生版式（cover, kpiDashboard, funnel, gantt, architectureStack 等）</span>
+            <span>支持 25 种原生版式（cover, kpiDashboard, funnel, gantt, marketSize, faq 等）</span>
             <button
               type="button"
               onClick={() => {

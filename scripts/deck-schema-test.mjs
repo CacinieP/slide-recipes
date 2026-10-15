@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { validateDeckSchema, validateSlide, SLIDE_TYPES, SUPPORTED_RECIPE_IDS } from '../skills/slide-recipes/lib/deck-schema.js';
+import { validateDeckSchema, validateSlide, SLIDE_TYPES, SUPPORTED_RECIPE_IDS, SUPPORTED_OCCASIONS, OCCASION_PRESETS } from '../skills/slide-recipes/lib/deck-schema.js';
 import { renderDeckToPptx } from '../skills/slide-recipes/lib/deck-renderer.js';
 import { readZip } from '../skills/slide-recipes/lib/zip-reader.js';
 import { parseSlide } from '../skills/slide-recipes/lib/pptx-shapes.js';
@@ -25,6 +25,20 @@ assert.equal(SUPPORTED_RECIPE_IDS.length, 11);
 assert.ok(SUPPORTED_RECIPE_IDS.includes('investor-signal'));
 assert.ok(SUPPORTED_RECIPE_IDS.includes('consulting-dense'));
 assert.ok(SUPPORTED_RECIPE_IDS.includes('tech-keynote'));
+
+assert.equal(SUPPORTED_OCCASIONS.length, 15);
+assert.equal(OCCASION_PRESETS.length, 15);
+assert.ok(SUPPORTED_OCCASIONS.includes('01-business-report'));
+assert.ok(SUPPORTED_OCCASIONS.includes('11-consulting'));
+assert.ok(SUPPORTED_OCCASIONS.includes('15-kids-playful'));
+
+// 场合校验测试
+const invalidOccasionRes = validateDeckSchema({
+  design: { occasion: 'unknown-occasion' },
+  slides: [{ type: 'cover', title: '测试' }],
+});
+assert.equal(invalidOccasionRes.valid, false);
+assert.ok(invalidOccasionRes.errors[0].includes('不支持的 occasion'));
 
 // 2. 单 slide 校验成功案例
 const validKpi = {
