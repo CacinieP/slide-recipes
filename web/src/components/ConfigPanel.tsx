@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { FontPairId, ModelConfig, StyleRecipe, InputMode, OccasionId } from "@/lib/types";
+import type { FontPairId, ModelConfig, StyleRecipe, InputMode, OccasionId, Theme } from "@/lib/types";
 import { FONT_PAIRS, OCCASION_PRESETS } from "@/lib/palettes";
 import { PROVIDER_PRESETS } from "@/lib/providers";
 import { smartFetch, DEFAULT_REQUEST_MODE } from "@/lib/client-generator";
@@ -24,6 +24,7 @@ interface Props {
   inputMode: InputMode;
   sourceText: string;
   occasion?: OccasionId;
+  customTheme?: Theme;
   set: (patch: Partial<Props>) => void;
 }
 
@@ -435,6 +436,7 @@ export default function ConfigPanel(props: Props) {
                     occasion: o.id,
                     tone: o.recommendedTone,
                     paletteId: o.recommendedPalette,
+                    customTheme: undefined,
                     styleRecipe: o.recommendedStyle,
                     fontPair: o.recommendedFont,
                     topic: props.topic ? props.topic : o.sampleTopic,
@@ -606,8 +608,13 @@ export default function ConfigPanel(props: Props) {
         </div>
       )}
 
-      {/* 4. 28 套合规色板 */}
-      <PalettePicker value={props.paletteId} onChange={(paletteId) => set({ paletteId })} />
+      {/* 4. 28+18 套合规色板与色相系统 */}
+      <PalettePicker
+        value={props.paletteId}
+        customTheme={props.customTheme}
+        onChange={(paletteId) => set({ paletteId, customTheme: undefined })}
+        onCustomThemeChange={(customTheme) => set({ customTheme })}
+      />
 
       {/* 5. 风格配方 */}
       <Field label="STYLE RECIPE / 风格">

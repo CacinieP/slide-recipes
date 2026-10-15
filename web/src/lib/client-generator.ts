@@ -1,7 +1,7 @@
 import { buildPrompt, clampSlideCount, normalizeModelPlan, parseModelResponse } from "./prompt";
 import { resolveTheme, resolveFontPair, resolveStyleMetrics } from "./palettes";
 import { renderPptx } from "./render";
-import type { DeckPlan, GenerateOptions, ModelConfig } from "./types";
+import type { DeckPlan, GenerateOptions, ModelConfig, Theme } from "./types";
 
 const DEFAULT_BASE_URL = "https://api.modelbest.cn/v1";
 const DEFAULT_MODEL = "MiniCPM-V-4.7-1B";
@@ -134,12 +134,13 @@ export async function renderDeckPlanToBlob(
   plan: DeckPlan,
   opts: {
     paletteId: string;
+    customTheme?: Theme;
     fontPair: GenerateOptions["fontPair"];
     styleRecipe: GenerateOptions["styleRecipe"];
     language: "zh-CN" | "en-US";
   },
 ): Promise<GenerateDeckResult> {
-  const theme = resolveTheme(opts.paletteId);
+  const theme = opts.customTheme || resolveTheme(opts.paletteId);
   const fonts = resolveFontPair(opts.fontPair);
   const style = resolveStyleMetrics(opts.styleRecipe);
 

@@ -7,7 +7,7 @@ import PreviewPanel from "@/components/PreviewPanel";
 import DownloadCard from "@/components/DownloadCard";
 import { requestLlmPlan, renderDeckPlanToBlob, DEFAULT_REQUEST_MODE, DEFAULT_PROXY_URL } from "@/lib/client-generator";
 import { deckPlanToMarkdown } from "@/lib/outline-markdown";
-import type { DeckPlan, FontPairId, ModelConfig, StyleRecipe, InputMode, OccasionId } from "@/lib/types";
+import type { DeckPlan, FontPairId, ModelConfig, StyleRecipe, InputMode, OccasionId, Theme } from "@/lib/types";
 
 interface Result {
   blobUrl: string;
@@ -42,6 +42,7 @@ export default function Home() {
   const [slideCount, setSlideCount] = useState(6);
   const [language, setLanguage] = useState<"zh-CN" | "en-US">("zh-CN");
   const [paletteId, setPaletteId] = useState("consulting-navy");
+  const [customTheme, setCustomTheme] = useState<Theme | undefined>(undefined);
   const [fontPair, setFontPair] = useState<FontPairId>("georgia-calibri");
   const [styleRecipe, setStyleRecipe] = useState<StyleRecipe>("soft");
   const [includeCode, setIncludeCode] = useState(false);
@@ -106,6 +107,7 @@ export default function Home() {
     inputMode: InputMode;
     sourceText: string;
     occasion?: OccasionId;
+    customTheme?: Theme;
   };
 
   const set = (patch: Partial<ConfigState>) => {
@@ -115,6 +117,7 @@ export default function Home() {
     if (patch.slideCount !== undefined) setSlideCount(patch.slideCount);
     if (patch.language !== undefined) setLanguage(patch.language);
     if (patch.paletteId !== undefined) setPaletteId(patch.paletteId);
+    if (patch.customTheme !== undefined) setCustomTheme(patch.customTheme);
     if (patch.fontPair !== undefined) setFontPair(patch.fontPair);
     if (patch.styleRecipe !== undefined) setStyleRecipe(patch.styleRecipe);
     if (patch.includeCode !== undefined) setIncludeCode(patch.includeCode);
@@ -191,7 +194,7 @@ export default function Home() {
       throw new Error("请填写演示文稿标题和每页标题后再导出。");
     }
     const markdown = deckPlanToMarkdown(finalPlan);
-    const genResult = await renderDeckPlanToBlob(finalPlan, { paletteId, fontPair, styleRecipe, language });
+    const genResult = await renderDeckPlanToBlob(finalPlan, { paletteId, customTheme, fontPair, styleRecipe, language });
     setResult({
       blobUrl: genResult.blobUrl, fileName: genResult.fileName, sizeKb: genResult.sizeKb, plan: finalPlan,
       outlineUrl: URL.createObjectURL(new Blob([markdown], { type: "text/markdown;charset=utf-8" })),
@@ -314,6 +317,7 @@ export default function Home() {
             inputMode={inputMode}
             sourceText={sourceText}
             occasion={occasion}
+            customTheme={customTheme}
             set={set}
           />
         </section>
