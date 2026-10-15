@@ -55,12 +55,13 @@ export async function renderDeckToPptx(deck, { pres: customPres, PptxGenJS: Cust
   const mode = deck.design?.mode || 'presentation';
   const deckTitle = deck.meta?.title || '';
 
-  // 3. 实例化商业底层 Recipe
+  // 3. 实例化商业底层 Recipe (支持预设 paletteId 或自定义 RGB / Hex palette 对象)
+  const paletteConfig = deck.design?.palette || deck.design?.paletteId || paletteId;
   const r = createCommercialRecipe(pres, baseRecipeId, {
     fontFace,
     label: deckTitle,
     mode,
-    palette: paletteId,
+    palette: paletteConfig,
   });
 
   // 4. 为 Recipe 扩充通用 content 与兼容版式

@@ -37,18 +37,101 @@ function luminance(hex) {
 export function contrastRatio(a,b) {
  const l = [luminance(a),luminance(b)].sort((x,y)=>y-x); return (l[0]+.05)/(l[1]+.05);
 }
+export function normalizeColorToHex(color) {
+  if (color === null || color === undefined) {
+    throw new Error('Color cannot be null or undefined');
+  }
+
+  // 1. Array format: [r, g, b]
+  if (Array.isArray(color) && color.length >= 3) {
+    const [r, g, b] = color.map(Number);
+    if ([r, g, b].some(v => !Number.isFinite(v) || v < 0 || v > 255)) {
+      throw new Error(`Invalid RGB array values: ${JSON.stringify(color)}`);
+    }
+    return [r, g, b].map(v => Math.round(v).toString(16).padStart(2, '0')).join('').toUpperCase();
+  }
+
+  // 2. Object format: { r, g, b } or { red, green, blue }
+  if (typeof color === 'object') {
+    const r = color.r !== undefined ? Number(color.r) : Number(color.red);
+    const g = color.g !== undefined ? Number(color.g) : Number(color.green);
+    const b = color.b !== undefined ? Number(color.b) : Number(color.blue);
+    if (!Number.isFinite(r) || !Number.isFinite(g) || !Number.isFinite(b) || r < 0 || r > 255 || g < 0 || g > 255 || b < 0 || b > 255) {
+      throw new Error(`Invalid RGB object: ${JSON.stringify(color)}`);
+    }
+    return [r, g, b].map(v => Math.round(v).toString(16).padStart(2, '0')).join('').toUpperCase();
+  }
+
+  // 3. String format
+  if (typeof color === 'string') {
+    const trimmed = color.trim();
+
+    // rgb(r, g, b) or rgba(r, g, b, a) or rgb(r g b)
+    const rgbMatch = trimmed.match(/^rgba?\s*\(\s*(\d{1,3})\s*[, ]\s*(\d{1,3})\s*[, ]\s*(\d{1,3})/i);
+    if (rgbMatch) {
+      const r = Number(rgbMatch[1]);
+      const g = Number(rgbMatch[2]);
+      const b = Number(rgbMatch[3]);
+      if ([r, g, b].some(v => v < 0 || v > 255)) {
+        throw new Error(`RGB values out of bounds (0-255): ${trimmed}`);
+      }
+      return [r, g, b].map(v => Math.round(v).toString(16).padStart(2, '0')).join('').toUpperCase();
+    }
+
+    // "r, g, b" format (e.g. "20, 43, 64")
+    const commaMatch = trimmed.match(/^(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})$/);
+    if (commaMatch) {
+      const r = Number(commaMatch[1]);
+      const g = Number(commaMatch[2]);
+      const b = Number(commaMatch[3]);
+      if ([r, g, b].some(v => v < 0 || v > 255)) {
+        throw new Error(`RGB values out of bounds (0-255): ${trimmed}`);
+      }
+      return [r, g, b].map(v => Math.round(v).toString(16).padStart(2, '0')).join('').toUpperCase();
+    }
+
+    // 3-digit short hex: "#RGB" or "RGB"
+    const clean = trimmed.replace(/^#/, '');
+    if (/^[0-9a-f]{3}$/i.test(clean)) {
+      return clean.split('').map(c => c + c).join('').toUpperCase();
+    }
+
+    // 6-digit hex: "#RRGGBB" or "RRGGBB"
+    if (/^[0-9a-f]{6}$/i.test(clean)) {
+      return clean.toUpperCase();
+    }
+  }
+
+  throw new Error(`Invalid color format: ${JSON.stringify(color)}`);
+}
+
 /** Reject unreadable palettes before adding slides, preserving brand hue for decoration when needed. */
 export function resolveBusinessPalette(base, override = {}) {
- const chosen = typeof override === 'string' ? businessPalettes[override] : override;
- if (!chosen || typeof chosen !== 'object' || Array.isArray(chosen)) throw new Error('Unknown business palette');
- const unknown = Object.keys(chosen).filter(k=>!roles.includes(k));
- if (unknown.length) throw new Error(`Unknown palette roles: ${unknown.join(', ')}`);
- const merged = { ...base, ...chosen };
- for (const role of roles) {
-   if (typeof merged[role] !== 'string' || !/^#?[0-9a-f]{6}$/i.test(merged[role])) throw new Error(`Invalid palette color: ${role}`);
-   merged[role] = merged[role].replace(/^#/,'').toUpperCase();
- }
- const pairs = [['ink','paper'],['muted','paper'],['accent','paper'],['light','dark'],['highlight','dark'],['light','ink'],['light','accent']];
- for (const [a,b] of pairs) if (contrastRatio(merged[a],merged[b]) < 4.5) throw new Error(`Palette contrast below 4.5:1: ${a}/${b}`);
- return merged;
+  let chosen = typeof override === 'string' ? businessPalettes[override] : override;
+  if (!chosen || typeof chosen !== 'object' || Array.isArray(chosen)) throw new Error('Unknown business palette');
+
+  // 支持 5-slot 主题键向 8-slot 语义映射
+  const input = { ...chosen };
+  if (input.primary !== undefined && input.ink === undefined) input.ink = input.primary;
+  if (input.bg !== undefined && input.paper === undefined) input.paper = input.bg;
+  if (input.secondary !== undefined && input.muted === undefined) input.muted = input.secondary;
+  if (input.light !== undefined && input.highlight === undefined) input.highlight = input.light;
+  delete input.primary;
+  delete input.bg;
+  delete input.secondary;
+
+  const unknown = Object.keys(input).filter(k => !roles.includes(k));
+  if (unknown.length) throw new Error(`Unknown palette roles: ${unknown.join(', ')}`);
+
+  const merged = { ...base };
+  for (const [k, v] of Object.entries(input)) {
+    merged[k] = normalizeColorToHex(v);
+  }
+  for (const role of roles) {
+    merged[role] = normalizeColorToHex(merged[role]);
+  }
+
+  const pairs = [['ink','paper'],['muted','paper'],['accent','paper'],['light','dark'],['highlight','dark'],['light','ink'],['light','accent']];
+  for (const [a,b] of pairs) if (contrastRatio(merged[a],merged[b]) < 4.5) throw new Error(`Palette contrast below 4.5:1: ${a}/${b}`);
+  return merged;
 }

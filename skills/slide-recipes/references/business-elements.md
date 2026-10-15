@@ -38,7 +38,8 @@ r.funnel({
 
 `palette` 接受预设 ID，或部分语义角色映射。实现为 `lib/business-palette.js`。
 预设：28 套商业合规预设（如 navy-teal、nordic-sage、consulting-navy、tokyo-cherry、desert-dune 等）。
-角色：paper、ink、muted、accent、highlight、line、dark、light。HEX 可含一个 `#`，内部统一大写六位值。
+角色：paper、ink、muted、accent、highlight、line、dark、light（亦兼容 Web 端 5-slot 主题映射）。
+格式：支持 HEX（含或不含 `#`）、RGB 字符串（如 `rgb(20, 43, 64)`、`20, 43, 64`）、RGB 数组（`[20, 43, 64]`）及 RGB 对象（`{ r: 20, g: 43, b: 64 }`），内部自动规整为大写六位 HEX 值。
 任何拼错的角色、非法颜色、关键文字低对比度都会报错。
 对比度检查覆盖 ink/paper、muted/paper、accent/paper、light/dark、highlight/dark、light/ink、light/accent。
 `line` 仅做装饰分隔，不作为关键信息唯一编码；真实照片背景仍需另行检查。

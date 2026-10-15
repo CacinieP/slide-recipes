@@ -14,8 +14,11 @@ try {
  for(const t of Object.values(commercialRecipes)) for(const palette of Object.keys(businessPalettes)) resolveBusinessPalette(t,palette);
  assert.throws(()=>resolveBusinessPalette(commercialRecipes['editorial-proposal'],'unknown'),/Unknown/);
  assert.throws(()=>resolveBusinessPalette(commercialRecipes['editorial-proposal'],{ink:'#FFFFFF'}),/contrast/);
- assert.throws(()=>resolveBusinessPalette(commercialRecipes['editorial-proposal'],{accent:'rgb(0,0,0)'}),/Invalid/);
+ assert.throws(()=>resolveBusinessPalette(commercialRecipes['editorial-proposal'],{accent:'rgb(300,0,0)'}),/RGB values out of bounds/);
+ assert.throws(()=>resolveBusinessPalette(commercialRecipes['editorial-proposal'],{accent:'not-a-color'}),/Invalid color format/);
  assert.throws(()=>resolveBusinessPalette(commercialRecipes['editorial-proposal'],{acccent:'000000'}),/roles/);
+ assert.equal(resolveBusinessPalette(commercialRecipes['editorial-proposal'],{accent:'rgb(169,68,19)'}).accent,'A94413');
+ assert.equal(resolveBusinessPalette(commercialRecipes['editorial-proposal'],{accent:[169,68,19]}).accent,'A94413');
  assert.equal(resolveBusinessPalette(commercialRecipes['editorial-proposal'],{accent:'#a94413'}).accent,'A94413');
  for(const palette of ['navy-teal','burgundy-cream','graphite-orange']) {
   const pres=new pptxgen();buildBusinessElements(pres,{palette});const path=join(dir,`${palette}.pptx`);await pres.writeFile({fileName:path});

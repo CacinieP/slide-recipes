@@ -6,9 +6,20 @@ import { HUE_FAMILIES, getHueFamily } from "@/lib/color-utils";
 interface Props {
   selectedHue: number | null;
   onHueChange: (hue: number | null) => void;
+  title?: string;
+  subtitle?: string;
+  centerColor?: string;
+  headerRight?: React.ReactNode;
 }
 
-export default function ColorWheel({ selectedHue, onHueChange }: Props) {
+export default function ColorWheel({
+  selectedHue,
+  onHueChange,
+  title,
+  subtitle,
+  centerColor,
+  headerRight,
+}: Props) {
   const wheelRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -74,24 +85,30 @@ export default function ColorWheel({ selectedHue, onHueChange }: Props) {
     <div className="flex flex-col gap-2.5 rounded-lg border border-line bg-elev/40 p-3">
       <div className="flex items-center justify-between text-xs">
         <div className="flex items-center gap-1.5 font-medium text-ink">
-          <span>🎯 色环定位</span>
+          <span>{title || "🎯 色环定位"}</span>
           {selectedHue !== null ? (
             <span className="rounded bg-gold/15 px-1.5 py-0.5 text-[10px] text-gold border border-gold/30">
               {currentFamily?.emoji} {currentFamily?.name} · {selectedHue}°
             </span>
           ) : (
-            <span className="text-[10px] text-ink-mute">点击色环或色系标签快速定位色板</span>
+            <span className="text-[10px] text-ink-mute">{subtitle || "点击色环或色系标签快速定位"}</span>
           )}
         </div>
-        {selectedHue !== null && (
-          <button
-            type="button"
-            onClick={() => onHueChange(null)}
-            className="text-[10px] text-ink-mute hover:text-gold transition hover:underline"
-          >
-            显示全部色板
-          </button>
-        )}
+        <div>
+          {headerRight !== undefined ? (
+            headerRight
+          ) : (
+            selectedHue !== null && (
+              <button
+                type="button"
+                onClick={() => onHueChange(null)}
+                className="text-[10px] text-ink-mute hover:text-gold transition hover:underline"
+              >
+                显示全部色板
+              </button>
+            )
+          )}
+        </div>
       </div>
 
       <div className="flex items-center justify-center gap-4 py-1">
@@ -115,7 +132,19 @@ export default function ColorWheel({ selectedHue, onHueChange }: Props) {
 
           {/* 圆环中空遮罩 */}
           <div className="absolute inset-4 flex flex-col items-center justify-center rounded-full bg-elev shadow-md border border-line/50">
-            {selectedHue !== null ? (
+            {centerColor ? (
+              <>
+                <div
+                  className="h-5 w-5 rounded-full shadow-xs border border-white/60 mb-0.5"
+                  style={{
+                    backgroundColor: centerColor.startsWith("#") ? centerColor : `#${centerColor}`,
+                  }}
+                />
+                <span className="text-[10px] font-mono font-bold text-ink leading-none">
+                  {selectedHue !== null ? `${selectedHue}°` : centerColor}
+                </span>
+              </>
+            ) : selectedHue !== null ? (
               <>
                 <div
                   className="h-5 w-5 rounded-full shadow-xs border border-white/60 mb-0.5"

@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { validateDeckSchema, validateSlide, SLIDE_TYPES, SUPPORTED_RECIPE_IDS, SUPPORTED_OCCASIONS, OCCASION_PRESETS } from '../skills/slide-recipes/lib/deck-schema.js';
 import { renderDeckToPptx } from '../skills/slide-recipes/lib/deck-renderer.js';
+import { normalizeColorToHex, resolveBusinessPalette } from '../skills/slide-recipes/lib/business-palette.js';
 import { readZip } from '../skills/slide-recipes/lib/zip-reader.js';
 import { parseSlide } from '../skills/slide-recipes/lib/pptx-shapes.js';
 
@@ -39,6 +40,27 @@ const invalidOccasionRes = validateDeckSchema({
 });
 assert.equal(invalidOccasionRes.valid, false);
 assert.ok(invalidOccasionRes.errors[0].includes('不支持的 occasion'));
+
+// 自定义 RGB 色彩解析测试
+assert.equal(normalizeColorToHex('rgb(20, 43, 64)'), '142B40');
+assert.equal(normalizeColorToHex('rgba(20, 43, 64, 0.9)'), '142B40');
+assert.equal(normalizeColorToHex([20, 43, 64]), '142B40');
+assert.equal(normalizeColorToHex({ r: 20, g: 43, b: 64 }), '142B40');
+assert.equal(normalizeColorToHex({ red: 20, green: 43, blue: 64 }), '142B40');
+assert.equal(normalizeColorToHex('245, 248, 250'), 'F5F8FA');
+assert.equal(normalizeColorToHex('#123'), '112233');
+
+const customRgbPalette = resolveBusinessPalette(
+  { paper: 'F5F8FA', ink: '142B40', muted: '526475', accent: '006F73', highlight: 'BCE9E5', line: 'CCD8E0', dark: '142B40', light: 'F5F8FA' },
+  {
+    ink: 'rgb(20, 43, 64)',
+    paper: [245, 248, 250],
+    accent: { r: 0, g: 111, b: 115 },
+  }
+);
+assert.equal(customRgbPalette.ink, '142B40');
+assert.equal(customRgbPalette.paper, 'F5F8FA');
+assert.equal(customRgbPalette.accent, '006F73');
 
 // 2. 单 slide 校验成功案例
 const validKpi = {
@@ -263,6 +285,31 @@ try {
   }
 
   console.log(`✅ deck-renderer end-to-end test PASS: 18 native slides rendered and verified cleanly`);
+
+  // 6. 自定义 RGB 调色板渲染测试
+  const rgbDeck = {
+    meta: { title: '自定义 RGB 色彩测试' },
+    design: {
+      recipeId: 'editorial-proposal',
+      palette: {
+        ink: 'rgb(20, 43, 64)',
+        paper: [245, 248, 250],
+        accent: { r: 0, g: 111, b: 115 },
+        highlight: 'rgba(188, 233, 229, 1)',
+      },
+    },
+    slides: [
+      { type: 'cover', title: '自定义 RGB 测试', subtitle: '支持多种 RGB 输入格式' },
+      { type: 'content', title: 'RGB 自定义内容', lead: '支持数组、对象与 rgb() 字符串' },
+    ],
+  };
+  const rgbPres = await renderDeckToPptx(rgbDeck);
+  const rgbFile = join(tmpDir, 'rgb-deck.pptx');
+  await rgbPres.writeFile({ fileName: rgbFile });
+  const rgbZip = readZip(await readFile(rgbFile));
+  assert.ok(rgbZip.has('ppt/slides/slide1.xml'));
+  assert.ok(rgbZip.has('ppt/slides/slide2.xml'));
+  console.log('✅ Custom RGB palette end-to-end rendering PASS');
 } finally {
   await rm(tmpDir, { recursive: true, force: true });
 }

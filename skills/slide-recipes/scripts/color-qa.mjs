@@ -11,12 +11,35 @@ const ROLE_THRESHOLDS = {
 };
 
 function normalizeHex(value) {
-  const hex = String(value || "").trim().replace(/^#/, "");
+  if (value === null || value === undefined) {
+    throw new Error('Color cannot be null or undefined');
+  }
+  if (Array.isArray(value) && value.length >= 3) {
+    return value.slice(0, 3).map((v) => Math.round(Number(v)).toString(16).padStart(2, '0')).join('').toUpperCase();
+  }
+  if (typeof value === 'object') {
+    const r = value.r !== undefined ? Number(value.r) : Number(value.red);
+    const g = value.g !== undefined ? Number(value.g) : Number(value.green);
+    const b = value.b !== undefined ? Number(value.b) : Number(value.blue);
+    return [r, g, b].map((v) => Math.round(v).toString(16).padStart(2, '0')).join('').toUpperCase();
+  }
+  const str = String(value || '').trim();
+  const rgbMatch = str.match(/^rgba?\s*\(\s*(\d{1,3})\s*[, ]\s*(\d{1,3})\s*[, ]\s*(\d{1,3})/i);
+  if (rgbMatch) {
+    const [r, g, b] = [Number(rgbMatch[1]), Number(rgbMatch[2]), Number(rgbMatch[3])];
+    return [r, g, b].map((v) => Math.round(v).toString(16).padStart(2, '0')).join('').toUpperCase();
+  }
+  const commaMatch = str.match(/^(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})$/);
+  if (commaMatch) {
+    const [r, g, b] = [Number(commaMatch[1]), Number(commaMatch[2]), Number(commaMatch[3])];
+    return [r, g, b].map((v) => Math.round(v).toString(16).padStart(2, '0')).join('').toUpperCase();
+  }
+  const hex = str.replace(/^#/, '');
   if (/^[0-9a-fA-F]{3}$/.test(hex)) {
-    return hex.split("").map((char) => char + char).join("").toUpperCase();
+    return hex.split('').map((char) => char + char).join('').toUpperCase();
   }
   if (!/^[0-9a-fA-F]{6}$/.test(hex)) {
-    throw new Error(`Invalid hex color: ${value}`);
+    throw new Error(`Invalid color (must be 6-char hex, rgb(r,g,b), or r,g,b): ${value}`);
   }
   return hex.toUpperCase();
 }

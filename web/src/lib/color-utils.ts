@@ -84,6 +84,75 @@ export function rotateHexHue(hex: string, deltaDegrees: number): string {
 }
 
 /**
+ * 直接设置色相为指定目标角度 (0-360)
+ * 若原颜色为中性灰（饱和度极低），自动补齐基础饱和度使色相能够显现
+ */
+export function setHexHue(hex: string, targetHue: number): string {
+  const hsl = hexToHsl(hex);
+  const s = hsl.s < 10 ? 60 : hsl.s;
+  const l = hsl.l < 10 ? 25 : hsl.l > 95 ? 85 : hsl.l;
+  return hslToHex(targetHue, s, l);
+}
+
+/**
+ * 调整明度 (+/- 百分比)
+ */
+export function adjustHexLightness(hex: string, deltaPercent: number): string {
+  const hsl = hexToHsl(hex);
+  const newL = Math.max(5, Math.min(95, hsl.l + deltaPercent));
+  return hslToHex(hsl.h, hsl.s, newL);
+}
+
+/**
+ * 调整饱和度 (+/- 百分比)
+ */
+export function adjustHexSaturation(hex: string, deltaPercent: number): string {
+  const hsl = hexToHsl(hex);
+  const newS = Math.max(0, Math.min(100, hsl.s + deltaPercent));
+  return hslToHex(hsl.h, newS, hsl.l);
+}
+
+/**
+ * 解析用户输入的任意颜色格式（HEX、#HEX、3位HEX、rgb(r,g,b)、r,g,b）
+ * 成功返回 6 位大写 HEX 字符串（无 #），失败返回 null
+ */
+export function parseAnyColorToHex(input: string): string | null {
+  if (!input || typeof input !== "string") return null;
+  const trimmed = input.trim();
+
+  // 1. rgb(r, g, b)
+  const rgbMatch = trimmed.match(/^rgb\s*\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/i);
+  if (rgbMatch) {
+    const [r, g, b] = [Number(rgbMatch[1]), Number(rgbMatch[2]), Number(rgbMatch[3])];
+    if (r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) {
+      return [r, g, b].map((v) => Math.round(v).toString(16).padStart(2, "0")).join("").toUpperCase();
+    }
+    return null;
+  }
+
+  // 2. r, g, b
+  const commaMatch = trimmed.match(/^(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})$/);
+  if (commaMatch) {
+    const [r, g, b] = [Number(commaMatch[1]), Number(commaMatch[2]), Number(commaMatch[3])];
+    if (r >= 0 && r <= 255 && g >= 0 && g <= 255 && b >= 0 && b <= 255) {
+      return [r, g, b].map((v) => Math.round(v).toString(16).padStart(2, "0")).join("").toUpperCase();
+    }
+    return null;
+  }
+
+  // 3. HEX
+  const clean = trimmed.replace(/^#/, "");
+  if (/^[0-9a-f]{3}$/i.test(clean)) {
+    return clean.split("").map((c) => c + c).join("").toUpperCase();
+  }
+  if (/^[0-9a-f]{6}$/i.test(clean)) {
+    return clean.toUpperCase();
+  }
+
+  return null;
+}
+
+/**
  * 计算相对亮度 (WCAG 2.1)
  */
 export function luminance(hex: string): number {
