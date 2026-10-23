@@ -30,6 +30,14 @@ For business reviews, client proposals, investor updates and brand presentations
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FCacinieP%2Fslide-recipes&project-name=slide-recipes&root-directory=web) · [Download](https://github.com/CacinieP/slide-recipes/releases/latest) · [Samples](#samples) · [Copy a prompt](#prompt-guide) · [Share kit](docs/share-kit.md)
 
+## Content-first skill workflow
+
+The [English skill](skills/slide-recipes/SKILL.md) and [Chinese mirror](skills/slide-recipes/SKILL.cn.md) now start with audience, decision, evidence and information relationships—not a stack of cards. The [design playbook](skills/slide-recipes/references/design-playbook.md) includes a compact brief/page plan and three concrete before/after cases. The [aesthetic rules](skills/slide-recipes/references/aesthetic-rules.md) define a 10 × 5.625-inch type/grid/color baseline, CJK wrapping and verified font selection; other styles remain welcome.
+
+Review cover + evidence + densest page before expansion (fewer for short decks); an explicit direct-build request can skip this check. Technical QA, rendered visual inspection and user approval are recorded separately. This is a documentation/workflow upgrade, not a new renderer or automatic Web Studio approval feature. Editable PPTX + Markdown, existing recipes, optional image providers, offline QR and QA tools remain available through the [production reference](skills/slide-recipes/references/production-reference.md). No extra paid image generation is required.
+
+Run `node scripts/aesthetic-docs-test.mjs` for bilingual length/frontmatter, local reference links and six routing fixtures. Fixtures encode expected intent boundaries, not measured model trigger accuracy or proof of aesthetic quality. Existing `npm test` compatibility coverage is unchanged.
+
 ## Open the Web Studio
 
 | Deployment | Live URL |

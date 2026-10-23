@@ -30,6 +30,14 @@
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FCacinieP%2Fslide-recipes&project-name=slide-recipes&root-directory=web) · [下载新版](https://github.com/CacinieP/slide-recipes/releases/latest) · [看样例](#samples) · [复制提示词](#prompt-guide) · [传播素材](docs/share-kit.md)
 
+## 内容优先的 skill 工作流升级
+
+[英文入口](skills/slide-recipes/SKILL.md) 与 [中文镜像](skills/slide-recipes/SKILL.cn.md) 从受众、决策、证据和信息关系开始，不再默认堆卡片。[设计手册](skills/slide-recipes/references/design-playbook.md) 提供紧凑需求/逐页计划模板和三个具体改版案例；[审美规范](skills/slide-recipes/references/aesthetic-rules.md) 明确 10 × 5.625 英寸的字号/网格/颜色基线、中文语义断行及字体可用性检查，同时允许其他风格。
+
+展开整套前一起确认封面、证据页和最密页（短 deck 可减少）；用户明确直做可跳过。技术 QA、渲染视觉检查、用户审阅分别记录。本次是文档/工作流升级，不是新渲染器，也没有给 Web Studio 增加自动审批功能。可编辑 PPTX + Markdown、原有 recipes、可选生图、离线二维码和 QA 工具均保留，操作见[制作参考](skills/slide-recipes/references/production-reference.md)，不要求额外付费生图。
+
+运行 `node scripts/aesthetic-docs-test.mjs` 检查双语长度/frontmatter、本地参考链接与六个意图路由样例。样例验证的是预期边界，不是实测模型触发准确率，也不能证明主观审美。既有 `npm test` 兼容性覆盖保持不变。
+
 ## 在线使用
 
 | 部署区域 | 在线入口 |

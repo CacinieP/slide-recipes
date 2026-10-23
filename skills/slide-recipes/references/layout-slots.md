@@ -1,7 +1,9 @@
 # Layout Slot Contracts
 
-This reference turns the `Slide 类型菜单` in `SKILL.md §5` from prose into a
-**machine-checkable contract**. Each layout declares which slots it requires
+This reference preserves the legacy stripe-based layout family as a
+**machine-checkable contract**. It is optional, not the universal aesthetic baseline.
+Use [aesthetic-rules.md](aesthetic-rules.md) and the selected recipe for new design decisions;
+do not add stripes/cards to unrelated recipes merely to satisfy this legacy contract. Each layout declares which slots it requires
 and which image usages it allows. `scripts/render-qa.mjs --contract <this-file>`
 reads the fenced `contract` blocks and verifies a generated `.pptx` against
 them — the PPTX analogue of guizang's `validate-swiss-deck.mjs` checking
@@ -20,7 +22,7 @@ Each layout has one fenced block tagged `contract`:
 { "layout": "Cover", "requiredSlots": ["stripe", "title"], "forbiddenUsages": ["card"] }
 ```
 
-- `layout` — the layout family name (matches SKILL.md §5).
+- `layout` — the layout family name (legacy family names listed below).
 - `requiredSlots` — slots that MUST be present on every slide using this layout.
   Recognized slots today: `stripe` (thin full-width shape near top or bottom),
   `title` (any text run ≥ 24pt), `footer` (small text in the bottom band),
@@ -101,7 +103,7 @@ PPTX box and the picture is not distorted or cropped wrong.
 ### Cover + background image (1a)
 
 ```contract
-{ "layout": "CoverBackground", "requiredSlots": ["stripe", "title", "image"], "forbiddenUsages": ["card", "icon", "sideStrip"], "notes": "image usage must be 'cover' (1360x768 / 16:9); add 40-55% overlay for title readability" }
+{ "layout": "CoverBackground", "requiredSlots": ["stripe", "title", "image"], "forbiddenUsages": ["card", "icon", "sideStrip"], "notes": "image usage 'cover' (1360x768 is approximately 16:9); preserve ratio with crop/contain; use overlay when needed and test actual title contrast" }
 ```
 
 ### Two-card + image (3a / 3b)
