@@ -24,7 +24,7 @@
   <img src="https://img.shields.io/badge/node-%E2%89%A5%2020-339933?style=flat-square" alt="Node" />
 </p>
 
-**把材料做成可编辑的商业 PPT：11 套审美 recipe × 28 套语义配色。**
+**把材料做成可编辑的商业 PPT：11 套审美 recipe × 39 套语义配色。**
 
 适合经营汇报、客户提案、投资沟通和品牌展示。内置 23 类商业页面/元素 API、统一 DeckSchema、结构化生图 Prompt Schema、中文排版规则、可配置 AI 配图与渲染检查。先看真实生成样例，再复制提示词开始。
 
@@ -77,9 +77,11 @@
 
 ### 同一套信息，换一种气质
 
-茄紫青柠、孔雀蓝杏桃、北欧鼠尾草、咨询深蓝……28 套色板均可搭配商业 recipe。下面展示角色色及其组合；完整 PPTX 示例仍采用表中标注的原始色板。
+茄紫青柠、孔雀蓝杏桃、北欧鼠尾草、咨询深蓝……39 套色板均可搭配商业 recipe（含 11 套从通用幻灯片设计中蒸馏的低饱和编辑风与传统色系，不含任何厂商素材）。下面展示角色色及其组合；完整 PPTX 示例仍采用表中标注的原始色板。
 
-![28 semantic palettes](docs/img/palette-gallery.svg)
+![39 semantic palettes](docs/img/palette-gallery.svg)
+
+色板来源与 QA 方法见 [palette distillation](docs/palette-distillation.md)。
 
 ### 复制这段，做你的版本
 

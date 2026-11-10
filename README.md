@@ -24,7 +24,7 @@
   <img src="https://img.shields.io/badge/node-%E2%89%A5%2020-339933?style=flat-square" alt="Node" />
 </p>
 
-**Turn your brief into an editable business deck: 11 visual recipes × 28 semantic palettes.**
+**Turn your brief into an editable business deck: 11 visual recipes × 39 semantic palettes.**
 
 For business reviews, client proposals, investor updates and brand presentations. Includes 23 business page/element APIs, unified DeckSchema, structured image prompt schema, CJK-aware layout, configurable AI images and render checks. See generated samples, then copy a prompt to start.
 
@@ -77,9 +77,11 @@ These samples were generated and rendered from this repository. All content and 
 
 ### Same structure. A different character.
 
-Aubergine/lime, petrol/apricot, nordic/sage, consulting/navy: 28 palettes work with commercial recipes. This board previews semantic colors; the downloadable decks retain their original palettes listed above.
+Aubergine/lime, petrol/apricot, nordic/sage, consulting/navy, plus 11 muted editorial & heritage families distilled from generic slide designs (no vendor assets): 39 palettes work with commercial recipes. This board previews semantic colors; the downloadable decks retain their original palettes listed above.
 
-![28 semantic palettes](docs/img/palette-gallery.svg)
+![39 semantic palettes](docs/img/palette-gallery.svg)
+
+Palette provenance and QA method: [palette distillation](docs/palette-distillation.md).
 
 ### Copy this to make it yours
 

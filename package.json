@@ -1,7 +1,7 @@
 {
   "name": "slide-recipes",
   "version": "2.4.0",
-  "description": "Editable commercial slide recipes, 28 semantic palettes, 23 slide types, CJK-aware layouts, configurable AI image providers, and render QA.",
+  "description": "Editable commercial slide recipes, 39 semantic palettes, 23 slide types, CJK-aware layouts, configurable AI image providers, and render QA.",
   "type": "module",
   "engines": {
     "node": ">=20"

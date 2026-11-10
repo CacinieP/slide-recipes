@@ -1,6 +1,6 @@
 # Semantic palette catalog / 语义配色目录
 
-20 original presets. All pass the runtime text-pair checks at 4.5:1. Color names are design directions, not claims of trend research.
+39 original presets. All pass the runtime text-pair checks at 4.5:1. Color names are design directions, not claims of trend research.
 
 ```js
 const recipe = createCommercialRecipe(pres, "editorial-proposal", {
@@ -38,6 +38,17 @@ const recipe = createCommercialRecipe(pres, "editorial-proposal", {
 | alpine-cyan | `F6F9FA` | `1A2C38` | `536573` | `1B6B8A` | `CDE7F2` | `D0DDE5` | `162630` | `F6F9FA` |
 | bamboo-teal | `F5F8F6` | `1D3328` | `50695B` | `1C6E4A` | `C6E8D6` | `CCD9D1` | `162A20` | `F5F8F6` |
 | amber-coal | `FAF8F4` | `282725` | `6B665E` | `9E5D10` | `FCE5C3` | `DCD5CA` | `26231E` | `FAF8F4` |
+| clay-sunrise | `F7F1E6` | `3A2A20` | `796656` | `B53800` | `FBD9C3` | `E3D5C2` | `4A2E1F` | `F7F1E6` |
+| pine-paper | `F6F4EE` | `212830` | `66726B` | `486255` | `D8E4DC` | `DDD8CE` | `1C2620` | `F2F1EA` |
+| xuan-cinnabar | `F1EFE9` | `2E2A26` | `6B655C` | `9A4B4D` | `E8D8C3` | `DDD6C8` | `26221E` | `F3F0E9` |
+| crimson-scholar | `F4F4F2` | `24211C` | `6A655C` | `B02020` | `F5DCDC` | `DCDBD5` | `2A1518` | `F5F0EE` |
+| deep-harbor | `F4F6F9` | `132A44` | `5C6B7E` | `2F6DB5` | `D8E6F5` | `D2DBE5` | `0D2038` | `EFF4FA` |
+| harbor-mist | `F5F4EC` | `27404A` | `5F6B71` | `3E6373` | `D9E4E8` | `DCD9C9` | `223841` | `F2F3EC` |
+| sage-brush | `FAF5EE` | `33302A` | `6D6960` | `5C6A64` | `EBD5C4` | `E0D8CB` | `2E2B26` | `F7F2EA` |
+| plum-noir | `F7F5F3` | `2B2530` | `6E6674` | `B4530E` | `D9D0E0` | `DFD8DC` | `332B36` | `F3EEF2` |
+| oat-taupe | `F2EFE9` | `3A2E24` | `6F645A` | `885946` | `E3D5C4` | `DED6C9` | `2C231C` | `F2EEE7` |
+| olive-rust | `F3EBDD` | `2C2416` | `6D624D` | `9F4A1B` | `E9C77E` | `E0D4BE` | `332A14` | `F4EDE0` |
+| slate-drizzle | `F4F6F7` | `262E36` | `64707C` | `3D4E5E` | `D4DEE7` | `D8DDE2` | `1F262D` | `F1F4F6` |
 
 Use paper for light backgrounds, ink/muted/accent for text on paper, light on dark/ink/accent, and highlight on dark. line is decorative. Never assume other pairs are readable. Use labels and shapes alongside colors for categories/status. Image backgrounds require visual review.
 
