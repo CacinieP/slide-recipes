@@ -667,7 +667,7 @@ export default function ConfigPanel(props: Props) {
         </div>
       )}
 
-      {/* 4. 28+18 套合规色板与色相系统 */}
+      {/* 4. 商业语义与灵感色板及色相系统 */}
       <PalettePicker
         value={props.paletteId}
         customTheme={props.customTheme}

@@ -45,7 +45,7 @@ const recipe = createCommercialRecipe(pres, "editorial-proposal", {
 | deep-harbor | `F4F6F9` | `132A44` | `5C6B7E` | `2F6DB5` | `D8E6F5` | `D2DBE5` | `0D2038` | `EFF4FA` |
 | harbor-mist | `F5F4EC` | `27404A` | `5F6B71` | `3E6373` | `D9E4E8` | `DCD9C9` | `223841` | `F2F3EC` |
 | sage-brush | `FAF5EE` | `33302A` | `6D6960` | `5C6A64` | `EBD5C4` | `E0D8CB` | `2E2B26` | `F7F2EA` |
-| plum-noir | `F7F5F3` | `2B2530` | `6E6674` | `B4530E` | `D9D0E0` | `DFD8DC` | `332B36` | `F3EEF2` |
+| plum-noir | `F7F5F3` | `2B2530` | `6E6674` | `B4530E` | `D9D0E0` | `DFD8DC` | `332B36` | `F5F2F5` |
 | oat-taupe | `F2EFE9` | `3A2E24` | `6F645A` | `885946` | `E3D5C4` | `DED6C9` | `2C231C` | `F2EEE7` |
 | olive-rust | `F3EBDD` | `2C2416` | `6D624D` | `9F4A1B` | `E9C77E` | `E0D4BE` | `332A14` | `F4EDE0` |
 | slate-drizzle | `F4F6F7` | `262E36` | `64707C` | `3D4E5E` | `D4DEE7` | `D8DDE2` | `1F262D` | `F1F4F6` |

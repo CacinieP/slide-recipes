@@ -26,7 +26,7 @@ LLM 被约束成必须输出一份大纲,**每页只能是 5 种页面类型之�
 | 维度 | 选项 |
 |---|---|
 | **5 种页面类型** | cover · toc · section · content · summary |
-| **18 个调色板** | 每个 5 色 `{primary, secondary, accent, light, bg}` 主题 |
+| **57 个调色板** | 39 套商业语义配色 + 18 套灵感配色；每个 5 色 `{primary, secondary, accent, light, bg}` 主题 |
 | **8 种字体配对** | Georgia/Calibri、Arial Black/Arial、… |
 | **4 种风格** | Sharp · Soft · Rounded · Pill(控制圆角和间距) |
 | **页码徽标** | 圆形或胶囊,除封面外每页必加(`x:9.3 y:5.1`) |
@@ -70,7 +70,7 @@ src/
 │   └── page.tsx                # 配置表单 + 预览 + 下载
 ├── lib/
 │   ├── types.ts                # SlideType, Theme, DeckPlan, …
-│   ├── palettes.ts             # 18 调色板 + 字体 + 风格 metrics
+│   ├── palettes.ts             # 57 调色板 + 字体 + 风格 metrics
 │   ├── prompt.ts               # 带 5 页面类型约束的 prompt + 大纲校验器
 │   └── render.ts               # PptxGenJS 渲染器(5 类型分派 + 徽标)
 └── components/

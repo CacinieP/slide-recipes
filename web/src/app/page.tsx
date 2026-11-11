@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { PALETTES } from "@/lib/palettes";
 import ConfigPanel from "@/components/ConfigPanel";
 import OutlineEditor from "@/components/OutlineEditor";
 import PreviewPanel from "@/components/PreviewPanel";
@@ -242,7 +243,7 @@ export default function Home() {
                   Web Studio · 模型连接可配置
                 </span>
               </div>
-              <p className="mono-label">28 PALETTES · 25 SLIDE TYPES · 15 OCCASIONS · BROWSER-NATIVE PPTX</p>
+              <p className="mono-label">{PALETTES.length} PALETTES · 25 SLIDE TYPES · 15 OCCASIONS · BROWSER-NATIVE PPTX</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
