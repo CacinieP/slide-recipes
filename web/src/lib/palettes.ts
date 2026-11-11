@@ -295,6 +295,72 @@ export const PALETTES: Palette[] = [
     theme: { primary: "282725", secondary: "6B665E", accent: "9E5D10", light: "FCE5C3", bg: "FAF8F4" },
     useCases: "精密制造、工匠精神、经典商业、工业软件",
   },
+  {
+    id: "clay-sunrise",
+    name: "Clay Sunrise",
+    theme: { primary: "3A2A20", secondary: "796656", accent: "B53800", light: "FBD9C3", bg: "F7F1E6" },
+    useCases: "品牌提案、生活方式、暖色编辑设计",
+  },
+  {
+    id: "pine-paper",
+    name: "Pine Paper",
+    theme: { primary: "212830", secondary: "66726B", accent: "486255", light: "D8E4DC", bg: "F6F4EE" },
+    useCases: "自然家居、可持续发展、极简出版",
+  },
+  {
+    id: "xuan-cinnabar",
+    name: "Xuan Cinnabar",
+    theme: { primary: "2E2A26", secondary: "6B655C", accent: "9A4B4D", light: "E8D8C3", bg: "F1EFE9" },
+    useCases: "东方美学、文化传承、文博展览",
+  },
+  {
+    id: "crimson-scholar",
+    name: "Crimson Scholar",
+    theme: { primary: "24211C", secondary: "6A655C", accent: "B02020", light: "F5DCDC", bg: "F4F4F2" },
+    useCases: "学术报告、教育研究、机构汇报",
+  },
+  {
+    id: "deep-harbor",
+    name: "Deep Harbor",
+    theme: { primary: "132A44", secondary: "5C6B7E", accent: "2F6DB5", light: "D8E6F5", bg: "F4F6F9" },
+    useCases: "企业战略、金融科技、投资沟通",
+  },
+  {
+    id: "harbor-mist",
+    name: "Harbor Mist",
+    theme: { primary: "27404A", secondary: "5F6B71", accent: "3E6373", light: "D9E4E8", bg: "F5F4EC" },
+    useCases: "海洋主题、咨询提案、文旅规划",
+  },
+  {
+    id: "sage-brush",
+    name: "Sage Brush",
+    theme: { primary: "33302A", secondary: "6D6960", accent: "5C6A64", light: "EBD5C4", bg: "FAF5EE" },
+    useCases: "生活美学、健康品牌、编辑提案",
+  },
+  {
+    id: "plum-noir",
+    name: "Plum Noir",
+    theme: { primary: "2B2530", secondary: "6E6674", accent: "B4530E", light: "D9D0E0", bg: "F7F5F3" },
+    useCases: "创意工作室、文化品牌、高端提案",
+  },
+  {
+    id: "oat-taupe",
+    name: "Oat Taupe",
+    theme: { primary: "3A2E24", secondary: "6F645A", accent: "885946", light: "E3D5C4", bg: "F2EFE9" },
+    useCases: "建筑空间、精品家居、生活方式",
+  },
+  {
+    id: "olive-rust",
+    name: "Olive Rust",
+    theme: { primary: "2C2416", secondary: "6D624D", accent: "9F4A1B", light: "E9C77E", bg: "F3EBDD" },
+    useCases: "传统工艺、文旅策划、品牌故事",
+  },
+  {
+    id: "slate-drizzle",
+    name: "Slate Drizzle",
+    theme: { primary: "262E36", secondary: "64707C", accent: "3D4E5E", light: "D4DEE7", bg: "F4F6F7" },
+    useCases: "企业报告、工程咨询、极简科技",
+  },
 ];
 
 export const DEFAULT_PALETTE_ID = "luxury-mysterious";

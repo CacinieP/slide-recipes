@@ -479,7 +479,7 @@ export default function PalettePicker({
         </div>
       </div>
 
-      {/* 预设色板库（28 套商业合规色板） */}
+      {/* 预设色板库（商业语义与灵感配色） */}
       <div>
         <div className="flex items-center justify-between text-[11px] text-ink-dim mb-1.5">
           <span>商业语义色板库（{filteredPalettes.length} 套）：</span>

@@ -28,6 +28,20 @@ export const businessPalettes = {
   'alpine-cyan': { paper: 'F6F9FA', ink: '1A2C38', muted: '536573', accent: '1B6B8A', highlight: 'CDE7F2', line: 'D0DDE5', dark: '162630', light: 'F6F9FA' },
   'bamboo-teal': { paper: 'F5F8F6', ink: '1D3328', muted: '50695B', accent: '1C6E4A', highlight: 'C6E8D6', line: 'CCD9D1', dark: '162A20', light: 'F5F8F6' },
   'amber-coal': { paper: 'FAF8F4', ink: '282725', muted: '6B665E', accent: '9E5D10', highlight: 'FCE5C3', line: 'DCD5CA', dark: '26231E', light: 'FAF8F4' },
+  // Muted editorial & heritage families. Distilled to the same 8-role contract
+  // from generic slide designs (no vendor assets); contrast-calibrated to >= 4.5:1
+  // for ink/muted/accent on paper and light/highlight on dark.
+  'clay-sunrise': { paper: 'F7F1E6', ink: '3A2A20', muted: '796656', accent: 'B53800', highlight: 'FBD9C3', line: 'E3D5C2', dark: '4A2E1F', light: 'F7F1E6' },
+  'pine-paper': { paper: 'F6F4EE', ink: '212830', muted: '66726B', accent: '486255', highlight: 'D8E4DC', line: 'DDD8CE', dark: '1C2620', light: 'F2F1EA' },
+  'xuan-cinnabar': { paper: 'F1EFE9', ink: '2E2A26', muted: '6B655C', accent: '9A4B4D', highlight: 'E8D8C3', line: 'DDD6C8', dark: '26221E', light: 'F3F0E9' },
+  'crimson-scholar': { paper: 'F4F4F2', ink: '24211C', muted: '6A655C', accent: 'B02020', highlight: 'F5DCDC', line: 'DCDBD5', dark: '2A1518', light: 'F5F0EE' },
+  'deep-harbor': { paper: 'F4F6F9', ink: '132A44', muted: '5C6B7E', accent: '2F6DB5', highlight: 'D8E6F5', line: 'D2DBE5', dark: '0D2038', light: 'EFF4FA' },
+  'harbor-mist': { paper: 'F5F4EC', ink: '27404A', muted: '5F6B71', accent: '3E6373', highlight: 'D9E4E8', line: 'DCD9C9', dark: '223841', light: 'F2F3EC' },
+  'sage-brush': { paper: 'FAF5EE', ink: '33302A', muted: '6D6960', accent: '5C6A64', highlight: 'EBD5C4', line: 'E0D8CB', dark: '2E2B26', light: 'F7F2EA' },
+  'plum-noir': { paper: 'F7F5F3', ink: '2B2530', muted: '6E6674', accent: 'B4530E', highlight: 'D9D0E0', line: 'DFD8DC', dark: '332B36', light: 'F5F2F5' },
+  'oat-taupe': { paper: 'F2EFE9', ink: '3A2E24', muted: '6F645A', accent: '885946', highlight: 'E3D5C4', line: 'DED6C9', dark: '2C231C', light: 'F2EEE7' },
+  'olive-rust': { paper: 'F3EBDD', ink: '2C2416', muted: '6D624D', accent: '9F4A1B', highlight: 'E9C77E', line: 'E0D4BE', dark: '332A14', light: 'F4EDE0' },
+  'slate-drizzle': { paper: 'F4F6F7', ink: '262E36', muted: '64707C', accent: '3D4E5E', highlight: 'D4DEE7', line: 'D8DDE2', dark: '1F262D', light: 'F1F4F6' },
 };
 const roles = ['paper','ink','muted','accent','highlight','line','dark','light'];
 function luminance(hex) {
