@@ -1,3 +1,4 @@
+import { SLIDE_TYPES } from "./types";
 import type { GenerateOptions, DeckPlan, SlidePlan, SlideType } from "./types";
 
 export const MAX_SOURCE_TEXT_LENGTH = 20_000;
@@ -186,7 +187,7 @@ export function normalizeModelPlan(raw: unknown, count: number, model?: string):
  * Validate + normalize a raw parsed LLM JSON object into a DeckPlan.
  * 移除了严格页数相等校验，改为大致篇幅，支持自适应页数容差。
  */
-export function validatePlan(raw: unknown, count?: number): {
+export function validatePlan(raw: unknown, _count?: number): {
   plan: DeckPlan | null;
   error?: string;
 } {
@@ -206,14 +207,7 @@ export function validatePlan(raw: unknown, count?: number): {
     return { plan: null, error: "模型大纲的最后一页必须是 closing。" };
   }
 
-  const validTypes = new Set([
-    "cover", "toc", "section", "content", "summary", "agenda", "closing",
-    "executiveSummary", "kpiDashboard", "funnel", "gantt", "processFlow",
-    "quadrant", "swot", "team", "pricing", "testimonial", "metrics",
-    "comparison", "caseStudy", "scope",
-    "milestoneTimeline", "featureGrid", "statCallout", "architectureStack",
-    "marketSize", "faq"
-  ]);
+  const validTypes = new Set<string>(SLIDE_TYPES);
 
   const slides: SlidePlan[] = slidesRaw
     .filter((s): s is Record<string, unknown> => !!s && typeof s === "object")
@@ -245,21 +239,14 @@ export function validatePlan(raw: unknown, count?: number): {
  * 容错自愈器：当通用模型大纲因页数偏差（如要求 20 页实际返回 24 页）或微小格式偏差而未通过严格校验时，
  * 自动清洗各页数据、自动矫正 cover 首页和 closing 尾页，确保用户无需重试即可获得完整有效大纲。
  */
-export function healModelPlan(raw: unknown, requestedCount?: number): DeckPlan | null {
+export function healModelPlan(raw: unknown, _requestedCount?: number): DeckPlan | null {
   if (!raw || typeof raw !== "object") return null;
   const obj = raw as Record<string, unknown>;
   const title = typeof obj.title === "string" && obj.title.trim() ? obj.title.trim() : "演示文稿";
   const slidesRaw = Array.isArray(obj.slides) ? obj.slides : null;
   // 如果包含标准的 slides 数组，按嵌套格式自愈
   if (slidesRaw && slidesRaw.length > 0) {
-    const validTypes = new Set([
-      "cover", "toc", "section", "content", "summary", "agenda", "closing",
-      "executiveSummary", "kpiDashboard", "funnel", "gantt", "processFlow",
-      "quadrant", "swot", "team", "pricing", "testimonial", "metrics",
-      "comparison", "caseStudy", "scope",
-      "milestoneTimeline", "featureGrid", "statCallout", "architectureStack",
-      "marketSize", "faq"
-    ]);
+    const validTypes = new Set<string>(SLIDE_TYPES);
 
     const cleanSlides: SlidePlan[] = [];
     for (let i = 0; i < slidesRaw.length; i++) {
@@ -357,6 +344,32 @@ export function healModelPlan(raw: unknown, requestedCount?: number): DeckPlan |
   }
 
   return null;
+}
+
+/**
+ * Parse and validate a user-supplied custom outline JSON string.
+ * Reuses the same validation + self-healing pipeline as the AI path:
+ * unknown slide types fall back to content, missing titles are filled,
+ * and the first/last pages are normalized to cover/closing.
+ */
+export function parseCustomOutlineJson(text: string): DeckPlan {
+  if (!text.trim()) {
+    throw new Error("请在左侧填入自定义大纲与内容的 JSON 数据。");
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(text);
+  } catch (e) {
+    throw new Error(`自定义 JSON 解析失败: ${e instanceof Error ? e.message : String(e)}`);
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("自定义大纲必须是一个 JSON 对象，包含 title 与 slides 数组。");
+  }
+  const { plan, error } = validatePlan(parsed);
+  if (plan) return plan;
+  const healed = healModelPlan(parsed);
+  if (healed && healed.slides.length >= 2) return healed;
+  throw new Error(`自定义大纲无效: ${error || "未找到可用页面。"}`);
 }
 
 /**

@@ -1,6 +1,6 @@
 "use client";
 
-import type { DeckPlan, SlidePlan } from "@/lib/types";
+import type { DeckPlan, SlidePlan, SlideType } from "@/lib/types";
 
 interface Props {
   plan: DeckPlan | null;
@@ -8,7 +8,9 @@ interface Props {
   error: string;
 }
 
-const TYPE_META: Record<string, { label: string; color: string }> = {
+// Exhaustive over SlideType: adding a new page type without a preview label
+// fails type-checking instead of silently falling back to “核心要点”.
+const TYPE_META: Record<SlideType, { label: string; color: string }> = {
   cover: { label: "封面", color: "text-amber-400" },
   toc: { label: "目录", color: "text-blue-400" },
   agenda: { label: "议程", color: "text-blue-400" },
@@ -31,6 +33,8 @@ const TYPE_META: Record<string, { label: string; color: string }> = {
   featureGrid: { label: "特性栅格", color: "text-blue-400" },
   statCallout: { label: "指标信号", color: "text-amber-400" },
   architectureStack: { label: "架构堆叠", color: "text-indigo-400" },
+  marketSize: { label: "市场规模", color: "text-cyan-400" },
+  faq: { label: "常见问题", color: "text-teal-400" },
   content: { label: "核心要点", color: "text-zinc-400" },
   summary: { label: "总结", color: "text-amber-400" },
   closing: { label: "收尾行动", color: "text-amber-400" },
@@ -43,7 +47,7 @@ function renderSlideDetails(s: SlidePlan) {
   if (s.items && Array.isArray(s.items)) {
     return (
       <div className="mt-1 flex flex-wrap gap-1 text-[11px] text-zinc-400">
-        {s.items.slice(0, 4).map((it: any, j: number) => (
+        {s.items.slice(0, 4).map((it: { label?: string; title?: string; value?: string | number }, j: number) => (
           <span key={j} className="rounded bg-zinc-800/60 px-1.5 py-0.5 border border-zinc-700/40">
             {it.label || it.title || JSON.stringify(it)} {it.value ? `: ${it.value}` : ""}
           </span>

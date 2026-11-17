@@ -31,6 +31,7 @@ jobs:
           cache-dependency-path: web/package-lock.json
       - run: npm ci --ignore-scripts
       - run: npm test
+      - run: npm run lint
       - run: npx tsc --noEmit --incremental false
       - run: npm run build
       - run: npm run build:pages

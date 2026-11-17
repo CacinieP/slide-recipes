@@ -120,17 +120,24 @@ export default function ConfigPanel(props: Props) {
         throw new Error(`端点返回错误 (${resp.status}): ${text.slice(0, 150)}`);
       }
 
-      const resData = (await resp.json()) as any;
-      const rawList = Array.isArray(resData)
+      const resData: unknown = await resp.json();
+      const rawList: unknown[] = Array.isArray(resData)
         ? resData
-        : Array.isArray(resData?.data)
-          ? resData.data
+        : resData && typeof resData === "object" && Array.isArray((resData as { data?: unknown }).data)
+          ? (resData as { data: unknown[] }).data
           : [];
 
       // 提取所有有效的 model id
       const modelIds: string[] = rawList
-        .map((item: any) => (typeof item === "string" ? item : item?.id || item?.name))
-        .filter((id: any): id is string => typeof id === "string" && id.trim().length > 0);
+        .map((item) => {
+          if (typeof item === "string") return item;
+          if (item && typeof item === "object") {
+            const record = item as { id?: unknown; name?: unknown };
+            return typeof record.id === "string" ? record.id : typeof record.name === "string" ? record.name : undefined;
+          }
+          return undefined;
+        })
+        .filter((id): id is string => typeof id === "string" && id.trim().length > 0);
 
       if (modelIds.length === 0) {
         throw new Error("成功连接，但返回的 /models 列表为空");
@@ -166,6 +173,7 @@ export default function ConfigPanel(props: Props) {
           </div>
           <button
             type="button"
+            aria-expanded={showModelConfig}
             onClick={() => setShowModelConfig(!showModelConfig)}
             className="text-xs text-ink-dim hover:text-ink underline"
           >
@@ -186,6 +194,7 @@ export default function ConfigPanel(props: Props) {
               <div className="grid grid-cols-2 gap-2">
                 <button
                   type="button"
+                  aria-pressed={requestMode === "proxy"}
                   onClick={() => {
                     setDetectedModels([]); setDetectStatus("");
                     set({ modelConfig: { ...props.modelConfig, mode: "proxy" } });
@@ -206,6 +215,7 @@ export default function ConfigPanel(props: Props) {
 
                 <button
                   type="button"
+                  aria-pressed={requestMode === "direct"}
                   onClick={() => {
                     setDetectedModels([]); setDetectStatus("");
                     set({ modelConfig: { ...props.modelConfig, mode: "direct" } });
@@ -232,6 +242,7 @@ export default function ConfigPanel(props: Props) {
                 <div className="inline-flex rounded border border-line bg-base p-0.5 text-[10px]">
                   <button
                     type="button"
+                    aria-pressed={providerRegion === "all"}
                     onClick={() => setProviderRegion("all")}
                     className={`px-1.5 py-0.5 rounded transition ${
                       providerRegion === "all" ? "bg-elev font-medium text-ink shadow-xs" : "text-ink-mute hover:text-ink"
@@ -241,6 +252,7 @@ export default function ConfigPanel(props: Props) {
                   </button>
                   <button
                     type="button"
+                    aria-pressed={providerRegion === "cn"}
                     onClick={() => setProviderRegion("cn")}
                     className={`px-1.5 py-0.5 rounded transition ${
                       providerRegion === "cn" ? "bg-elev font-medium text-ink shadow-xs" : "text-ink-mute hover:text-ink"
@@ -250,6 +262,7 @@ export default function ConfigPanel(props: Props) {
                   </button>
                   <button
                     type="button"
+                    aria-pressed={providerRegion === "global"}
                     onClick={() => setProviderRegion("global")}
                     className={`px-1.5 py-0.5 rounded transition ${
                       providerRegion === "global" ? "bg-elev font-medium text-ink shadow-xs" : "text-ink-mute hover:text-ink"
@@ -269,6 +282,7 @@ export default function ConfigPanel(props: Props) {
                     <button
                       key={p.id}
                       type="button"
+                      aria-pressed={active}
                       onClick={() => handleSelectProvider(p.id)}
                       className={`inline-flex items-center gap-1 rounded px-2.5 py-1 text-xs transition border ${
                         active
@@ -301,6 +315,7 @@ export default function ConfigPanel(props: Props) {
                 )}
               </div>
               <input
+                aria-label="API Base URL"
                 className={inputCls}
                 value={props.modelConfig.baseUrl}
                 onChange={(e) => {
@@ -320,6 +335,7 @@ export default function ConfigPanel(props: Props) {
               <div className="flex gap-2">
                 <input
                   type="password"
+                  aria-label="API Key"
                   className={inputCls}
                   value={props.modelConfig.apiKey}
                   onChange={(e) =>
@@ -365,6 +381,7 @@ export default function ConfigPanel(props: Props) {
               {detectedModels.length > 0 ? (
                 <div className="flex flex-col gap-1.5">
                   <select
+                    aria-label="从已检测模型中选择"
                     className={inputCls}
                     value={props.modelConfig.model}
                     onChange={(e) =>
@@ -391,6 +408,7 @@ export default function ConfigPanel(props: Props) {
               ) : matchedPreset && matchedPreset.models.length > 0 ? (
                 <div className="flex flex-col gap-1">
                   <select
+                    aria-label="从预设模型中选择"
                     className={inputCls}
                     value={props.modelConfig.model}
                     onChange={(e) =>
@@ -488,6 +506,7 @@ export default function ConfigPanel(props: Props) {
               <button
                 key={o.id}
                 type="button"
+                aria-pressed={active}
                 onClick={() => {
                   set({
                     occasion: o.id,
@@ -684,6 +703,7 @@ export default function ConfigPanel(props: Props) {
               <button
                 key={s.id}
                 type="button"
+                aria-pressed={active}
                 onClick={() => set({ styleRecipe: s.id })}
                 className={`rounded-md border px-2 py-2 text-center transition ${
                   active
@@ -710,6 +730,7 @@ export default function ConfigPanel(props: Props) {
               <button
                 key={key}
                 type="button"
+                aria-pressed={props[key]}
                 onClick={() => set({ [key]: !props[key] } as Partial<Props>)}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm transition ${
                   props[key]

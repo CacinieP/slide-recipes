@@ -1,16 +1,22 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+import coreWebVitals from "eslint-config-next/core-web-vitals";
+import typescript from "eslint-config-next/typescript";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
+// Next 16 ships native ESLint flat configs; the legacy FlatCompat wrapper
+// produces circular-structure errors with eslint-config-next >= 16.
 const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+  ...coreWebVitals,
+  ...typescript,
+  {
+    rules: {
+      // Pre-existing debt: pptxgenjs handles (render.ts) and the loose slide
+      // item shape (types.ts) are still `any`. Track as warnings until typed.
+      "@typescript-eslint/no-explicit-any": "warn",
+      "@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+    },
+  },
+  {
+    ignores: [".next/**", "out/**", "node_modules/**"],
+  },
 ];
 
 export default eslintConfig;

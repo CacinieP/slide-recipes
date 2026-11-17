@@ -1,5 +1,3 @@
-import type { ModelConfig } from "./types";
-
 export interface ProviderPreset {
   id: string;
   name: string;

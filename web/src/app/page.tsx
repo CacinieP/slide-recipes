@@ -1,12 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { PALETTES } from "@/lib/palettes";
+import { SLIDE_TYPES } from "@/lib/types";
 import ConfigPanel from "@/components/ConfigPanel";
 import OutlineEditor from "@/components/OutlineEditor";
 import PreviewPanel from "@/components/PreviewPanel";
 import DownloadCard from "@/components/DownloadCard";
 import { requestLlmPlan, renderDeckPlanToBlob, DEFAULT_REQUEST_MODE, DEFAULT_PROXY_URL } from "@/lib/client-generator";
+import { loadPersistedModelConfig, persistModelConfig } from "@/lib/model-config-storage";
+import { parseCustomOutlineJson } from "@/lib/prompt";
 import { deckPlanToMarkdown } from "@/lib/outline-markdown";
 import type { DeckPlan, FontPairId, ModelConfig, StyleRecipe, InputMode, OccasionId, Theme } from "@/lib/types";
 
@@ -62,9 +65,12 @@ export default function Home() {
   const [plan, setPlan] = useState<DeckPlan | null>(null);
   const [result, setResult] = useState<Result | null>(null);
   const [currentHost, setCurrentHost] = useState("");
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      // Mount-only sync from a browser API; no cascading render loop.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setCurrentHost(window.location.hostname);
     }
   }, []);
@@ -73,23 +79,18 @@ export default function Home() {
     if (result) { URL.revokeObjectURL(result.blobUrl); URL.revokeObjectURL(result.outlineUrl); }
   }, [result]);
 
-  // 读取 localStorage 历史配置
+  // 读取历史配置（仅非敏感字段；API Key 只留在内存，绝不落盘）
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem("slide_recipes_model_config");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        setModelConfig((prev) => ({ ...prev, ...parsed }));
-      }
-    } catch {}
+    const saved = loadPersistedModelConfig();
+    // Mount-only hydration from localStorage; runs once, no render loop.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setModelConfig((prev) => ({ ...prev, ...saved }));
   }, []);
 
-  // 更新配置并持久化敏感字段到本地浏览器
+  // 更新配置并持久化非敏感字段到本地浏览器
   const updateModelConfig = (cfg: ModelConfig) => {
     setModelConfig(cfg);
-    try {
-      localStorage.setItem("slide_recipes_model_config", JSON.stringify(cfg));
-    } catch {}
+    persistModelConfig(cfg);
   };
 
   type ConfigState = {
@@ -135,27 +136,15 @@ export default function Home() {
     setIsLoading(true);
     setPlan(null);
     setResult(null);
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     try {
       let finalPlan: DeckPlan;
 
       if (inputMode === "json") {
-        // 自定义大纲模式: 直接解析用户输入的 JSON
-        if (!customOutlineJson.trim()) {
-          throw new Error("请在左侧填入自定义大纲与内容的 JSON 数据。");
-        }
-        try {
-          const parsed = JSON.parse(customOutlineJson);
-          if (!parsed || !Array.isArray(parsed.slides) || parsed.slides.length === 0) {
-            throw new Error("自定义大纲必须包含有效的 slides 数组。");
-          }
-          finalPlan = {
-            title: parsed.title || "自定义演示文稿",
-            slides: parsed.slides,
-          };
-        } catch (e) {
-          throw new Error(`自定义 JSON 解析失败: ${e instanceof Error ? e.message : String(e)}`);
-        }
+        // 自定义大纲模式: 解析 + 与 AI 路径同源的校验/自愈
+        finalPlan = parseCustomOutlineJson(customOutlineJson);
       } else {
         // AI 规划模式: 使用所选请求方式调用模型
         if (inputMode === "topic" && !topic.trim()) {
@@ -176,7 +165,7 @@ export default function Home() {
             includeChart,
             occasion,
           },
-          modelConfig,
+          { ...modelConfig, signal: controller.signal },
         );
       }
 
@@ -186,6 +175,7 @@ export default function Home() {
     } catch (err) {
       setError(err instanceof Error ? err.message : "生成失败，请重试。");
     } finally {
+      abortRef.current = null;
       setIsLoading(false);
     }
   }
@@ -225,11 +215,30 @@ export default function Home() {
     setError("");
   }
 
+  const canGenerate = Boolean(
+    inputMode === "topic" ? topic.trim() : inputMode === "text" ? sourceText.trim() : customOutlineJson.trim(),
+  );
+
+  // Ctrl/Cmd+Enter 快捷生成；用 ref 避免每次按键重绑监听器
+  const shortcutRef = useRef({ isLoading, canGenerate, handleGenerate });
+  shortcutRef.current = { isLoading, canGenerate, handleGenerate };
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const s = shortcutRef.current;
+      if ((e.metaKey || e.ctrlKey) && e.key === "Enter" && !s.isLoading && s.canGenerate) {
+        e.preventDefault();
+        s.handleGenerate();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
   return (
     <div className="min-h-screen bg-canvas">
       {/* Header */}
       <header className="sticky top-0 z-10 border-b border-line bg-canvas/85 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3.5">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-6 py-3.5">
           <div className="flex items-center gap-3">
             <div className="flex h-8 w-8 items-center justify-center rounded border border-gold/50 bg-gold-soft">
               <span className="font-mono text-sm font-bold text-gold">S</span>
@@ -243,10 +252,19 @@ export default function Home() {
                   Web Studio · 模型连接可配置
                 </span>
               </div>
-              <p className="mono-label">{PALETTES.length} PALETTES · 25 SLIDE TYPES · 15 OCCASIONS · BROWSER-NATIVE PPTX</p>
+              <p className="mono-label">{PALETTES.length} PALETTES · {SLIDE_TYPES.length} SLIDE TYPES · 15 OCCASIONS · BROWSER-NATIVE PPTX</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {isLoading && (
+              <button
+                type="button"
+                onClick={() => abortRef.current?.abort()}
+                className="rounded-md border border-line px-3 py-1.5 text-xs text-ink-dim transition hover:border-red-400/60 hover:text-red-300"
+              >
+                取消
+              </button>
+            )}
             <div className="hidden md:flex items-center gap-1 rounded-full border border-line bg-elev/70 px-2 py-1 text-[11px]">
               <span className="text-ink-dim pl-1">网络节点:</span>
               <a
@@ -285,7 +303,8 @@ export default function Home() {
             <button
               type="button"
               onClick={handleGenerate}
-              disabled={isLoading || (inputMode === "topic" ? !topic.trim() : inputMode === "text" ? !sourceText.trim() : !customOutlineJson.trim())}
+              disabled={isLoading || !canGenerate}
+              title="快捷键：Ctrl/Cmd + Enter"
               className="rounded-md bg-gold px-4 py-1.5 text-xs font-semibold text-canvas transition hover:brightness-110 disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-mute"
             >
               {isLoading ? "处理与渲染中…" : plan && inputMode !== "json" ? "重新调用 AI 生成" : "生成大纲与 PPTX"}

@@ -41,7 +41,9 @@ jobs:
         run: python3 -m pip install --disable-pip-version-check --no-input python-pptx==1.0.2
 
       - name: Validate skill manifests
-        run: node scripts/validate-skills.mjs
+        run: |
+          node scripts/validate-skills.mjs
+          node scripts/validate-skills-test.mjs
 
       - name: Run smoke tests
         run: node scripts/smoke-test.mjs

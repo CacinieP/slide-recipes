@@ -91,7 +91,7 @@ node "$SKILL_DIR/scripts/color-qa.mjs" --fg 0F2233 --bg F1FBFA --role body
 
 除非用户明确只要一种，默认交付可编辑 `<output>.pptx` 和 UTF-8 `<output>.md`。大纲包括整份标题、按最终顺序编号的页标题、正文/要点、图表/表格数据、来源及必要备注。改页同步改大纲；不能仅为导出大纲再次调用模型。
 
-保留构建脚本和授权素材供后续修改。大纲不放密钥、连接配置或构建代码。Web Studio 接受普通文稿、可选高级 JSON 输入，并能按编辑后的大纲重新导出 PPTX 和 Markdown，无需再次调用模型。
+保留构建脚本和授权素材供后续修改。大纲不放密钥、连接配置或构建代码。Web Studio 接受普通文稿、可选高级 JSON 输入，并能按编辑后的大纲重新导出 PPTX 和 Markdown，无需再次调用模型。浏览器入口：[仓库](https://github.com/CacinieP/slide-recipes)、[国内 · EdgeOne](https://slides.linguistwantstech.online/)、[全球 · Vercel](https://slide-recipes-web.vercel.app/)。
 
 完工清单：
 - 尊重受众/行动、页数、禁区和来源事实；缺失不编造。

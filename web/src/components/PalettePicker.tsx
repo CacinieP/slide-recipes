@@ -14,7 +14,6 @@ import {
   parseAnyColorToHex,
   contrastRatio,
   hexToHsl,
-  HUE_FAMILIES,
 } from "@/lib/color-utils";
 
 interface Props {
@@ -61,6 +60,8 @@ export default function PalettePicker({
 
   // 当 activeSlot 或 activeTheme 变化时同步更新输入框文字
   useEffect(() => {
+    // Sync the editable text field from external selection state; intentional.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSlotInputText(`#${activeTheme[activeSlot]}`);
   }, [activeSlot, activeTheme]);
 

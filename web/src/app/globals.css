@@ -14,7 +14,7 @@
   --border-strong: #3f3f46;
   --text: #f5f5f5;
   --text-dim: #a1a1aa;
-  --text-mute: #71717a;
+  --text-mute: #8a8a8a; /* ≥4.5:1 on canvas AND elev (verified with skill color-qa) */
   --gold: #d4af37;
   --gold-soft: rgba(212, 175, 55, 0.12);
   --blue: #0070f3;
@@ -55,6 +55,15 @@ textarea:focus-visible,
 select:focus-visible {
   border-color: var(--gold) !important;
   box-shadow: 0 0 0 1px var(--gold);
+}
+/* Keyboard focus must stay visible on buttons and links too. */
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+summary:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* Custom scrollbar — dark + subtle gold. */

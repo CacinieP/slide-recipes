@@ -91,7 +91,7 @@ Do not deliver known unreadable/colliding text, false evidence, missing required
 
 Unless the user explicitly requests only one, deliver editable `<output>.pptx` plus UTF-8 `<output>.md`. The outline includes deck title, numbered page titles, body/bullets, chart/table data, sources and necessary notes in final order. Update it whenever the deck changes; do not call a model again merely to export it.
 
-Keep the build script and authorized assets for revision. Do not include keys, connection settings or build code in the outline. Web Studio accepts ordinary text, offers optional advanced JSON input, and re-exports edited outline content to PPTX and Markdown without another model call.
+Keep the build script and authorized assets for revision. Do not include keys, connection settings or build code in the outline. Web Studio accepts ordinary text, offers optional advanced JSON input, and re-exports edited outline content to PPTX and Markdown without another model call. Browser entry points: [repository](https://github.com/CacinieP/slide-recipes), [China · EdgeOne](https://slides.linguistwantstech.online/), [Global · Vercel](https://slide-recipes-web.vercel.app/).
 
 Final checklist:
 - Audience/action, page cap, exclusions and source facts respected; no fabricated gaps.
