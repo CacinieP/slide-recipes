@@ -1,10 +1,10 @@
-import { buildPrompt, clampSlideCount, normalizeModelPlan, parseModelResponse, healModelPlan } from "./prompt";
+import { buildPrompt, clampSlideCount, normalizeModelPlan, parseModelResponse, healModelPlan, inferRichLayouts } from "./prompt";
 import { resolveTheme, resolveFontPair, resolveStyleMetrics } from "./palettes";
 import { renderPptx } from "./render";
 import type { DeckPlan, GenerateOptions, ModelConfig, Theme } from "./types";
 
 const DEFAULT_BASE_URL = "https://api.modelbest.cn/v1";
-const DEFAULT_MODEL = "MiniCPM-V-4.7-1B";
+const DEFAULT_MODEL = "MiniCPM-V-4.7-35B-A3B";
 
 export interface GenerateDeckResult {
   blob: Blob;
@@ -171,6 +171,11 @@ export async function requestLlmPlan(
     throw new Error(error || "生成的大纲格式无效。");
   }
 
+  // The flat 1B path only emits text pages; upgrade a few pages to richer
+  // native layouts when the content explicitly supports it.
+  if (model === "MiniCPM-V-4.7-1B") {
+    return inferRichLayouts(plan);
+  }
   return plan;
 }
 

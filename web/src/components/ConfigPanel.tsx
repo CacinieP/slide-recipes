@@ -459,7 +459,7 @@ export default function ConfigPanel(props: Props) {
             <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line bg-base px-3 py-2">
               <span className="text-[11px] text-ink-dim">
                 没有 Key？推荐 ModelBest（MiniCPM），默认模型
-                <code className="mx-1 font-mono text-[10px] text-ink">MiniCPM-V-4.7-1B</code>
+                <code className="mx-1 font-mono text-[10px] text-ink">MiniCPM-V-4.7-35B-A3B</code>
               </span>
               <a
                 href="https://platform.modelbest.cn/console/login?ref=A93DCA73"

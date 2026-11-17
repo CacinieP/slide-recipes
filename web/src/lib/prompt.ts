@@ -30,8 +30,14 @@ export function buildPrompt(opts: GenerateOptions, model?: string): { system: st
       `必须恰好生成 ${count} 页文字。每页只填写 page_数字_title 和 page_数字_body 两个字符串。`,
       "严格保留下面所有键名，不改名、不翻译、不新增、不删除、不重复键名。不要输出数组或嵌套对象。",
       "所有空字符串必须替换为与主题相关的具体内容，禁止直接返回空白模板或占位词。",
-      `title 写整份演示的标题。第 1 页写封面标题和副标题；第 2 至 ${count - 1} 页写具体结论和一段简短说明；第 ${count} 页写结束标题和下一步行动。`,
-      `正文语言为 ${opts.language}。不要编造没有依据的数字或事实。`,
+      `title 写整份演示的标题。page_1_title 必须是封面主标题（禁止写“目录”“封面”“简介”这类词），page_1_body 写一句副标题。`,
+      `第 2 至 ${count - 1} 页：每页 body 写 2–3 句具体信息（约 50–90 字），给出结论、做法、原因或例子；禁止“提升效率、保障质量、分阶段推进”这类没有信息量的空话。`,
+      `page_${count}_title 写结束标题，page_${count}_body 写具体的下一步行动（何时、谁、做什么），禁止只写“感谢观看”。`,
+      "受众以主题描述为准：若主题指明了受众（如高中生），全文必须用适合该受众的语言，不要插入“管理层”“产品团队”等无关受众。",
+      `全文使用自然流畅的 ${opts.language}，不夹杂其他语言词汇。不要编造没有依据的具体统计数据；可以写定性结论、方法与常识性例子。`,
+      "深度示例（仅供风格参考，键名仍以下方模板为准）：",
+      "封面副标题示例：「从单店到 3 家店的这一年：营收、复购与教训」",
+      "正文示例：「复购会员贡献了大部分营收，复购周期明显缩短，主因是早高峰出品稳定与储值优惠；明年将扩大早餐组合供应，提升到店频次。」",
       `固定 JSON 结构：\n${JSON.stringify(template)}`,
     ].join("\n");
     const user = [
@@ -111,7 +117,50 @@ export function clampSlideCount(value: number): number {
   return Math.min(20, Math.max(3, Math.floor(value)));
 }
 
-/** Remove an outer fence and, for 1B only, at most three redundant closing braces. */
+/**
+ * Cap flat 1B fields that land in single-line render boxes (cover subtitle,
+ * closing action). Small models over-write these despite instructions; a
+ * deterministic cap keeps the PPTX inside the render-QA overflow gate.
+ * Cuts at a sentence/clause boundary when one exists in the second half.
+ */
+export function capFlatField(text: string, max = 28): string {
+  const s = text.trim();
+  if (s.length <= max) return s;
+  const cut = s.slice(0, max);
+  const at = Math.max(cut.lastIndexOf("。"), cut.lastIndexOf("；"), cut.lastIndexOf("，"));
+  return (at >= max * 0.5 ? cut.slice(0, at) : cut).trim();
+}
+
+/**
+ * Escape raw control characters (newline / CR / tab) that appear INSIDE JSON
+ * string literals. Small models asked for multi-sentence bodies often emit a
+ * literal line break inside a value, which is invalid JSON. We walk the text
+ * tracking string/escape state and only touch characters inside strings, so
+ * structural whitespace is preserved.
+ */
+function escapeRawControlInStrings(src: string): string {
+  let out = "";
+  let inString = false;
+  let escaped = false;
+  for (let i = 0; i < src.length; i++) {
+    const ch = src[i];
+    if (inString) {
+      if (escaped) { escaped = false; out += ch; continue; }
+      if (ch === "\\") { escaped = true; out += ch; continue; }
+      if (ch === '"') { inString = false; out += ch; continue; }
+      if (ch === "\n") { out += "\\n"; continue; }
+      if (ch === "\r") { out += "\\r"; continue; }
+      if (ch === "\t") { out += "\\t"; continue; }
+      out += ch;
+    } else {
+      if (ch === '"') inString = true;
+      out += ch;
+    }
+  }
+  return out;
+}
+
+/** Remove an outer fence and, for 1B only, repair raw control chars and at most three redundant closing braces. */
 export function parseModelResponse(content: string, model?: string): unknown {
   const trimmed = content.trim();
   const fence = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
@@ -120,11 +169,21 @@ export function parseModelResponse(content: string, model?: string): unknown {
     return JSON.parse(clean);
   } catch (error) {
     if (model !== "MiniCPM-V-4.7-1B" || !clean.startsWith("{")) throw error;
+    // Repair 1: escape raw newlines/tabs inside string values, then retry.
+    const repaired = escapeRawControlInStrings(clean);
+    if (repaired !== clean) {
+      try {
+        return JSON.parse(repaired);
+      } catch {
+        // fall through to brace trimming on the repaired text
+      }
+    }
+    const source = repaired;
     let depth = 0;
     let inString = false;
     let escaped = false;
-    for (let index = 0; index < clean.length; index++) {
-      const char = clean[index];
+    for (let index = 0; index < source.length; index++) {
+      const char = source[index];
       if (inString) {
         if (escaped) escaped = false;
         else if (char === "\\") escaped = true;
@@ -136,10 +195,10 @@ export function parseModelResponse(content: string, model?: string): unknown {
       else if (char === "}") {
         depth--;
         if (depth === 0) {
-          const tail = clean.slice(index + 1).replace(/\s/g, "");
+          const tail = source.slice(index + 1).replace(/\s/g, "");
           if (!/^}{1,3}$/.test(tail)) throw error;
           // Parse the complete original object; only the redundant tail is removed.
-          return JSON.parse(clean.slice(0, index + 1));
+          return JSON.parse(source.slice(0, index + 1));
         }
       }
     }
@@ -176,8 +235,8 @@ export function normalizeModelPlan(raw: unknown, count: number, model?: string):
   const slides: SlidePlan[] = Array.from({ length: count }, (_, index) => {
     const title = (obj[`page_${index + 1}_title`] as string).trim();
     const body = (obj[`page_${index + 1}_body`] as string).trim();
-    if (index === 0) return { type: "cover", title, bullets: [body] };
-    if (index === count - 1) return { type: "closing", title, action: body };
+    if (index === 0) return { type: "cover", title, bullets: [capFlatField(body)] };
+    if (index === count - 1) return { type: "closing", title, action: capFlatField(body) };
     return { type: "content", title, body };
   });
   return validatePlan({ title: (obj.title as string).trim(), slides }, count);
@@ -329,14 +388,14 @@ export function healModelPlan(raw: unknown, _requestedCount?: number): DeckPlan 
       flatSlides[0] = {
         type: "cover",
         title: flatSlides[0].title || title,
-        bullets: flatSlides[0].body ? [flatSlides[0].body] : undefined,
+        bullets: flatSlides[0].body ? [capFlatField(flatSlides[0].body)] : undefined,
       };
 
       const last = flatSlides.length - 1;
       flatSlides[last] = {
         type: "closing",
         title: flatSlides[last].title || "总结与行动",
-        action: flatSlides[last].body || "推进落地执行",
+        action: capFlatField(flatSlides[last].body || "推进落地执行"),
       };
 
       return { title, slides: flatSlides };
@@ -344,6 +403,54 @@ export function healModelPlan(raw: unknown, _requestedCount?: number): DeckPlan 
   }
 
   return null;
+}
+
+/**
+ * Deterministic layout inference for flat 1B output.
+ * The 1B path can only emit title/body text; this upgrades a few middle
+ * pages to richer native layouts when the content clearly supports it:
+ *   - explicit stage/sequence markers + 3–5 segments  → processFlow
+ *   - a prominent number+unit in a short body         → statCallout
+ * Conservative by design: at most 2 upgrades, decks < 5 pages untouched,
+ * cover/closing never touched, no guessing beyond explicit signals.
+ */
+export function inferRichLayouts(plan: DeckPlan): DeckPlan {
+  if (plan.slides.length < 5) return plan;
+  let upgraded = 0;
+  const slides = plan.slides.map((slide, index) => {
+    if (upgraded >= 2) return slide;
+    if (index === 0 || index === plan.slides.length - 1) return slide;
+    if (slide.type !== "content" || typeof slide.body !== "string") return slide;
+    const body = slide.body.trim();
+    if (!body) return slide;
+
+    const hasSequence = /第[一二三四五六1-6]阶段|首先|其次|再次|最后|步骤[一二三1-3]|第一步|第二步/.test(body);
+    if (hasSequence) {
+      const segments = body.split(/[；;。]/).map((s) => s.trim()).filter((s) => s.length >= 8);
+      if (segments.length >= 3 && segments.length <= 5) {
+        upgraded += 1;
+        const steps = segments.map((seg) => {
+          const m = seg.match(/^([^：:，,]{2,14})[：:，,]\s*(.+)$/);
+          return m ? { title: m[1], body: m[2] } : { title: seg.slice(0, 12), body: seg };
+        });
+        return { ...slide, type: "processFlow" as SlideType, steps, body: undefined };
+      }
+    }
+
+    const statMatch = body.match(/(\d+(?:\.\d+)?\s*(?:%|％|万|亿|倍|元|人|家|个|天|小时))/);
+    if (statMatch && body.length <= 90) {
+      upgraded += 1;
+      return {
+        ...slide,
+        type: "statCallout" as SlideType,
+        stat: statMatch[1].replace(/\s+/g, ""),
+        takeaway: body,
+        body: undefined,
+      };
+    }
+    return slide;
+  });
+  return { ...plan, slides };
 }
 
 /**

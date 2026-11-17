@@ -17,7 +17,7 @@
 主题 / 普通文本 / Markdown + 配置 → AI 大纲 → 自由编辑 → 下载 .pptx + .md
 ```
 
-LLM 被约束成必须输出一份大纲，**每页只能是 27 种页面类型之一**——基础 5 类 `cover` / `toc` / `section` / `content` / `summary`，加 22 种商业/分析版式（kpiDashboard、funnel、gantt、swot、marketSize、faq 等），并强制结构规则（首页必封面、末页必收尾）。轻量 1B 模型（MiniCPM-V-4.7-1B）走固定平铺模板并自动映射版式；其他模型走完整 schema。校验失败时自动容错自愈（未知类型归一为 content、补齐首尾页）。渲染器再把每种类型映射成具体的 PptxGenJS 布局，严格遵循 skill 的设计规范。
+LLM 被约束成必须输出一份大纲，**每页只能是 27 种页面类型之一**——基础 5 类 `cover` / `toc` / `section` / `content` / `summary`，加 22 种商业/分析版式（kpiDashboard、funnel、gantt、swot、marketSize、faq 等），并强制结构规则（首页必封面、末页必收尾）。默认 `MiniCPM-V-4.7-35B-A3B` 走完整 schema；低成本 `MiniCPM-V-4.7-1B` 走固定平铺模板，正文含明确阶段/数字信号时确定性地推断为 processFlow / statCallout（每份最多 2 页），并对字符串内裸换行、多余尾括号做本地修复，封面副标题/收尾行动限长防溢出。校验失败时自动容错自愈（未知类型归一为 content、补齐首尾页）。渲染器再把每种类型映射成具体的 PptxGenJS 布局，严格遵循 skill 的设计规范。
 
 产出可编辑的 **`.pptx`** 和配套 **`.md` 大纲**。修改大纲后重新导出不再次调用模型。已在 Keynote 核验 PPTX 的可编辑文本。
 
@@ -51,7 +51,7 @@ npm run dev                  # 打开 http://localhost:3000，填写自己的模
 
 完整配置及当前限制见 [`docs/ENV.md`](./docs/ENV.md)。共享限流缺配置或不可用时，生产代理返回 503，不向模型上游发请求。
 
-已选定网站模型 `MiniCPM-V-4.7-1B`，固定 ModelBest 接口。配置准备和未启用的功能边界见 [`docs/MODEL_CONFIG.md`](./docs/MODEL_CONFIG.md)。
+已选定网站默认模型 `MiniCPM-V-4.7-35B-A3B`（MoE，3B 激活，走完整 27 类型设计系统），固定 ModelBest 接口；同 Key 可选低成本 `MiniCPM-V-4.7-1B`（平铺模板 + 版式推断）。配置准备和未启用的功能边界见 [`docs/MODEL_CONFIG.md`](./docs/MODEL_CONFIG.md)。
 
 ## 预览原理
 

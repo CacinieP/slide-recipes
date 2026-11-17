@@ -1,5 +1,23 @@
 # Changelog / 更新日志
 
+## 2026-11-17 — 模型分层与 1B 路径加固（issue #16，qwen4 实施）
+
+### Changed / 变更
+
+- **默认模型升级**：ModelBest 预设新增 `MiniCPM-V-4.7-35B-A3B`（MoE 3B 激活）并设为默认，同 Key 实测可用；1B 保留为低成本选项。非 1B 自动走完整 27 类型设计系统（实测 ~10s 产出 architectureStack/gantt/kpiDashboard 富结构大纲）。前端默认值、服务端配置准备模块、推荐文案同步更新；用户已保存的模型选择不受影响。
+
+### Fixed / 修复（1B 路径，全部实测驱动）
+
+- **JSON 裸换行崩溃**：实测 1B 在多句正文里输出未转义换行 → 解析直接失败。新增字符串内控制字符转义修复（仅 1B，与尾括号修复可叠加）。
+- **封面/收尾溢出 P0**：1B 把封面副标题写成多句长文 → render-qa TEXT_OVERFLOW P0。normalize/heal 的平铺映射新增 `capFlatField`（28 字、按句读边界截断）。
+- **内容空洞**：1B prompt 强化——每页 2–3 句具体信息下限、禁空话清单、受众以主题为准（修复“高中生主题出现管理层”串扰）、语言纯净规则、封面/收尾指令强化、深度示例（文本式，避免第二 JSON 干扰）。
+- **版式单调**：新增 `inferRichLayouts` 确定性版式推断——阶段/序列标记+3–5 分段→processFlow，短正文显著数字→statCallout；每份最多 2 页、<5 页不动、封面/收尾不动。
+
+### Verified / 验证（qwen4 实测）
+
+- 166/166 测试（新增 12 项）、tsc、lint 0 error、build + build:pages 全绿。
+- 真实 API 端到端：1B 强化路径产出具体正文并渲染 85KB PPTX，**render-qa P0:0/P1:0 通过门禁**（修复前 P0:1/P1:1）；pptx-editable-check 通过；35B-A3B 默认路径产出富结构大纲。
+
 ## 2026-11-17 — 高级动态层：让界面活起来（designlang 二轮研究，qwen4 实施）
 
 ### Added / 新增

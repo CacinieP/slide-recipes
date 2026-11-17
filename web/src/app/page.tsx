@@ -36,7 +36,7 @@ const EXAMPLES = [
 
 const DEFAULT_MODEL_CONFIG: ModelConfig = {
   baseUrl: "https://api.modelbest.cn/v1",
-  model: "MiniCPM-V-4.7-1B",
+  model: "MiniCPM-V-4.7-35B-A3B",
   apiKey: "",
   mode: DEFAULT_REQUEST_MODE,
   proxyUrl: DEFAULT_PROXY_URL,

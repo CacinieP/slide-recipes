@@ -17,9 +17,10 @@ export const PROVIDER_PRESETS: ProviderPreset[] = [
     badge: "MiniCPM",
     region: "cn",
     baseUrl: "https://api.modelbest.cn/v1",
-    defaultModel: "MiniCPM-V-4.7-1B",
+    defaultModel: "MiniCPM-V-4.7-35B-A3B",
     models: [
-      { id: "MiniCPM-V-4.7-1B", name: "MiniCPM-V-4.7-1B", desc: "网站选定模型" },
+      { id: "MiniCPM-V-4.7-35B-A3B", name: "MiniCPM-V-4.7-35B-A3B", desc: "推荐 · 27 种富版式" },
+      { id: "MiniCPM-V-4.7-1B", name: "MiniCPM-V-4.7-1B", desc: "低成本 · 纯文本版式" },
     ],
     keyPlaceholder: "sk-live-...",
     docUrl: "https://platform.modelbest.cn/console/login?ref=A93DCA73",
