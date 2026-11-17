@@ -300,7 +300,7 @@ export default function PalettePicker({
                 <div
                   key={s.key}
                   onClick={() => setActiveSlot(s.key)}
-                  className={`group relative flex cursor-pointer flex-col items-center rounded-lg border p-1.5 transition ${
+                  className={`group pop relative flex cursor-pointer flex-col items-center rounded-lg border p-1.5 ${
                     isSelected
                       ? "border-gold bg-gold-soft shadow-xs ring-1 ring-gold/50"
                       : "border-line bg-base hover:border-line-strong"
@@ -475,12 +475,12 @@ export default function PalettePicker({
                 }}
                 title={`${p.name} (${pHue}°) — ${p.useCases}`}
                 aria-pressed={isActive}
-                className={`group relative aspect-square overflow-hidden rounded-md border transition ${
+                className={`group pop relative aspect-square overflow-hidden rounded-md border ${
                   isActive
-                    ? "z-10 scale-105 border-gold shadow-sm ring-2 ring-gold/60"
+                    ? "conic-ring z-10 scale-105 border-gold shadow-sm"
                     : isHueMatched
                     ? "border-warning/70 ring-1 ring-warning/30"
-                    : "border-line hover:scale-105 hover:border-line-strong"
+                    : "border-line hover:border-line-strong"
                 }`}
               >
                 <div className="flex h-full flex-col">

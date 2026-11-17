@@ -1,6 +1,7 @@
 "use client";
 
 import type { DeckPlan, SlidePlan, SlideType, Theme } from "@/lib/types";
+import { useSpotlight, useTilt, useReveal } from "@/lib/motion";
 import { IconAlert, IconFileText, IconArrowRight } from "./icons";
 
 interface Props {
@@ -51,6 +52,7 @@ const TYPE_META: Record<SlideType, { label: string; color: string }> = {
  * family — not a full renderer, just enough to recognize the page shape.
  */
 function SlideThumb({ slide, theme }: { slide: SlidePlan; theme: Theme }) {
+  const tiltRef = useTilt<HTMLDivElement>(8);
   const c = (hex: string) => `#${hex}`;
   const bar = (color: string, w: string, h = 3) => (
     <div style={{ background: c(color), width: w, height: h, borderRadius: 1 }} />
@@ -151,7 +153,8 @@ function SlideThumb({ slide, theme }: { slide: SlidePlan; theme: Theme }) {
 
   return (
     <div
-      className="relative aspect-video w-20 shrink-0 overflow-hidden rounded-md border border-line shadow-xs"
+      ref={tiltRef}
+      className="tilt relative aspect-video w-20 shrink-0 overflow-hidden rounded-md border border-line shadow-xs"
       style={{ background: c(theme.bg) }}
       aria-hidden="true"
     >
@@ -220,8 +223,11 @@ function renderSlideDetails(s: SlidePlan) {
 }
 
 export default function PreviewPanel({ plan, isLoading, error, theme, onLoadSample }: Props) {
+  const spotRef = useSpotlight<HTMLDivElement>();
+  // Re-observe after the list remounts (loading skeleton ↔ plan) or changes.
+  const revealRef = useReveal<HTMLOListElement>(60, !isLoading && plan ? plan : null);
   return (
-    <div className="card flex h-full flex-col p-4">
+    <div ref={spotRef} className="card spotlight flex h-full flex-col p-4">
       <div className="mb-3 flex items-center justify-between">
         <div className="flex items-baseline gap-2">
           <span className="section-no" aria-hidden="true">※</span>
@@ -236,9 +242,21 @@ export default function PreviewPanel({ plan, isLoading, error, theme, onLoadSamp
 
       <div className="flex-1 overflow-y-auto rounded-lg border border-line bg-base p-3">
         {isLoading && (
-          <div className="flex h-full min-h-48 flex-col items-center justify-center gap-3 text-ink-mute">
-            <span className="spin inline-block h-6 w-6 rounded-full border-2 border-line border-t-gold" aria-hidden="true" />
-            <span className="text-xs tracking-wide">正在生成大纲并渲染 PPTX…</span>
+          <div className="flex h-full min-h-48 flex-col gap-2">
+            <div className="flex items-center justify-center gap-2.5 py-3 text-ink-mute">
+              <span className="spin inline-block h-5 w-5 rounded-full border-2 border-line border-t-gold" aria-hidden="true" />
+              <span className="text-xs tracking-wide">正在生成大纲并渲染 PPTX…</span>
+            </div>
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="flex gap-3 rounded-lg border border-line bg-elev p-2.5" style={{ opacity: 1 - i * 0.25 }} aria-hidden="true">
+                <div className="skeleton aspect-video w-20 shrink-0 rounded-md border border-line" />
+                <div className="flex flex-1 flex-col justify-center gap-2">
+                  <div className="skeleton h-2.5 w-1/3 rounded-full" />
+                  <div className="skeleton h-3.5 w-3/4 rounded-md" />
+                  <div className="skeleton h-2.5 w-1/2 rounded-full" />
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -283,14 +301,14 @@ export default function PreviewPanel({ plan, isLoading, error, theme, onLoadSamp
         )}
 
         {!isLoading && !error && plan && (
-          <ol className="flex flex-col gap-2">
+          <ol ref={revealRef} className="flex flex-col gap-2">
             {plan.slides.map((s, i) => {
               const meta = TYPE_META[s.type] ?? TYPE_META.content;
               return (
                 <li
                   key={i}
-                  className="rise flex gap-3 rounded-lg border border-line bg-elev p-2.5 shadow-xs"
-                  style={{ animationDelay: `${Math.min(i, 8) * 45}ms` }}
+                  data-reveal
+                  className="flex gap-3 rounded-lg border border-line bg-elev p-2.5 shadow-xs transition-colors hover:border-line-strong"
                 >
                   {theme && <SlideThumb slide={s} theme={theme} />}
                   <div className="min-w-0 flex-1">

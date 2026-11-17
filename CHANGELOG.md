@@ -1,5 +1,22 @@
 # Changelog / 更新日志
 
+## 2026-11-17 — 高级动态层：让界面活起来（designlang 二轮研究，qwen4 实施）
+
+### Added / 新增
+
+- **二轮 designlang 研究**：提取 stripe.com（~12s 环境动画周期、多色相径向光晕、hover stagger 编排）与 liveblocks.io（指针位置径向聚光 `radial-gradient(100px at <x> <y>)`、过冲弹簧 `cubic-bezier(0.09,1.12,0.37,1)`）的动效签名。
+- **环境氛围层**（AmbientBackground）：3 团多色相极光（群青/朱红/青/紫）在 18–26s 周期漂移 + **6 张幽灵幻灯片**（主题本身的 16:9 线框在背景漂浮）；共享单 rAF 阻尼指针视差（指数平滑、静止即停、隐藏标签页即停，无每帧 React 状态）。
+- **聚光卡片**（Liveblocks 签名）：配置卡/预览卡/编辑卡/下载卡随指针移动径向高光 + 边框辉光（mask 描边）。
+- **3D 倾斜缩略图**：大纲缩略图随指针 perspective 倾斜，离开弹簧回正。
+- **Stripe 式入场编排**：IntersectionObserver 分级 reveal（70ms stagger），导出后重挂载自动重新观察；滚动到位逐页浮现。
+- **磁吸主 CTA + 光泽扫过**、wordmark 渐变 shimmer、生成中顶部渐变进度光带 + 骨架屏微光、成功对勾描线动画、文件大小数字 count-up、选中色板旋转 conic 光环、模型面板弹簧平滑折叠（关闭时 inert 保焦点安全）。
+- **应用式布局**：桌面改为视口内 app shell（左栏独立滚动，右栏编辑区限高内滚 + 预览永远可见），修复了旧布局预览被长编辑器挤出视口的问题；移动端 grid 轨道 minmax(0,1fr) 修复横向溢出。
+
+### Verified / 验证（qwen4 实测）
+
+- 154/154 测试、tsc、lint 0 error、build + build:pages 全绿。
+- Playwright：极光/幽灵/视差/聚光/倾斜变量实测生效；示例→导出→reveal 仍生效（修复了一个重挂载后观察器失效 bug）；内滚触发剩余 reveal；折叠 inert 正确；重复载入无残留；390px 移动端无溢出且全流程可完成；`prefers-reduced-motion` 实测全部动画/视差归零；控制台 0 报错。
+
 ## 2026-11-17 — Web Studio 视觉重设计：去 AI 味（designlang 研究驱动，qwen4 实施）
 
 ### Changed / 变更

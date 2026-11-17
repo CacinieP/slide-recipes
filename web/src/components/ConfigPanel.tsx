@@ -213,8 +213,9 @@ export default function ConfigPanel(props: Props) {
           </button>
         </div>
 
-        {showModelConfig && (
-          <div className="flex flex-col gap-3.5">
+        <div className={`collapse-grid ${showModelConfig ? "is-open" : ""}`} inert={!showModelConfig}>
+          <div>
+          <div className="flex flex-col gap-3.5 pt-0.5">
             {/* 通信与请求模式切换 */}
             <div>
               <div className="mb-1.5 flex items-center justify-between">
@@ -302,7 +303,7 @@ export default function ConfigPanel(props: Props) {
                       type="button"
                       aria-pressed={active}
                       onClick={() => handleSelectProvider(p.id)}
-                      className={`press inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] ${
+                      className={`press pop inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] ${
                         active
                           ? "border-gold bg-gold-soft font-medium text-gold"
                           : "border-line bg-elev text-ink-dim hover:border-line-strong hover:text-ink"
@@ -485,7 +486,8 @@ export default function ConfigPanel(props: Props) {
               )}
             </div>
           </div>
-        )}
+          </div>
+        </div>
       </div>
 
       {/* 02 演示场景 */}
@@ -510,7 +512,7 @@ export default function ConfigPanel(props: Props) {
                     topic: props.topic ? props.topic : o.sampleTopic,
                   });
                 }}
-                className={`press rounded-lg border p-2 text-left ${
+                className={`press pop rounded-lg border p-2 text-left ${
                   active
                     ? "border-gold bg-gold-soft shadow-xs"
                     : "border-line bg-elev shadow-xs hover:border-line-strong"
@@ -669,7 +671,7 @@ export default function ConfigPanel(props: Props) {
                 type="button"
                 aria-pressed={active}
                 onClick={() => set({ styleRecipe: s.id })}
-                className={`press flex flex-col items-center gap-1.5 rounded-lg border px-2 py-2.5 ${
+                className={`press pop flex flex-col items-center gap-1.5 rounded-lg border px-2 py-2.5 ${
                   active
                     ? "border-gold bg-gold-soft shadow-xs"
                     : "border-line bg-elev shadow-xs hover:border-line-strong"

@@ -4,6 +4,7 @@ import type { DeckPlan, SlidePlan } from "@/lib/types";
 import { OUTLINE_FIELD_LABELS } from "@/lib/outline-markdown";
 import { trimDeckPlan } from "@/lib/prompt";
 import { IconArrowUp, IconArrowDown, IconTrash, IconPlus, IconDownload, IconInfo } from "./icons";
+import { useSpotlight } from "@/lib/motion";
 
 const inputClass = "w-full rounded-lg border border-line bg-elev px-3 py-2 text-sm text-ink shadow-xs focus:border-gold focus:outline-none";
 const buttonClass = "press inline-flex items-center gap-1 rounded-md border border-line bg-elev px-2 py-1 text-[11px] text-ink-dim shadow-xs hover:border-line-strong hover:text-ink disabled:opacity-40 disabled:shadow-none";
@@ -59,13 +60,14 @@ export default function OutlineEditor({ plan, isLoading, dirty, targetCount, onC
   onChange: (plan: DeckPlan) => void; onExport: () => void;
 }) {
   const updateSlide = (index: number, next: SlidePlan) => onChange({ ...plan, slides: plan.slides.map((slide, i) => i === index ? next : slide) });
+  const spotRef = useSpotlight<HTMLElement>();
   const moveSlide = (index: number, offset: number) => {
     const slides = [...plan.slides];
     [slides[index], slides[index + offset]] = [slides[index + offset], slides[index]];
     onChange({ ...plan, slides });
   };
   return (
-    <section className="card p-4">
+    <section ref={spotRef} className="card spotlight p-4">
       <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
         <div className="flex items-baseline gap-2">
           <span className="section-no" aria-hidden="true">✎</span>

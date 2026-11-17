@@ -12,6 +12,8 @@ import { loadPersistedModelConfig, persistModelConfig } from "@/lib/model-config
 import { parseCustomOutlineJson } from "@/lib/prompt";
 import { deckPlanToMarkdown } from "@/lib/outline-markdown";
 import { SAMPLE_PLAN } from "@/lib/sample-plan";
+import { useSpotlight, useMagnetic } from "@/lib/motion";
+import AmbientBackground from "@/components/AmbientBackground";
 import { IconArrowRight, IconShuffle, IconLock, IconStop, IconFileText } from "@/components/icons";
 import type { DeckPlan, FontPairId, ModelConfig, StyleRecipe, InputMode, OccasionId, Theme } from "@/lib/types";
 
@@ -246,18 +248,22 @@ export default function Home() {
   const previewTheme = customTheme || resolveTheme(paletteId);
   const onChinaNode = currentHost.includes("linguistwantstech.online");
   const onGlobalNode = currentHost.includes("vercel.app");
+  const configSpotlight = useSpotlight<HTMLElement>();
+  const ctaMagnetic = useMagnetic<HTMLButtonElement>(4);
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen lg:flex lg:h-screen lg:flex-col lg:overflow-hidden">
+      <AmbientBackground />
       {/* Header */}
-      <header className="sticky top-0 z-20 border-b border-line bg-canvas/85 backdrop-blur-md">
+      <header className="sticky top-0 z-20 shrink-0 border-b border-line bg-canvas/85 backdrop-blur-md">
+        {isLoading && <div className="progress-ribbon" aria-hidden="true" />}
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-6 py-3">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-ink text-canvas shadow-xs">
               <span className="font-display text-lg italic leading-none">S</span>
             </div>
             <div className="flex items-baseline gap-2.5">
-              <h1 className="font-display text-lg tracking-tight text-ink">
+              <h1 className="wordmark font-display text-lg tracking-tight">
                 Slide Recipes
               </h1>
               <span className="hidden sm:inline-block h-3.5 w-px bg-line-strong" aria-hidden="true" />
@@ -324,10 +330,11 @@ export default function Home() {
             )}
             <button
               type="button"
+              ref={ctaMagnetic}
               onClick={handleGenerate}
               disabled={isLoading || !canGenerate}
               title="快捷键：Ctrl/Cmd + Enter"
-              className="press inline-flex items-center gap-1.5 rounded-lg bg-gold px-4 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-[var(--ultra-deep)] disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-mute disabled:shadow-none"
+              className="magnetic shine press inline-flex items-center gap-1.5 rounded-lg bg-gold px-4 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-[var(--ultra-deep)] disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-mute disabled:shadow-none"
             >
               {isLoading ? (
                 <>
@@ -346,9 +353,9 @@ export default function Home() {
       </header>
 
       {/* Body: two-column */}
-      <main className="mx-auto grid max-w-7xl gap-6 px-6 py-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
+      <main className="mx-auto grid w-full max-w-7xl grid-cols-[minmax(0,1fr)] gap-6 px-6 py-6 lg:min-h-0 lg:flex-1 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)] lg:py-4">
         {/* Left: config */}
-        <section className="card rise p-5" style={{ animationDelay: "40ms" }}>
+        <section ref={configSpotlight} className="card spotlight rise min-w-0 p-5 lg:min-h-0 lg:overflow-y-auto" style={{ animationDelay: "40ms" }}>
           <ConfigPanel
             topic={topic}
             audience={audience}
@@ -371,16 +378,16 @@ export default function Home() {
         </section>
 
         {/* Right: preview + download */}
-        <section className="flex min-h-[60vh] flex-col gap-4">
+        <section className="flex min-h-[60vh] min-w-0 flex-col gap-4 lg:min-h-0">
           {plan && (
-            <div className="rise" style={{ animationDelay: "80ms" }}>
+            <div className="rise shrink-0 lg:max-h-[45%] lg:overflow-y-auto" style={{ animationDelay: "80ms" }}>
               <OutlineEditor plan={plan} isLoading={isLoading} dirty={!result}
                 targetCount={slideCount}
                 onChange={handlePlanChange} onExport={handleExportEdited} />
             </div>
           )}
           {result && (
-            <div className="rise" style={{ animationDelay: "60ms" }}>
+            <div className="rise shrink-0" style={{ animationDelay: "60ms" }}>
               <DownloadCard
                 fileName={result.fileName}
                 blobUrl={result.blobUrl}
@@ -391,14 +398,14 @@ export default function Home() {
               />
             </div>
           )}
-          <div className="rise flex-1" style={{ animationDelay: plan ? "120ms" : "80ms" }}>
+          <div className="rise min-h-0 flex-1" style={{ animationDelay: plan ? "120ms" : "80ms" }}>
             <PreviewPanel plan={plan} isLoading={isLoading} error={error}
               theme={previewTheme} onLoadSample={handleLoadSample} />
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-line bg-elev/60 px-6 py-4">
+      <footer className="shrink-0 border-t border-line bg-elev/60 px-6 py-4">
         <div className="mx-auto flex max-w-7xl flex-col sm:flex-row items-center justify-between gap-3 text-xs text-ink-mute">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
             <span className="inline-flex items-center gap-1.5 text-ink-dim">

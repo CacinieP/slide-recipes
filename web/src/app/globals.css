@@ -47,12 +47,15 @@
   --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
   --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
 
-  /* Motion (Linear-style ladder) */
+  /* Motion (Linear ladder + Liveblocks overshoot spring + Stripe ambient) */
   --dur-xs: 100ms;
   --dur-sm: 160ms;
   --dur-md: 400ms;
   --ease-out: cubic-bezier(0.32, 0.72, 0, 1);
   --ease-soft: cubic-bezier(0.165, 0.84, 0.44, 1);
+  --ease-spring: cubic-bezier(0.09, 1.12, 0.37, 1);
+  --ease-glide: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-sweep: cubic-bezier(0.78, 0, 0.22, 1);
 
   /* Elevation: soft, warm, never neon */
   --shadow-xs: 0 1px 2px rgba(25, 23, 20, 0.05);
@@ -96,17 +99,8 @@ body {
   text-rendering: optimizeLegibility;
 }
 
-/* Layered paper atmosphere: grain + a faint projection wash from top-right. */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background:
-    radial-gradient(1100px 420px at 78% -8%, rgba(39, 66, 224, 0.055), transparent 70%),
-    radial-gradient(900px 380px at -6% 108%, rgba(198, 61, 20, 0.04), transparent 70%);
-}
+/* Layered paper atmosphere: grain only — the living aurora + ghost slides
+   are rendered by <AmbientBackground/> above this layer. */
 body::after {
   content: "";
   position: fixed;
@@ -249,6 +243,306 @@ input[type="range"]:focus-visible {
     animation: none;
   }
   .press {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Premium motion layer (designlang: stripe.com + liveblocks.io)       */
+/* ------------------------------------------------------------------ */
+
+/* Ambient aurora fields: multi-hue radials drifting on long cycles. */
+.aurora {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(72px);
+  will-change: transform;
+}
+.aurora-a {
+  width: 58vw;
+  height: 58vw;
+  top: -22vw;
+  right: -14vw;
+  background: radial-gradient(circle at 40% 40%, rgba(39, 66, 224, 0.16), rgba(124, 58, 237, 0.09) 46%, transparent 72%);
+  animation: aurora-drift-a 21s var(--ease-sweep) infinite alternate;
+}
+.aurora-b {
+  width: 46vw;
+  height: 46vw;
+  bottom: -18vw;
+  left: -12vw;
+  background: radial-gradient(circle at 55% 45%, rgba(198, 61, 20, 0.11), rgba(154, 103, 0, 0.07) 50%, transparent 74%);
+  animation: aurora-drift-b 26s var(--ease-sweep) infinite alternate;
+}
+.aurora-c {
+  width: 34vw;
+  height: 34vw;
+  top: 34%;
+  left: 30%;
+  background: radial-gradient(circle at 50% 50%, rgba(14, 116, 144, 0.10), transparent 70%);
+  animation: aurora-drift-c 18s var(--ease-sweep) infinite alternate;
+}
+@keyframes aurora-drift-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(-7vw, 6vh, 0) scale(1.14); }
+}
+@keyframes aurora-drift-b {
+  from { transform: translate3d(0, 0, 0) scale(1.08); }
+  to { transform: translate3d(6vw, -5vh, 0) scale(0.94); }
+}
+@keyframes aurora-drift-c {
+  from { transform: translate3d(-4vw, -2vh, 0) scale(0.92); opacity: 0.7; }
+  to { transform: translate3d(5vw, 4vh, 0) scale(1.12); opacity: 1; }
+}
+
+/* Ghost slides: damped pointer parallax outside, slow float inside. */
+.ghost-parallax {
+  transform: translate3d(
+    calc(var(--par-x, 0) * var(--depth, 16px)),
+    calc(var(--par-y, 0) * var(--depth, 16px)),
+    0
+  );
+}
+.ghost-float {
+  animation: ghost-float var(--dur, 20s) ease-in-out var(--delay, 0s) infinite alternate;
+}
+@keyframes ghost-float {
+  from { transform: translateY(-7px) rotate(var(--rot, -1.5deg)); }
+  to { transform: translateY(9px) rotate(calc(var(--rot, -1.5deg) * -0.7)); }
+}
+
+/* Cursor spotlight cards (Liveblocks signature): radial highlight + border
+   glow that follows the pointer via --mx/--my written by useSpotlight. */
+.spotlight {
+  position: relative;
+}
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: var(--spot-o, 0);
+  transition: opacity var(--dur-md) var(--ease-out);
+  background: radial-gradient(
+    260px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(39, 66, 224, 0.07),
+    transparent 70%
+  );
+}
+.spotlight::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: var(--spot-o, 0);
+  transition: opacity var(--dur-md) var(--ease-out);
+  background: radial-gradient(
+    220px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(39, 66, 224, 0.35),
+    transparent 70%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  padding: 1px;
+}
+
+/* 3D tilt for proof thumbnails (useTilt). */
+.tilt {
+  transform: perspective(640px)
+    rotateX(var(--tilt-x, 0deg))
+    rotateY(var(--tilt-y, 0deg))
+    translateZ(0);
+  transition: transform 420ms var(--ease-spring), box-shadow 420ms var(--ease-spring);
+  transform-style: preserve-3d;
+}
+.tilt:hover {
+  box-shadow: var(--shadow-lift);
+}
+
+/* Staged scroll reveal (useReveal): Stripe-style stagger choreography. */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(12px);
+}
+[data-reveal].is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 560ms var(--ease-glide) var(--reveal-delay, 0ms),
+    transform 560ms var(--ease-spring) var(--reveal-delay, 0ms);
+}
+
+/* Magnetic CTA + shine sweep. */
+.magnetic {
+  transform: translate3d(var(--mag-x, 0px), var(--mag-y, 0px), 0);
+  transition: transform 480ms var(--ease-spring);
+}
+.shine {
+  position: relative;
+  overflow: hidden;
+}
+.shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.34) 50%, transparent 62%);
+  transform: translateX(-130%);
+}
+.shine:hover::after {
+  animation: shine-sweep 900ms var(--ease-sweep);
+}
+@keyframes shine-sweep {
+  to { transform: translateX(130%); }
+}
+
+/* Wordmark shimmer on hover. */
+.wordmark {
+  background: linear-gradient(100deg, var(--ink) 40%, var(--ultra) 50%, var(--ink) 60%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: background-position 700ms var(--ease-sweep);
+}
+.wordmark:hover {
+  background-position: -120% 0;
+}
+
+/* Generation progress ribbon: indeterminate gradient sweep under header. */
+.progress-ribbon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  overflow: hidden;
+}
+.progress-ribbon::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--ultra) 30%, var(--plum) 52%, var(--verm) 72%, transparent);
+  transform: translateX(-100%);
+  animation: ribbon-sweep 1.6s var(--ease-sweep) infinite;
+}
+@keyframes ribbon-sweep {
+  to { transform: translateX(100%); }
+}
+
+/* Shimmer skeleton slides while generating. */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.85) 50%, transparent 70%);
+  transform: translateX(-100%);
+  animation: shine-sweep 1.5s var(--ease-sweep) infinite;
+}
+
+/* Rotating conic ring for the active palette swatch / busy states. */
+@property --ring-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+.conic-ring {
+  position: relative;
+}
+.conic-ring::before {
+  content: "";
+  position: absolute;
+  inset: -2.5px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--ring-angle),
+    var(--ultra),
+    var(--plum) 28%,
+    var(--verm) 52%,
+    var(--teal) 76%,
+    var(--ultra)
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: ring-rotate 3.4s linear infinite;
+  pointer-events: none;
+}
+@keyframes ring-rotate {
+  to { --ring-angle: 360deg; }
+}
+
+/* Success check stroke draw-in. */
+.draw-check {
+  stroke-dasharray: 26;
+  stroke-dashoffset: 26;
+  animation: draw-check 620ms var(--ease-glide) 120ms forwards;
+}
+@keyframes draw-check {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Smooth collapse for the model service panel. */
+.collapse-grid {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 460ms var(--ease-spring);
+}
+.collapse-grid.is-open {
+  grid-template-rows: 1fr;
+}
+.collapse-grid > div {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Springy selection pop for swatches and chips. */
+.pop {
+  transition:
+    transform 380ms var(--ease-spring),
+    border-color var(--dur-sm) var(--ease-out),
+    box-shadow 380ms var(--ease-spring),
+    background-color var(--dur-sm) var(--ease-out);
+}
+.pop:hover {
+  transform: translateY(-1.5px);
+}
+.pop:active {
+  transform: scale(0.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora,
+  .ghost-float,
+  .progress-ribbon::before,
+  .skeleton::after,
+  .conic-ring::before,
+  .shine:hover::after {
+    animation: none;
+  }
+  .ghost-parallax,
+  .magnetic,
+  .tilt {
+    transform: none;
+  }
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+  .draw-check {
+    stroke-dashoffset: 0;
+    animation: none;
+  }
+  .collapse-grid {
     transition: none;
   }
 }
