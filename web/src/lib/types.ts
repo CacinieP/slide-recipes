@@ -1,36 +1,41 @@
 // Shared types for the PPTX web generator.
 
 /**
- * All supported slide page types (5 basic types + 15 commercial/analytical elements).
+ * All supported slide page types (5 basic types + 22 commercial/analytical elements).
+ * Single source of truth: the SlideType union and every type whitelist derive
+ * from this array, so counts and validation cannot drift apart.
  */
-export type SlideType =
-  | "cover"
-  | "toc"
-  | "section"
-  | "content"
-  | "summary"
-  | "agenda"
-  | "closing"
-  | "executiveSummary"
-  | "kpiDashboard"
-  | "funnel"
-  | "gantt"
-  | "processFlow"
-  | "quadrant"
-  | "swot"
-  | "team"
-  | "pricing"
-  | "testimonial"
-  | "metrics"
-  | "comparison"
-  | "caseStudy"
-  | "scope"
-  | "milestoneTimeline"
-  | "featureGrid"
-  | "statCallout"
-  | "architectureStack"
-  | "marketSize"
-  | "faq";
+export const SLIDE_TYPES = [
+  "cover",
+  "toc",
+  "section",
+  "content",
+  "summary",
+  "agenda",
+  "closing",
+  "executiveSummary",
+  "kpiDashboard",
+  "funnel",
+  "gantt",
+  "processFlow",
+  "quadrant",
+  "swot",
+  "team",
+  "pricing",
+  "testimonial",
+  "metrics",
+  "comparison",
+  "caseStudy",
+  "scope",
+  "milestoneTimeline",
+  "featureGrid",
+  "statCallout",
+  "architectureStack",
+  "marketSize",
+  "faq",
+] as const;
+
+export type SlideType = (typeof SLIDE_TYPES)[number];
 
 /**
  * The theme object contract — MANDATORY shape.

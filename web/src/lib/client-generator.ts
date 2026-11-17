@@ -1,10 +1,10 @@
-import { buildPrompt, clampSlideCount, normalizeModelPlan, parseModelResponse, healModelPlan } from "./prompt";
+import { buildPrompt, clampSlideCount, normalizeModelPlan, parseModelResponse, healModelPlan, inferRichLayouts } from "./prompt";
 import { resolveTheme, resolveFontPair, resolveStyleMetrics } from "./palettes";
 import { renderPptx } from "./render";
 import type { DeckPlan, GenerateOptions, ModelConfig, Theme } from "./types";
 
 const DEFAULT_BASE_URL = "https://api.modelbest.cn/v1";
-const DEFAULT_MODEL = "MiniCPM-V-4.7-1B";
+const DEFAULT_MODEL = "MiniCPM-V-4.7-35B-A3B";
 
 export interface GenerateDeckResult {
   blob: Blob;
@@ -15,7 +15,15 @@ export interface GenerateDeckResult {
 }
 
 export type RequestMode = "proxy" | "direct";
-export interface RequestConfig { mode?: RequestMode; proxyUrl?: string }
+export interface RequestConfig {
+  mode?: RequestMode;
+  proxyUrl?: string;
+  /** Caller-owned cancellation (e.g. a “取消” button). Never auto-switched. */
+  signal?: AbortSignal;
+  /** Per-request timeout; 0 disables. Defaults to 120s so a hung upstream cannot spin the UI forever. */
+  timeoutMs?: number;
+}
+export const DEFAULT_REQUEST_TIMEOUT_MS = 120_000;
 export const DEFAULT_REQUEST_MODE: RequestMode = process.env.NEXT_PUBLIC_MODEL_REQUEST_MODE === "direct" ? "direct" : "proxy";
 export const DEFAULT_PROXY_URL = process.env.NEXT_PUBLIC_MODEL_PROXY_URL || "/api/proxy";
 
@@ -29,14 +37,43 @@ export async function smartFetch(
   const headers = new Headers(init.headers || {});
   headers.delete("x-target-url");
   if (mode === "proxy") headers.set("x-target-url", targetUrl);
+
+  // Compose caller cancellation + timeout into one signal without relying on
+  // AbortSignal.any (wider browser support).
+  const controller = new AbortController();
+  let timedOut = false;
+  const timeoutMs = config.timeoutMs ?? DEFAULT_REQUEST_TIMEOUT_MS;
+  const onOuterAbort = () => controller.abort();
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  if (config.signal) {
+    if (config.signal.aborted) controller.abort();
+    else config.signal.addEventListener("abort", onOuterAbort, { once: true });
+  }
+  if (timeoutMs > 0) {
+    timer = setTimeout(() => { timedOut = true; controller.abort(); }, timeoutMs);
+  }
+
   try {
     return await fetch(mode === "proxy" ? config.proxyUrl || DEFAULT_PROXY_URL : targetUrl, {
       ...init, headers, redirect: "error", credentials: "omit",
+      signal: controller.signal,
     });
   } catch {
+    if (config.signal?.aborted) {
+      throw new Error("请求已取消。");
+    }
+    if (timedOut) {
+      const seconds = Math.max(1, Math.round(timeoutMs / 1000));
+      throw new Error(mode === "proxy"
+        ? `本站模型代理响应超时（${seconds} 秒），请检查网络、代理部署或稍后重试。`
+        : `浏览器直连超时（${seconds} 秒）：可能是网络、端点或供应商限制。请检查服务状态或使用已配置的代理。`);
+    }
     throw new Error(mode === "proxy"
       ? "无法连接本站模型代理，请检查网络、代理部署或稍后重试。"
       : "浏览器直连失败：可能是网络、端点或供应商 CORS 策略限制。请检查服务状态或使用已配置的代理。");
+  } finally {
+    if (timer !== undefined) clearTimeout(timer);
+    config.signal?.removeEventListener("abort", onOuterAbort);
   }
 }
 
@@ -45,7 +82,7 @@ export async function smartFetch(
  */
 export async function requestLlmPlan(
   opts: GenerateOptions,
-  config: ModelConfig,
+  config: ModelConfig & RequestConfig,
 ): Promise<DeckPlan> {
   const baseUrl = (config.baseUrl || DEFAULT_BASE_URL).trim().replace(/\/+$/, "");
   const model = config.model || DEFAULT_MODEL;
@@ -134,6 +171,11 @@ export async function requestLlmPlan(
     throw new Error(error || "生成的大纲格式无效。");
   }
 
+  // The flat 1B path only emits text pages; upgrade a few pages to richer
+  // native layouts when the content explicitly supports it.
+  if (model === "MiniCPM-V-4.7-1B") {
+    return inferRichLayouts(plan);
+  }
   return plan;
 }
 

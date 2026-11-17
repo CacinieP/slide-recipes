@@ -1,7 +1,7 @@
 import "server-only";
 
 export const WEBSITE_MODEL_BASE_URL = "https://api.modelbest.cn/v1";
-export const WEBSITE_MODEL_NAME = "MiniCPM-V-4.7-1B";
+export const WEBSITE_MODEL_NAME = "MiniCPM-V-4.7-35B-A3B";
 export const WEBSITE_MODEL_MAX_TOKENS = 6000;
 
 export interface WebsiteModelConfig {

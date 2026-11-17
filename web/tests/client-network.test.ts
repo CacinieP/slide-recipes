@@ -188,7 +188,7 @@ test("the client retries a sanitized response_format error from the real proxy h
   assert.equal(Object.hasOwn(upstreamBodies[1], "response_format"), false);
 });
 
-test("empty model settings use the selected ModelBest 1B defaults with bounded output", async (t) => {
+test("empty model settings use the selected ModelBest 35B-A3B defaults with bounded output", async (t) => {
   let target = "";
   let body: Record<string, unknown> = {};
   t.mock.method(globalThis, "fetch", async (input: RequestInfo | URL, init?: RequestInit) => {
@@ -209,7 +209,7 @@ test("empty model settings use the selected ModelBest 1B defaults with bounded o
   await requestLlmPlan(options, { baseUrl: "", model: "", apiKey: "test-api-key" });
 
   assert.equal(target, "https://api.modelbest.cn/v1/chat/completions");
-  assert.equal(body.model, "MiniCPM-V-4.7-1B");
+  assert.equal(body.model, "MiniCPM-V-4.7-35B-A3B");
   assert.equal(body.stream, false);
   assert.equal(body.max_tokens, 6000);
 });

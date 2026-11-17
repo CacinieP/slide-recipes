@@ -1,49 +1,149 @@
 @import "tailwindcss";
 
 /*
- * PPT-Web — "Platinum White-Gold" dark engineering theme.
- * Echoes the design language from the pptx-generator skill:
- *   gray-1000 #0a0a0a (canvas), gold-400 #D4AF37 (accent),
- *   blue-400 #0070F3 (secondary accent), platinum whites.
+ * Slide Recipes Web Studio — "Proof Studio" design language.
+ * A warm paper light chrome inspired by print production: ink text, one
+ * committed ultramarine, a vermilion display accent, hairline rules.
+ * Researched with designlang extractions of pitch.com (light dominance,
+ * committed accent, soft colored shadows) and linear.app (14px body ladder,
+ * 100/160/400ms motion, cubic-bezier(0.32, 0.72, 0,1) easing, hairline insets).
  */
 :root {
-  --bg: #0a0a0a;
-  --bg-elev: #121214;
-  --bg-elev-2: #18181b;
-  --border: #27272a;
-  --border-strong: #3f3f46;
-  --text: #f5f5f5;
-  --text-dim: #a1a1aa;
-  --text-mute: #71717a;
-  --gold: #d4af37;
-  --gold-soft: rgba(212, 175, 55, 0.12);
-  --blue: #0070f3;
-  --blue-soft: rgba(0, 112, 243, 0.12);
+  /* Warm neutrals: page / surface / inset / overlay */
+  --paper: #f5f3ee;
+  --surface: #ffffff;
+  --surface-2: #faf9f6;
+  --scrim: rgba(25, 23, 20, 0.42);
+
+  /* Ink ramp (all >= 4.5:1 on paper and surface) */
+  --ink: #191714;
+  --ink-dim: #57534b;
+  --ink-mute: #6e6960;
+
+  /* Hairlines */
+  --line: #e4e0d6;
+  --line-strong: #cfc9bc;
+
+  /* Committed hues */
+  --ultra: #2742e0;          /* dominant accent: actions, selection, links */
+  --ultra-deep: #1d33b3;     /* hover/pressed */
+  --ultra-soft: rgba(39, 66, 224, 0.08);
+  --verm: #c63d14;           /* display accent: section numerals, live marks */
+  --verm-soft: rgba(198, 61, 20, 0.08);
+  --teal: #0e7490;           /* secondary: direct/local transport */
+  --teal-soft: rgba(14, 116, 144, 0.09);
+  --plum: #7c3aed;           /* chart/type hue */
+
+  /* Semantic (always paired with text or icon, never color-only) */
+  --success: #1e7f4f;
+  --success-soft: rgba(30, 127, 79, 0.09);
+  --warning: #9a6700;
+  --warning-soft: rgba(154, 103, 0, 0.1);
+  --danger: #c92a2a;
+  --danger-soft: rgba(201, 42, 42, 0.08);
+
+  /* Type */
+  --font-display: Georgia, "Times New Roman", "Songti SC", "Noto Serif CJK SC", "SimSun", serif;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+
+  /* Motion (Linear ladder + Liveblocks overshoot spring + Stripe ambient) */
+  --dur-xs: 100ms;
+  --dur-sm: 160ms;
+  --dur-md: 400ms;
+  --ease-out: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-soft: cubic-bezier(0.165, 0.84, 0.44, 1);
+  --ease-spring: cubic-bezier(0.09, 1.12, 0.37, 1);
+  --ease-glide: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-sweep: cubic-bezier(0.78, 0, 0.22, 1);
+
+  /* Elevation: soft, warm, never neon */
+  --shadow-xs: 0 1px 2px rgba(25, 23, 20, 0.05);
+  --shadow-sm: 0 1px 2px rgba(25, 23, 20, 0.05), 0 8px 24px -18px rgba(25, 23, 20, 0.25);
+  --shadow-lift: 0 1px 2px rgba(25, 23, 20, 0.06), 0 20px 48px -24px rgba(25, 23, 20, 0.28);
 }
 
 @theme inline {
-  --color-canvas: var(--bg);
-  --color-elev: var(--bg-elev);
-  --color-line: var(--border);
-  --color-line-strong: var(--border-strong);
-  --color-ink: var(--text);
-  --color-ink-dim: var(--text-dim);
-  --color-ink-mute: var(--text-mute);
-  --color-gold: var(--gold);
-  --color-azure: var(--blue);
-  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
-  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  /* Legacy token names remapped so component markup stays coherent */
+  --color-canvas: var(--paper);
+  --color-elev: var(--surface);
+  --color-base: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-ink: var(--ink);
+  --color-ink-dim: var(--ink-dim);
+  --color-ink-mute: var(--ink-mute);
+  --color-gold: var(--ultra);
+  --color-gold-soft: var(--ultra-soft);
+  --color-azure: var(--teal);
+  --color-blue-soft: var(--teal-soft);
+  --color-verm: var(--verm);
+  --color-verm-soft: var(--verm-soft);
+  --color-plum: var(--plum);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
 }
 
 html,
 body {
-  background: var(--bg);
-  color: var(--text);
+  background: var(--paper);
+  color: var(--ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-/* Thin gold focus ring for inputs/labels. */
+/* Layered paper atmosphere: grain only — the living aurora + ghost slides
+   are rendered by <AmbientBackground/> above this layer. */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Display face for wordmark, numerals and editorial headings. */
+.font-display {
+  font-family: var(--font-display);
+}
+
+/* Small label: quiet sans caps, not the old mono shout. */
+.mono-label {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-mute);
+}
+
+/* Section numeral — vermilion serif, print-spec feel. */
+.section-no {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 13px;
+  color: var(--verm);
+  min-width: 1.6em;
+}
+
+/* Cards */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  box-shadow: var(--shadow-xs);
+}
+
+/* Focus: visible on every interactive element. */
 input,
 textarea,
 select,
@@ -53,31 +153,406 @@ button {
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  border-color: var(--gold) !important;
-  box-shadow: 0 0 0 1px var(--gold);
+  border-color: var(--ultra) !important;
+  box-shadow: 0 0 0 3px var(--ultra-soft);
+}
+button:focus-visible,
+a:focus-visible,
+[role="button"]:focus-visible,
+summary:focus-visible,
+input[type="range"]:focus-visible {
+  outline: 2px solid var(--ultra);
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
-/* Custom scrollbar — dark + subtle gold. */
+/* Scrollbars drawn in the studio's own language. */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
 *::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
 }
 *::-webkit-scrollbar-track {
   background: transparent;
 }
 *::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: 4px;
+  background: var(--line-strong);
+  border-radius: 8px;
+  border: 2px solid var(--surface);
 }
 *::-webkit-scrollbar-thumb:hover {
-  background: var(--gold);
+  background: color-mix(in srgb, var(--ultra) 45%, var(--line-strong));
 }
 
-/* Mono label utility — engineering feel. */
-.mono-label {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-mute);
+/* Motion: staged entrance + micro-interactions. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.rise {
+  animation: rise var(--dur-md) var(--ease-soft) both;
+}
+.press {
+  transition:
+    transform var(--dur-sm) var(--ease-out),
+    background-color var(--dur-sm) var(--ease-out),
+    border-color var(--dur-sm) var(--ease-out),
+    color var(--dur-sm) var(--ease-out),
+    box-shadow var(--dur-sm) var(--ease-out),
+    opacity var(--dur-sm) var(--ease-out);
+}
+.press:active {
+  transform: scale(0.985);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.pulse-dot {
+  animation: pulse-dot 1.4s var(--ease-soft) infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise,
+  .spin,
+  .pulse-dot {
+    animation: none;
+  }
+  .press {
+    transition: none;
+  }
+}
+
+/* ------------------------------------------------------------------ */
+/* Premium motion layer (designlang: stripe.com + liveblocks.io)       */
+/* ------------------------------------------------------------------ */
+
+/* Ambient aurora fields: multi-hue radials drifting on long cycles. */
+.aurora {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(72px);
+  will-change: transform;
+}
+.aurora-a {
+  width: 58vw;
+  height: 58vw;
+  top: -22vw;
+  right: -14vw;
+  background: radial-gradient(circle at 40% 40%, rgba(39, 66, 224, 0.16), rgba(124, 58, 237, 0.09) 46%, transparent 72%);
+  animation: aurora-drift-a 21s var(--ease-sweep) infinite alternate;
+}
+.aurora-b {
+  width: 46vw;
+  height: 46vw;
+  bottom: -18vw;
+  left: -12vw;
+  background: radial-gradient(circle at 55% 45%, rgba(198, 61, 20, 0.11), rgba(154, 103, 0, 0.07) 50%, transparent 74%);
+  animation: aurora-drift-b 26s var(--ease-sweep) infinite alternate;
+}
+.aurora-c {
+  width: 34vw;
+  height: 34vw;
+  top: 34%;
+  left: 30%;
+  background: radial-gradient(circle at 50% 50%, rgba(14, 116, 144, 0.10), transparent 70%);
+  animation: aurora-drift-c 18s var(--ease-sweep) infinite alternate;
+}
+@keyframes aurora-drift-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(-7vw, 6vh, 0) scale(1.14); }
+}
+@keyframes aurora-drift-b {
+  from { transform: translate3d(0, 0, 0) scale(1.08); }
+  to { transform: translate3d(6vw, -5vh, 0) scale(0.94); }
+}
+@keyframes aurora-drift-c {
+  from { transform: translate3d(-4vw, -2vh, 0) scale(0.92); opacity: 0.7; }
+  to { transform: translate3d(5vw, 4vh, 0) scale(1.12); opacity: 1; }
+}
+
+/* Ghost slides: damped pointer parallax outside, slow float inside. */
+.ghost-parallax {
+  transform: translate3d(
+    calc(var(--par-x, 0) * var(--depth, 16px)),
+    calc(var(--par-y, 0) * var(--depth, 16px)),
+    0
+  );
+}
+.ghost-float {
+  animation: ghost-float var(--dur, 20s) ease-in-out var(--delay, 0s) infinite alternate;
+}
+@keyframes ghost-float {
+  from { transform: translateY(-7px) rotate(var(--rot, -1.5deg)); }
+  to { transform: translateY(9px) rotate(calc(var(--rot, -1.5deg) * -0.7)); }
+}
+
+/* Cursor spotlight cards (Liveblocks signature): radial highlight + border
+   glow that follows the pointer via --mx/--my written by useSpotlight. */
+.spotlight {
+  position: relative;
+}
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: var(--spot-o, 0);
+  transition: opacity var(--dur-md) var(--ease-out);
+  background: radial-gradient(
+    260px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(39, 66, 224, 0.07),
+    transparent 70%
+  );
+}
+.spotlight::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: var(--spot-o, 0);
+  transition: opacity var(--dur-md) var(--ease-out);
+  background: radial-gradient(
+    220px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(39, 66, 224, 0.35),
+    transparent 70%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  padding: 1px;
+}
+
+/* 3D tilt for proof thumbnails (useTilt). */
+.tilt {
+  transform: perspective(640px)
+    rotateX(var(--tilt-x, 0deg))
+    rotateY(var(--tilt-y, 0deg))
+    translateZ(0);
+  transition: transform 420ms var(--ease-spring), box-shadow 420ms var(--ease-spring);
+  transform-style: preserve-3d;
+}
+.tilt:hover {
+  box-shadow: var(--shadow-lift);
+}
+
+/* Staged scroll reveal (useReveal): Stripe-style stagger choreography. */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(12px);
+}
+[data-reveal].is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 560ms var(--ease-glide) var(--reveal-delay, 0ms),
+    transform 560ms var(--ease-spring) var(--reveal-delay, 0ms);
+}
+
+/* Magnetic CTA + shine sweep. */
+.magnetic {
+  transform: translate3d(var(--mag-x, 0px), var(--mag-y, 0px), 0);
+  transition: transform 480ms var(--ease-spring);
+}
+.shine {
+  position: relative;
+  overflow: hidden;
+}
+.shine::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.34) 50%, transparent 62%);
+  transform: translateX(-130%);
+}
+.shine:hover::after {
+  animation: shine-sweep 900ms var(--ease-sweep);
+}
+@keyframes shine-sweep {
+  to { transform: translateX(130%); }
+}
+
+/* Wordmark shimmer on hover. */
+.wordmark {
+  background: linear-gradient(100deg, var(--ink) 40%, var(--ultra) 50%, var(--ink) 60%);
+  background-size: 220% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  transition: background-position 700ms var(--ease-sweep);
+}
+.wordmark:hover {
+  background-position: -120% 0;
+}
+
+/* Generation progress ribbon: indeterminate gradient sweep under header. */
+.progress-ribbon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  overflow: hidden;
+}
+.progress-ribbon::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--ultra) 30%, var(--plum) 52%, var(--verm) 72%, transparent);
+  transform: translateX(-100%);
+  animation: ribbon-sweep 1.6s var(--ease-sweep) infinite;
+}
+@keyframes ribbon-sweep {
+  to { transform: translateX(100%); }
+}
+
+/* Shimmer skeleton slides while generating. */
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface-2);
+}
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, 0.85) 50%, transparent 70%);
+  transform: translateX(-100%);
+  animation: shine-sweep 1.5s var(--ease-sweep) infinite;
+}
+
+/* Rotating conic ring for the active palette swatch / busy states. */
+@property --ring-angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+.conic-ring {
+  position: relative;
+}
+.conic-ring::before {
+  content: "";
+  position: absolute;
+  inset: -2.5px;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--ring-angle),
+    var(--ultra),
+    var(--plum) 28%,
+    var(--verm) 52%,
+    var(--teal) 76%,
+    var(--ultra)
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  animation: ring-rotate 3.4s linear infinite;
+  pointer-events: none;
+}
+@keyframes ring-rotate {
+  to { --ring-angle: 360deg; }
+}
+
+/* Success check stroke draw-in. */
+.draw-check {
+  stroke-dasharray: 26;
+  stroke-dashoffset: 26;
+  animation: draw-check 620ms var(--ease-glide) 120ms forwards;
+}
+@keyframes draw-check {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Smooth collapse for the model service panel. */
+.collapse-grid {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 460ms var(--ease-spring);
+}
+.collapse-grid.is-open {
+  grid-template-rows: 1fr;
+}
+.collapse-grid > div {
+  overflow: hidden;
+  min-height: 0;
+}
+
+/* Springy selection pop for swatches and chips. */
+.pop {
+  transition:
+    transform 380ms var(--ease-spring),
+    border-color var(--dur-sm) var(--ease-out),
+    box-shadow 380ms var(--ease-spring),
+    background-color var(--dur-sm) var(--ease-out);
+}
+.pop:hover {
+  transform: translateY(-1.5px);
+}
+.pop:active {
+  transform: scale(0.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora,
+  .ghost-float,
+  .progress-ribbon::before,
+  .skeleton::after,
+  .conic-ring::before,
+  .shine:hover::after {
+    animation: none;
+  }
+  .ghost-parallax,
+  .magnetic,
+  .tilt {
+    transform: none;
+  }
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+  }
+  .draw-check {
+    stroke-dashoffset: 0;
+    animation: none;
+  }
+  .collapse-grid {
+    transition: none;
+  }
+}
+
+/* Native range inputs pick up the accent. */
+input[type="range"] {
+  accent-color: var(--ultra);
+}
+
+/* Selection tint belongs to the palette too. */
+::selection {
+  background: rgba(39, 66, 224, 0.18);
 }

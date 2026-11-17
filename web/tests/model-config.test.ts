@@ -55,7 +55,7 @@ test("server model configuration fixes the selected endpoint, model, and output 
   assert.deepEqual(result, {
     baseUrl: "https://api.modelbest.cn/v1",
     chatCompletionsUrl: "https://api.modelbest.cn/v1/chat/completions",
-    model: "MiniCPM-V-4.7-1B",
+    model: "MiniCPM-V-4.7-35B-A3B",
     stream: false,
     maxTokens: 6000,
     fixtureKeyMatches: true,
@@ -76,7 +76,7 @@ test("client-like model and endpoint environment values cannot override the fixe
   });
 
   assert.equal(result.baseUrl, "https://api.modelbest.cn/v1");
-  assert.equal(result.model, "MiniCPM-V-4.7-1B");
+  assert.equal(result.model, "MiniCPM-V-4.7-35B-A3B");
   assert.equal(result.fixtureKeyMatches, true);
   assert.equal(result.networkAttempts, 0);
 });
