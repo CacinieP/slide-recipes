@@ -82,19 +82,20 @@ export default function ColorWheel({
   const currentFamily = selectedHue !== null ? getHueFamily(selectedHue) : null;
 
   return (
-    <div className="flex flex-col gap-2.5 rounded-lg border border-line bg-elev/40 p-3">
-      <div className="flex items-center justify-between text-xs">
-        <div className="flex items-center gap-1.5 font-medium text-ink">
-          <span>{title || "🎯 色环定位"}</span>
+    <div className="flex flex-col gap-2.5 rounded-lg border border-line bg-base/70 p-3">
+      <div className="flex items-center justify-between gap-2 text-xs">
+        <div className="flex min-w-0 items-center gap-1.5 font-medium text-ink">
+          <span className="truncate">{title || "色环定位"}</span>
           {selectedHue !== null ? (
-            <span className="rounded bg-gold/15 px-1.5 py-0.5 text-[10px] text-gold border border-gold/30">
-              {currentFamily?.emoji} {currentFamily?.name} · {selectedHue}°
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full border border-line bg-elev px-1.5 py-0.5 text-[10px] text-ink-dim shadow-xs">
+              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: currentFamily?.color ?? `hsl(${selectedHue}, 80%, 48%)` }} aria-hidden="true" />
+              {currentFamily?.name} · {selectedHue}°
             </span>
           ) : (
-            <span className="text-[10px] text-ink-mute">{subtitle || "点击色环或色系标签快速定位"}</span>
+            <span className="truncate text-[10px] font-normal text-ink-mute">{subtitle || "点击色环或色系标签快速定位"}</span>
           )}
         </div>
-        <div>
+        <div className="shrink-0">
           {headerRight !== undefined ? (
             headerRight
           ) : (
@@ -102,7 +103,7 @@ export default function ColorWheel({
               <button
                 type="button"
                 onClick={() => onHueChange(null)}
-                className="text-[10px] text-ink-mute hover:text-gold transition hover:underline"
+                className="press text-[10px] text-ink-mute hover:text-gold hover:underline"
               >
                 显示全部色板
               </button>
@@ -123,7 +124,7 @@ export default function ColorWheel({
         >
           {/* 360° 色相环背景 */}
           <div
-            className="h-full w-full rounded-full shadow-inner"
+            className="h-full w-full rounded-full shadow-xs"
             style={{
               background:
                 "conic-gradient(from 0deg, #EF4444 0deg, #F97316 30deg, #EAB308 60deg, #22C55E 120deg, #06B6D4 180deg, #3B82F6 220deg, #8B5CF6 270deg, #EC4899 320deg, #EF4444 360deg)",
@@ -131,38 +132,38 @@ export default function ColorWheel({
           />
 
           {/* 圆环中空遮罩 */}
-          <div className="absolute inset-4 flex flex-col items-center justify-center rounded-full bg-elev shadow-md border border-line/50">
+          <div className="absolute inset-4 flex flex-col items-center justify-center rounded-full border border-line bg-elev shadow-sm">
             {centerColor ? (
               <>
                 <div
-                  className="h-5 w-5 rounded-full shadow-xs border border-white/60 mb-0.5"
+                  className="mb-0.5 h-5 w-5 rounded-full border border-ink/10 shadow-xs"
                   style={{
                     backgroundColor: centerColor.startsWith("#") ? centerColor : `#${centerColor}`,
                   }}
                 />
-                <span className="text-[10px] font-mono font-bold text-ink leading-none">
+                <span className="font-mono text-[10px] font-bold leading-none text-ink">
                   {selectedHue !== null ? `${selectedHue}°` : centerColor}
                 </span>
               </>
             ) : selectedHue !== null ? (
               <>
                 <div
-                  className="h-5 w-5 rounded-full shadow-xs border border-white/60 mb-0.5"
+                  className="mb-0.5 h-5 w-5 rounded-full border border-ink/10 shadow-xs"
                   style={{ backgroundColor: `hsl(${selectedHue}, 80%, 48%)` }}
                 />
-                <span className="text-[10px] font-mono font-bold text-ink leading-none">
+                <span className="font-mono text-[10px] font-bold leading-none text-ink">
                   {selectedHue}°
                 </span>
               </>
             ) : (
-              <span className="text-[10px] text-ink-mute font-mono">全色相</span>
+              <span className="font-mono text-[10px] text-ink-mute">全色相</span>
             )}
           </div>
 
           {/* 选中色相在环上的指示光标 */}
           {selectedHue !== null && (
             <div
-              className="pointer-events-none absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-black/40 shadow-md ring-1 ring-black/20"
+              className="pointer-events-none absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white shadow-md ring-1 ring-ink/20"
               style={{
                 left: `${pointerX}px`,
                 top: `${pointerY}px`,
@@ -173,8 +174,8 @@ export default function ColorWheel({
         </div>
 
         {/* 常用色系快速直达标签 */}
-        <div className="flex flex-1 flex-col gap-1 max-w-[200px]">
-          <div className="text-[10px] text-ink-mute mb-0.5">8 大色系快选：</div>
+        <div className="flex max-w-[200px] flex-1 flex-col gap-1">
+          <div className="mb-0.5 text-[10px] text-ink-mute">8 大色系快选</div>
           <div className="grid grid-cols-2 gap-1 text-[11px]">
             {HUE_FAMILIES.map((fam) => {
               const active =
@@ -184,15 +185,16 @@ export default function ColorWheel({
                 <button
                   key={fam.id}
                   type="button"
+                  aria-pressed={active}
                   onClick={() => onHueChange(fam.hue)}
-                  className={`flex items-center gap-1 rounded px-1.5 py-1 text-left transition border ${
+                  className={`press flex items-center gap-1.5 rounded-md border px-1.5 py-1 text-left ${
                     active
                       ? "border-gold bg-gold-soft font-medium text-gold"
-                      : "border-line bg-elev/60 text-ink-dim hover:border-line-strong hover:text-ink"
+                      : "border-line bg-elev text-ink-dim shadow-xs hover:border-line-strong hover:text-ink"
                   }`}
                 >
                   <span
-                    className="inline-block h-2 w-2 rounded-full shrink-0"
+                    className="inline-block h-2 w-2 shrink-0 rounded-full"
                     style={{ backgroundColor: fam.color }}
                   />
                   <span className="truncate text-[10px]">{fam.name.slice(0, 2)}</span>

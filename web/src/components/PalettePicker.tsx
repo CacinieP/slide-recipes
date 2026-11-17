@@ -15,6 +15,7 @@ import {
   contrastRatio,
   hexToHsl,
 } from "@/lib/color-utils";
+import { IconRefresh, IconTarget, IconSearch } from "./icons";
 
 interface Props {
   value: string;
@@ -163,48 +164,56 @@ export default function PalettePicker({
   const isPrimaryPass = primaryBgRatio >= 4.5;
   const isAccentPass = accentBgRatio >= 4.5;
 
+  const microBtn = "press rounded-md border border-line bg-elev px-1.5 py-0.5 text-[10px] text-ink-dim shadow-xs hover:border-line-strong hover:text-ink";
+
   return (
     <div className="flex flex-col gap-3">
       {/* 顶部标题与恢复按钮 */}
       <div className="flex items-center justify-between">
-        <span className="mono-label">PALETTE / 调色板与色相系统</span>
-        <div className="flex items-center gap-2">
-          {customTheme && (
-            <button
-              type="button"
-              onClick={handleResetAll}
-              className="rounded px-2 py-0.5 text-xs text-amber-400 hover:text-amber-300 hover:underline transition"
-              title="放弃自定义修改，恢复为预设配色"
-            >
-              ↺ 恢复整套预设
-            </button>
-          )}
+        <div className="flex items-baseline gap-2">
+          <span className="section-no" aria-hidden="true">04</span>
+          <h3 className="text-[13px] font-semibold tracking-tight text-ink">调色板与色相系统</h3>
         </div>
+        {customTheme && (
+          <button
+            type="button"
+            onClick={handleResetAll}
+            className="press inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] text-warning hover:underline"
+            title="放弃自定义修改，恢复为预设配色"
+          >
+            <IconRefresh size={11} />
+            恢复整套预设
+          </button>
+        )}
       </div>
 
       {/* 色环模式切换栏 */}
-      <div className="flex items-center justify-between rounded-md bg-elev p-1 border border-line text-xs">
+      <div className="flex items-center gap-1 rounded-lg border border-line bg-base p-1 text-xs" role="group" aria-label="色环模式">
         <button
           type="button"
+          aria-pressed={wheelMode === "slot"}
           onClick={() => setWheelMode("slot")}
-          className={`flex-1 rounded py-1 px-2 text-center font-medium transition ${
+          className={`press flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 px-2 font-medium ${
             wheelMode === "slot"
-              ? "bg-gold/20 text-gold shadow-xs border border-gold/40"
+              ? "bg-elev text-gold shadow-xs"
               : "text-ink-mute hover:text-ink"
           }`}
         >
-          🎯 调节选中色块色相 ({activeSlotMeta.label})
+          <IconTarget size={12} />
+          调节色块（{activeSlotMeta.label}）
         </button>
         <button
           type="button"
+          aria-pressed={wheelMode === "filter"}
           onClick={() => setWheelMode("filter")}
-          className={`flex-1 rounded py-1 px-2 text-center font-medium transition ${
+          className={`press flex flex-1 items-center justify-center gap-1.5 rounded-md py-1.5 px-2 font-medium ${
             wheelMode === "filter"
-              ? "bg-gold/20 text-gold shadow-xs border border-gold/40"
+              ? "bg-elev text-gold shadow-xs"
               : "text-ink-mute hover:text-ink"
           }`}
         >
-          🔍 筛选预设色板库 ({filteredPalettes.length} 套)
+          <IconSearch size={12} />
+          筛选色板库（{filteredPalettes.length}）
         </button>
       </div>
 
@@ -214,10 +223,10 @@ export default function PalettePicker({
           selectedHue={activeSlotHsl.h}
           onHueChange={handleSlotHueChange}
           centerColor={`#${activeTheme[activeSlot]}`}
-          title={`🎯 色环微调: 【${activeSlotMeta.label}】`}
+          title={`色环微调 · ${activeSlotMeta.label}`}
           subtitle="拖动或点击色环，实时改变当前选中色块的颜色"
           headerRight={
-            <span className="text-[10px] font-mono text-ink-mute">
+            <span className="font-mono text-[10px] text-ink-mute">
               H:{activeSlotHsl.h}° S:{activeSlotHsl.s}% L:{activeSlotHsl.l}%
             </span>
           }
@@ -243,14 +252,14 @@ export default function PalettePicker({
               }
             }
           }}
-          title="🔍 色环定位预设"
+          title="色环定位预设"
           subtitle="点击色环或色系标签快速定位色板"
           headerRight={
             filterHue !== null ? (
               <button
                 type="button"
                 onClick={() => setFilterHue(null)}
-                className="text-[10px] text-ink-mute hover:text-gold transition hover:underline"
+                className="press text-[10px] text-ink-mute hover:text-gold hover:underline"
               >
                 显示全部
               </button>
@@ -260,27 +269,25 @@ export default function PalettePicker({
       )}
 
       {/* 当前选中的色板卡片与 5 色槽选择修改区域 */}
-      <div className="rounded-md border border-line bg-elev px-3.5 py-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-medium text-ink">{selectedPreset.name}</span>
+      <div className="rounded-lg border border-line bg-elev px-3.5 py-3 shadow-xs">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-2">
+            <span className="truncate text-sm font-semibold text-ink">{selectedPreset.name}</span>
             {customTheme && (
-              <span className="rounded bg-gold/20 px-1.5 py-0.2 text-[10px] font-medium text-gold border border-gold/40">
-                已自定义修改
+              <span className="shrink-0 rounded-full border border-gold/40 bg-gold-soft px-1.5 py-px text-[9px] font-medium text-gold">
+                已自定义
               </span>
             )}
           </div>
-          <span className="text-[10px] font-mono text-ink-mute">预设 ID: {value}</span>
+          <span className="shrink-0 font-mono text-[9px] text-ink-mute">{value}</span>
         </div>
-        <div className="mt-1 text-xs text-ink-dim">{selectedPreset.useCases}</div>
+        <div className="mt-0.5 text-[11px] text-ink-mute">{selectedPreset.useCases}</div>
 
-        {/* 5 个关键语义色槽：点击即可选中并修改颜色 */}
+        {/* 5 个关键语义色槽 */}
         <div className="mt-3">
-          <div className="text-[11px] text-ink-dim mb-1 flex items-center justify-between">
-            <span>👇 点击色块选择并直接修改色号：</span>
-            <span className="text-[10px] text-gold font-mono">
-              当前调整: {activeSlotMeta.label}
-            </span>
+          <div className="mb-1.5 flex items-center justify-between text-[11px]">
+            <span className="text-ink-mute">点击色块选择并直接修改色号</span>
+            <span className="font-medium text-gold">当前: {activeSlotMeta.label}</span>
           </div>
 
           <div className="grid grid-cols-5 gap-2">
@@ -293,15 +300,14 @@ export default function PalettePicker({
                 <div
                   key={s.key}
                   onClick={() => setActiveSlot(s.key)}
-                  className={`group relative flex flex-col items-center rounded-md border p-1.5 transition cursor-pointer ${
+                  className={`group relative flex cursor-pointer flex-col items-center rounded-lg border p-1.5 transition ${
                     isSelected
-                      ? "border-gold bg-gold-soft/30 ring-2 ring-gold/70 shadow-sm scale-102"
-                      : "border-line bg-base/60 hover:border-line-strong hover:bg-elev"
+                      ? "border-gold bg-gold-soft shadow-xs ring-1 ring-gold/50"
+                      : "border-line bg-base hover:border-line-strong"
                   }`}
                   title={`点击选中调节 ${s.label}`}
                 >
-                  {/* 色块本身（点击也可直接唤起原生拾色器） */}
-                  <div className="relative h-8 w-full rounded overflow-hidden shadow-xs border border-black/10">
+                  <div className="relative h-8 w-full overflow-hidden rounded-md border border-ink/10 shadow-xs">
                     <input
                       type="color"
                       value={`#${hexVal.toLowerCase()}`}
@@ -319,24 +325,21 @@ export default function PalettePicker({
                     />
                   </div>
 
-                  {/* 语义角色名 */}
                   <div
-                    className={`mt-1.5 text-center text-[10px] font-medium truncate w-full ${
-                      isSelected ? "text-gold font-bold" : "text-ink-mute"
+                    className={`mt-1.5 w-full truncate text-center text-[9px] font-medium ${
+                      isSelected ? "text-gold" : "text-ink-mute"
                     }`}
                   >
                     {s.label}
                   </div>
 
-                  {/* 色号显示 */}
-                  <div className="text-[9px] font-mono text-center text-ink mt-0.5">
+                  <div className="mt-0.5 text-center font-mono text-[8px] text-ink-dim">
                     #{hexVal}
                   </div>
 
-                  {/* 自定义微调圆点标识 */}
                   {isSlotDiff && (
                     <span
-                      className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-gold"
+                      className="absolute right-1 top-1 h-1.5 w-1.5 rounded-full bg-verm"
                       title="已微调"
                     />
                   )}
@@ -347,13 +350,13 @@ export default function PalettePicker({
         </div>
 
         {/* 正在选中的色块精细调节条 */}
-        <div className="mt-3 rounded-lg border border-gold/30 bg-gold-soft/15 p-2.5 flex flex-col gap-2">
+        <div className="mt-3 flex flex-col gap-2 rounded-lg border border-gold/25 bg-gold-soft/50 p-2.5">
           <div className="flex items-center justify-between text-xs">
-            <div className="flex items-center gap-1.5">
-              <span className="font-semibold text-ink">
-                🎯 当前选中: <span className="text-gold">{activeSlotMeta.label}</span> ({activeSlot})
+            <div className="flex min-w-0 items-center gap-1.5">
+              <span className="truncate font-semibold text-ink">
+                {activeSlotMeta.label} <span className="font-mono text-[10px] font-normal text-ink-mute">({activeSlot})</span>
               </span>
-              <span className="text-[10px] text-ink-mute hidden sm:inline">
+              <span className="hidden truncate text-[10px] text-ink-mute sm:inline">
                 · {activeSlotMeta.roleDesc}
               </span>
             </div>
@@ -361,21 +364,20 @@ export default function PalettePicker({
               <button
                 type="button"
                 onClick={handleResetSlot}
-                className="text-[10px] text-amber-400 hover:underline"
+                className="press shrink-0 text-[10px] text-warning hover:underline"
               >
-                ↺ 恢复为 #{selectedPreset.theme[activeSlot]}
+                恢复 #{selectedPreset.theme[activeSlot]}
               </button>
             )}
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            {/* 原生拾色器按钮 */}
-            <div className="relative flex items-center gap-1.5 rounded border border-line bg-base px-2 py-1 shadow-xs cursor-pointer">
+            <div className="relative flex cursor-pointer items-center gap-1.5 rounded-md border border-line bg-elev px-2 py-1 shadow-xs">
               <div
-                className="h-4 w-4 rounded-full border border-black/20 shadow-xs"
+                className="h-4 w-4 rounded-full border border-ink/15 shadow-xs"
                 style={{ backgroundColor: `#${activeTheme[activeSlot]}` }}
               />
-              <span className="text-xs text-ink font-medium">拾色器</span>
+              <span className="text-xs font-medium text-ink">拾色器</span>
               <input
                 type="color"
                 value={`#${activeTheme[activeSlot].toLowerCase()}`}
@@ -385,11 +387,11 @@ export default function PalettePicker({
               />
             </div>
 
-            {/* 色号直接输入（支持 HEX、#HEX、rgb(r,g,b)） */}
             <div className="flex items-center gap-1">
-              <span className="text-[10px] text-ink-mute">色号:</span>
+              <span className="text-[10px] text-ink-mute">色号</span>
               <input
                 type="text"
+                aria-label="色号输入"
                 value={slotInputText}
                 onChange={(e) => {
                   const val = e.target.value;
@@ -400,97 +402,65 @@ export default function PalettePicker({
                   }
                 }}
                 placeholder="#0A2540 或 rgb(10,37,64)"
-                className="w-28 rounded border border-line bg-base px-1.5 py-1 text-center font-mono text-xs text-ink transition focus:border-gold focus:outline-none"
+                className="w-32 rounded-md border border-line bg-elev px-1.5 py-1 text-center font-mono text-xs text-ink shadow-xs transition focus:border-gold focus:outline-none"
               />
             </div>
 
-            {/* 快速明度与微调按钮 */}
-            <div className="flex items-center gap-1 ml-auto">
-              <button
-                type="button"
-                onClick={() => handleAdjustLightness(-8)}
-                className="rounded border border-line bg-base px-1.5 py-0.5 text-[10px] text-ink-dim hover:text-ink hover:border-line-strong transition"
-                title="降低明度 (变深)"
-              >
-                暗 -8%
-              </button>
-              <button
-                type="button"
-                onClick={() => handleAdjustLightness(8)}
-                className="rounded border border-line bg-base px-1.5 py-0.5 text-[10px] text-ink-dim hover:text-ink hover:border-line-strong transition"
-                title="提高明度 (变浅)"
-              >
-                亮 +8%
-              </button>
-              <button
-                type="button"
-                onClick={() => handleAdjustSaturation(12)}
-                className="rounded border border-line bg-base px-1.5 py-0.5 text-[10px] text-ink-dim hover:text-ink hover:border-line-strong transition"
-                title="增加饱和度"
-              >
-                鲜艳 +
-              </button>
-              <button
-                type="button"
-                onClick={() => handleAdjustHueAngle(15)}
-                className="rounded border border-line bg-base px-1.5 py-0.5 text-[10px] text-ink-dim hover:text-ink hover:border-line-strong transition"
-                title="色相顺时针微调 15°"
-              >
-                色相 +15°
-              </button>
+            <div className="ml-auto flex items-center gap-1">
+              <button type="button" onClick={() => handleAdjustLightness(-8)} className={microBtn} title="降低明度 (变深)">暗 −8%</button>
+              <button type="button" onClick={() => handleAdjustLightness(8)} className={microBtn} title="提高明度 (变浅)">亮 +8%</button>
+              <button type="button" onClick={() => handleAdjustSaturation(12)} className={microBtn} title="增加饱和度">鲜艳 +</button>
+              <button type="button" onClick={() => handleAdjustHueAngle(15)} className={microBtn} title="色相顺时针微调 15°">色相 +15°</button>
             </div>
           </div>
         </div>
 
         {/* WCAG 对比度指标与全局色相旋转 */}
-        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-line/60 pt-2 text-[11px]">
-          <div className="flex items-center gap-3">
-            <span className="text-ink-mute">WCAG 对比度:</span>
+        <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-line pt-2 text-[11px]">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="text-ink-mute">WCAG 对比度</span>
             <span
-              className={`font-mono font-medium ${
-                isPrimaryPass ? "text-emerald-400" : "text-amber-400"
-              }`}
+              className={`inline-flex items-center gap-1 font-mono font-medium ${isPrimaryPass ? "text-success" : "text-warning"}`}
               title="主文字与底板对比度 (标准 ≥4.5:1)"
             >
-              正文/底板 {primaryBgRatio}:1 {isPrimaryPass ? "✅" : "⚠️"}
+              <span className={`h-1.5 w-1.5 rounded-full ${isPrimaryPass ? "bg-success" : "bg-warning"}`} aria-hidden="true" />
+              正文/底板 {primaryBgRatio}:1 {isPrimaryPass ? "通过" : "不足"}
             </span>
             <span
-              className={`font-mono font-medium ${
-                isAccentPass ? "text-emerald-400" : "text-amber-400"
-              }`}
+              className={`inline-flex items-center gap-1 font-mono font-medium ${isAccentPass ? "text-success" : "text-warning"}`}
               title="强调色与底板对比度 (标准 ≥4.5:1)"
             >
-              强调/底板 {accentBgRatio}:1 {isAccentPass ? "✅" : "⚠️"}
+              <span className={`h-1.5 w-1.5 rounded-full ${isAccentPass ? "bg-success" : "bg-warning"}`} aria-hidden="true" />
+              强调/底板 {accentBgRatio}:1 {isAccentPass ? "通过" : "不足"}
             </span>
           </div>
 
           <div className="flex items-center gap-1.5">
-            <span className="text-[10px] text-ink-mute">整套旋转:</span>
+            <span className="text-[10px] text-ink-mute">整套旋转</span>
             <input
               type="range"
               min="-180"
               max="180"
               step="5"
               defaultValue="0"
+              aria-label="全局色相旋转"
               onChange={(e) => handleGlobalHueRotate(Number(e.target.value))}
-              className="w-20 accent-gold cursor-pointer"
+              className="w-20 cursor-pointer"
               title="全局旋转整套配色色相"
             />
           </div>
         </div>
       </div>
 
-      {/* 预设色板库（商业语义与灵感配色） */}
+      {/* 预设色板库 */}
       <div>
-        <div className="flex items-center justify-between text-[11px] text-ink-dim mb-1.5">
-          <span>商业语义色板库（{filteredPalettes.length} 套）：</span>
+        <div className="mb-1.5 flex items-center justify-between text-[11px] text-ink-mute">
+          <span>色板库（{filteredPalettes.length} 套）</span>
           {filterHue !== null && (
-            <span className="text-[10px] text-gold font-mono">
-              已按色相 {filterHue}° 邻近度排序
-            </span>
+            <span className="font-mono text-[10px] text-gold">按色相 {filterHue}° 邻近度排序</span>
           )}
         </div>
-        <div className="grid grid-cols-9 gap-1.5 max-h-48 overflow-y-auto p-0.5">
+        <div className="grid max-h-48 grid-cols-9 gap-1.5 overflow-y-auto p-0.5">
           {filteredPalettes.map((p) => {
             const isActive = p.id === value;
             const pHue = paletteHueMap.get(p.id) ?? 0;
@@ -504,12 +474,13 @@ export default function PalettePicker({
                   if (onCustomThemeChange) onCustomThemeChange(undefined);
                 }}
                 title={`${p.name} (${pHue}°) — ${p.useCases}`}
-                className={`group relative aspect-square overflow-hidden rounded-sm border transition ${
+                aria-pressed={isActive}
+                className={`group relative aspect-square overflow-hidden rounded-md border transition ${
                   isActive
-                    ? "border-gold ring-2 ring-gold scale-105 z-10 shadow-sm"
+                    ? "z-10 scale-105 border-gold shadow-sm ring-2 ring-gold/60"
                     : isHueMatched
-                    ? "border-amber-400/80 ring-1 ring-amber-400/40"
-                    : "border-line hover:border-line-strong hover:scale-102"
+                    ? "border-warning/70 ring-1 ring-warning/30"
+                    : "border-line hover:scale-105 hover:border-line-strong"
                 }`}
               >
                 <div className="flex h-full flex-col">

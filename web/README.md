@@ -61,6 +61,10 @@ npm run dev                  # 打开 http://localhost:3000，填写自己的模
 
 Next.js 16 (App Router) · React 19 · TypeScript · Tailwind v4 · PptxGenJS
 
+## 设计语言
+
+「Proof Studio」暖纸浅色编辑风：纸白底 + 墨色 + 群青主色/朱红显示色，衬线编号与发丝线分节，零 emoji，自绘线性图标。用 `npx designlang` 从 pitch.com 与 linear.app 提取设计语言研究后融合；关键文本对比度均 ≥4.5:1，动效尊重 prefers-reduced-motion。首次访问可用「载入示例」无 Key 体验完整导出流程。
+
 ## 项目结构
 
 ```

@@ -1,6 +1,23 @@
 # Changelog / 更新日志
 
-## 2026-11-17 — Web Studio 前端与 skill 工具链优化（issue #13）
+## 2026-11-17 — Web Studio 视觉重设计：去 AI 味（designlang 研究驱动，qwen4 实施）
+
+### Changed / 变更
+
+- **整体艺术方向**：从「深色 + 金色 + emoji + 等宽大写标签」的典型 AI 生成风，改为「Proof Studio」暖纸浅色编辑风：纸白底 #F5F3EE + 墨色文字，单一主色群青 #2742E0 + 朱红显示色 #C63D14，衬线展示字体（Georgia/宋体）用于 wordmark 与编号，发丝线分节。设计语言用 `npx designlang` 从 pitch.com（浅色主导、committed accent、柔和彩色阴影）与 linear.app（14px 字阶、100/160/400ms 动效、cubic-bezier(0.32,0.72,0,1)、hairline inset）提取研究后融合。
+- **零 emoji**：全部界面 emoji 替换为自绘 16px 线性 SVG 图标组（icons.tsx，26 个）；隐私卡从大绿块改为安静脚注；ModelBest 推广从大金卡改为一行式链接。
+- **配置面板**：编号分节 01–06（朱红衬线斜体编号），风格配方用真实圆角字形示意，切换按钮全部带 aria-pressed。
+- **大纲预览**：每页新增 16:9 实时缩略图，直接用当前选中色板渲染（换色板即时可见），按版式家族呈现不同构图；类型标签穷举 Record + 色点（永不纯色表意）。
+- **无 Key 完整体验**：新增 SAMPLE_PLAN（虚构山雾咖啡年度规划，7 页多版式）与「载入示例」路径：首次访问无需 API Key 即可预览→编辑→导出真实 PPTX + Markdown。空态改为编辑风「先看一份成品。」。
+- **氛围与动效**：纸纹颗粒 + 顶部投影光晕分层背景；分级入场动画（stagger 45–120ms）、按压回弹、加载/未导出脉冲点；自定义滚动条与选区色同属色板；全部动效尊重 prefers-reduced-motion。
+- **对比度**：新色板关键文本对全部 ≥4.5:1（skill color-qa 验证）；状态色永远伴随文字/图标。
+
+### Verified / 验证
+
+- 154/154 测试、tsc、lint（0 error）、build、build:pages 全绿。
+- Playwright 实测：示例载入→7 页缩略图→导出 148KB 真实 PPTX + MD；色板切换缩略图实时变色；JSON 模式示例填充；390px 移动端无横向溢出、CTA 可达；控制台 0 报错；界面 emoji 残留 0。
+
+## 2026-11-17 — Web Studio 前端与 skill 工具链优化（issue #13，qwen4 实施）
 
 ### Fixed / 修复
 

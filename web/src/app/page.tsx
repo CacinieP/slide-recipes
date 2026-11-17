@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { PALETTES } from "@/lib/palettes";
+import { PALETTES, resolveTheme } from "@/lib/palettes";
 import { SLIDE_TYPES } from "@/lib/types";
 import ConfigPanel from "@/components/ConfigPanel";
 import OutlineEditor from "@/components/OutlineEditor";
@@ -11,6 +11,8 @@ import { requestLlmPlan, renderDeckPlanToBlob, DEFAULT_REQUEST_MODE, DEFAULT_PRO
 import { loadPersistedModelConfig, persistModelConfig } from "@/lib/model-config-storage";
 import { parseCustomOutlineJson } from "@/lib/prompt";
 import { deckPlanToMarkdown } from "@/lib/outline-markdown";
+import { SAMPLE_PLAN } from "@/lib/sample-plan";
+import { IconArrowRight, IconShuffle, IconLock, IconStop, IconFileText } from "@/components/icons";
 import type { DeckPlan, FontPairId, ModelConfig, StyleRecipe, InputMode, OccasionId, Theme } from "@/lib/types";
 
 interface Result {
@@ -52,7 +54,7 @@ export default function Home() {
   const [includeCode, setIncludeCode] = useState(false);
   const [includeChart, setIncludeChart] = useState(true);
 
-  // 模型配置三要素 (持久化至 localStorage)
+  // 模型配置三要素 (仅非敏感字段持久化；Key 只留内存)
   const [modelConfig, setModelConfig] = useState<ModelConfig>(DEFAULT_MODEL_CONFIG);
 
   // 自定义大纲模式
@@ -215,6 +217,13 @@ export default function Home() {
     setError("");
   }
 
+  // 无需 API Key 的完整体验路径：载入示例大纲 → 编辑 → 导出真实 PPTX
+  function handleLoadSample() {
+    setError("");
+    setResult(null);
+    setPlan(SAMPLE_PLAN);
+  }
+
   const canGenerate = Boolean(
     inputMode === "topic" ? topic.trim() : inputMode === "text" ? sourceText.trim() : customOutlineJson.trim(),
   );
@@ -234,70 +243,83 @@ export default function Home() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  const previewTheme = customTheme || resolveTheme(paletteId);
+  const onChinaNode = currentHost.includes("linguistwantstech.online");
+  const onGlobalNode = currentHost.includes("vercel.app");
+
   return (
-    <div className="min-h-screen bg-canvas">
+    <div className="min-h-screen">
       {/* Header */}
-      <header className="sticky top-0 z-10 border-b border-line bg-canvas/85 backdrop-blur">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-6 py-3.5">
+      <header className="sticky top-0 z-20 border-b border-line bg-canvas/85 backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-x-6 gap-y-2 px-6 py-3">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded border border-gold/50 bg-gold-soft">
-              <span className="font-mono text-sm font-bold text-gold">S</span>
+            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-ink text-canvas shadow-xs">
+              <span className="font-display text-lg italic leading-none">S</span>
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-sm font-semibold tracking-tight text-ink">
-                  Slide Recipes Web Studio
-                </h1>
-                <span className="rounded bg-azure/20 text-azure px-1.5 py-0.2 text-[10px] font-mono border border-azure/40">
-                  Web Studio · 模型连接可配置
-                </span>
-              </div>
-              <p className="mono-label">{PALETTES.length} PALETTES · {SLIDE_TYPES.length} SLIDE TYPES · 15 OCCASIONS · BROWSER-NATIVE PPTX</p>
+            <div className="flex items-baseline gap-2.5">
+              <h1 className="font-display text-lg tracking-tight text-ink">
+                Slide Recipes
+              </h1>
+              <span className="hidden sm:inline-block h-3.5 w-px bg-line-strong" aria-hidden="true" />
+              <span className="mono-label hidden sm:inline-block">Web Studio</span>
             </div>
           </div>
-          <div className="flex items-center gap-3">
+
+          <div className="flex flex-wrap items-center gap-2.5">
+            <div className="hidden md:flex items-center rounded-full border border-line bg-elev p-0.5 text-[11px] shadow-xs" role="group" aria-label="部署节点">
+              <a
+                href="https://slides.linguistwantstech.online/"
+                aria-current={onChinaNode ? "page" : undefined}
+                className={`press inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 ${
+                  onChinaNode ? "bg-ink text-canvas font-medium" : "text-ink-mute hover:text-ink"
+                }`}
+                title="国内直连 EdgeOne CDN"
+              >
+                <span className={`h-1.5 w-1.5 rounded-full ${onChinaNode ? "bg-canvas" : "bg-verm"}`} aria-hidden="true" />
+                国内节点
+              </a>
+              <a
+                href="https://slide-recipes-web.vercel.app/"
+                aria-current={onGlobalNode ? "page" : undefined}
+                className={`press inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 ${
+                  onGlobalNode ? "bg-ink text-canvas font-medium" : "text-ink-mute hover:text-ink"
+                }`}
+                title="全球海外 Vercel Anycast"
+              >
+                <span className={`h-1.5 w-1.5 rounded-full ${onGlobalNode ? "bg-canvas" : "bg-gold"}`} aria-hidden="true" />
+                全球节点
+              </a>
+            </div>
+
+            {inputMode === "topic" && !isLoading && (
+              <button
+                type="button"
+                onClick={() => setTopic(EXAMPLES[Math.floor(Math.random() * EXAMPLES.length)])}
+                className="press inline-flex items-center gap-1.5 rounded-lg border border-line bg-elev px-3 py-1.5 text-xs text-ink-dim shadow-xs hover:border-line-strong hover:text-ink"
+              >
+                <IconShuffle size={13} />
+                随机示例
+              </button>
+            )}
+            {!plan && !isLoading && (
+              <button
+                type="button"
+                onClick={handleLoadSample}
+                className="press inline-flex items-center gap-1.5 rounded-lg border border-line bg-elev px-3 py-1.5 text-xs text-ink-dim shadow-xs hover:border-line-strong hover:text-ink"
+                title="无需 API Key，直接预览并导出示例 PPTX"
+              >
+                <IconFileText size={13} />
+                载入示例
+              </button>
+            )}
             {isLoading && (
               <button
                 type="button"
                 onClick={() => abortRef.current?.abort()}
-                className="rounded-md border border-line px-3 py-1.5 text-xs text-ink-dim transition hover:border-red-400/60 hover:text-red-300"
+                className="press inline-flex items-center gap-1.5 rounded-lg border border-danger/40 bg-danger-soft px-3 py-1.5 text-xs font-medium text-danger hover:border-danger/70"
               >
+                <IconStop size={13} />
                 取消
-              </button>
-            )}
-            <div className="hidden md:flex items-center gap-1 rounded-full border border-line bg-elev/70 px-2 py-1 text-[11px]">
-              <span className="text-ink-dim pl-1">网络节点:</span>
-              <a
-                href="https://slides.linguistwantstech.online/"
-                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 transition ${
-                  currentHost.includes("linguistwantstech.online")
-                    ? "bg-gold-soft text-gold font-medium border border-gold/40"
-                    : "text-ink-dim hover:text-ink hover:bg-base"
-                }`}
-                title="国内直连 EdgeOne CDN"
-              >
-                <span>🇨🇳 国内节点</span>
-              </a>
-              <span className="text-line">|</span>
-              <a
-                href="https://slide-recipes-web.vercel.app/"
-                className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 transition ${
-                  currentHost.includes("vercel.app")
-                    ? "bg-azure/20 text-azure font-medium border border-azure/40"
-                    : "text-ink-dim hover:text-ink hover:bg-base"
-                }`}
-                title="全球海外 Vercel Anycast"
-              >
-                <span>🌍 全球节点</span>
-              </a>
-            </div>
-            {inputMode === "topic" && (
-              <button
-                type="button"
-                onClick={() => setTopic(EXAMPLES[Math.floor(Math.random() * EXAMPLES.length)])}
-                className="rounded-md border border-line px-3 py-1.5 text-xs text-ink-dim transition hover:border-line-strong hover:text-ink"
-              >
-                随机示例
               </button>
             )}
             <button
@@ -305,9 +327,19 @@ export default function Home() {
               onClick={handleGenerate}
               disabled={isLoading || !canGenerate}
               title="快捷键：Ctrl/Cmd + Enter"
-              className="rounded-md bg-gold px-4 py-1.5 text-xs font-semibold text-canvas transition hover:brightness-110 disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-mute"
+              className="press inline-flex items-center gap-1.5 rounded-lg bg-gold px-4 py-1.5 text-xs font-semibold text-white shadow-xs hover:bg-[var(--ultra-deep)] disabled:cursor-not-allowed disabled:bg-line disabled:text-ink-mute disabled:shadow-none"
             >
-              {isLoading ? "处理与渲染中…" : plan && inputMode !== "json" ? "重新调用 AI 生成" : "生成大纲与 PPTX"}
+              {isLoading ? (
+                <>
+                  <span className="spin inline-block h-3 w-3 rounded-full border-[1.5px] border-white/40 border-t-white" aria-hidden="true" />
+                  处理与渲染中
+                </>
+              ) : (
+                <>
+                  {plan && inputMode !== "json" ? "重新调用 AI 生成" : "生成大纲与 PPTX"}
+                  <IconArrowRight size={13} />
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -316,11 +348,7 @@ export default function Home() {
       {/* Body: two-column */}
       <main className="mx-auto grid max-w-7xl gap-6 px-6 py-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.1fr)]">
         {/* Left: config */}
-        <section className="rounded-xl border border-line bg-canvas p-5">
-          <div className="mb-4 flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-gold" />
-            <h2 className="mono-label text-ink-dim">CONFIGURATION / 工作台配置</h2>
-          </div>
+        <section className="card rise p-5" style={{ animationDelay: "40ms" }}>
           <ConfigPanel
             topic={topic}
             audience={audience}
@@ -345,56 +373,58 @@ export default function Home() {
         {/* Right: preview + download */}
         <section className="flex min-h-[60vh] flex-col gap-4">
           {plan && (
-            <OutlineEditor plan={plan} isLoading={isLoading} dirty={!result}
-              targetCount={slideCount}
-              onChange={handlePlanChange} onExport={handleExportEdited} />
+            <div className="rise" style={{ animationDelay: "80ms" }}>
+              <OutlineEditor plan={plan} isLoading={isLoading} dirty={!result}
+                targetCount={slideCount}
+                onChange={handlePlanChange} onExport={handleExportEdited} />
+            </div>
           )}
           {result && (
-            <DownloadCard
-              fileName={result.fileName}
-              blobUrl={result.blobUrl}
-              sizeKb={result.sizeKb}
-              outlineUrl={result.outlineUrl}
-              outlineFileName={result.outlineFileName}
-              onReset={handleReset}
-            />
+            <div className="rise" style={{ animationDelay: "60ms" }}>
+              <DownloadCard
+                fileName={result.fileName}
+                blobUrl={result.blobUrl}
+                sizeKb={result.sizeKb}
+                outlineUrl={result.outlineUrl}
+                outlineFileName={result.outlineFileName}
+                onReset={handleReset}
+              />
+            </div>
           )}
-          <div className="flex-1">
-            <PreviewPanel plan={plan} isLoading={isLoading} error={error} />
+          <div className="rise flex-1" style={{ animationDelay: plan ? "120ms" : "80ms" }}>
+            <PreviewPanel plan={plan} isLoading={isLoading} error={error}
+              theme={previewTheme} onLoadSample={handleLoadSample} />
           </div>
         </section>
       </main>
 
-      <footer className="border-t border-line px-6 py-4">
+      <footer className="border-t border-line bg-elev/60 px-6 py-4">
         <div className="mx-auto flex max-w-7xl flex-col sm:flex-row items-center justify-between gap-3 text-xs text-ink-mute">
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="mono-label text-emerald-400">🛡️ 本地纯前端渲染 · 零服务器存储 · API Key 绝不留存</span>
-            <span className="hidden sm:inline text-line">|</span>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+            <span className="inline-flex items-center gap-1.5 text-ink-dim">
+              <IconLock size={13} className="text-success" />
+              本地纯前端渲染 · 零服务器存储 · API Key 只留内存
+            </span>
+            <span className="hidden sm:inline text-line-strong" aria-hidden="true">|</span>
             <div className="inline-flex items-center gap-2">
-              <span>镜像站:</span>
-              <a
-                href="https://slides.linguistwantstech.online/"
-                className="text-ink-dim hover:text-gold hover:underline transition"
-              >
-                🇨🇳 腾讯云 EdgeOne (国内)
-              </a>
-              <span className="text-line">·</span>
-              <a
-                href="https://slide-recipes-web.vercel.app/"
-                className="text-ink-dim hover:text-azure hover:underline transition"
-              >
-                🌍 Vercel Anycast (全球)
-              </a>
+              <span>镜像</span>
+              <a href="https://slides.linguistwantstech.online/" className="press text-ink-dim hover:text-gold hover:underline">国内 EdgeOne</a>
+              <span className="text-line-strong" aria-hidden="true">·</span>
+              <a href="https://slide-recipes-web.vercel.app/" className="press text-ink-dim hover:text-gold hover:underline">全球 Vercel</a>
             </div>
           </div>
           <a
             href="https://github.com/CacinieP/slide-recipes"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-ink-dim hover:text-ink transition hover:underline"
+            className="press inline-flex items-center gap-1.5 text-ink-dim hover:text-ink hover:underline"
           >
             GitHub Repository
+            <IconArrowRight size={12} />
           </a>
+        </div>
+        <div className="mx-auto mt-2 max-w-7xl text-[11px] text-ink-mute">
+          {PALETTES.length} 套色板 · {SLIDE_TYPES.length} 种版式 · 15 类演示场景 · 浏览器原生生成可编辑 PPTX
         </div>
       </footer>
     </div>

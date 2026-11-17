@@ -6,7 +6,11 @@ import { FONT_PAIRS, OCCASION_PRESETS } from "@/lib/palettes";
 import { PROVIDER_PRESETS } from "@/lib/providers";
 import { smartFetch, DEFAULT_REQUEST_MODE } from "@/lib/client-generator";
 import { MAX_SOURCE_TEXT_LENGTH } from "@/lib/prompt";
+import { SAMPLE_PLAN } from "@/lib/sample-plan";
 import PalettePicker from "./PalettePicker";
+import {
+  IconServer, IconShield, IconSearch, IconKey, IconExternal, IconLock, IconCheck, IconChevronDown,
+} from "./icons";
 
 interface Props {
   topic: string;
@@ -29,23 +33,44 @@ interface Props {
 }
 
 const STYLES: { id: StyleRecipe; label: string; desc: string }[] = [
-  { id: "sharp", label: "Sharp", desc: "紧凑·数据密集" },
-  { id: "soft", label: "Soft", desc: "均衡·通用商务" },
-  { id: "rounded", label: "Rounded", desc: "宽松·产品营销" },
-  { id: "pill", label: "Pill", desc: "通透·品牌发布" },
+  { id: "sharp", label: "Sharp", desc: "紧凑 · 数据密集" },
+  { id: "soft", label: "Soft", desc: "均衡 · 通用商务" },
+  { id: "rounded", label: "Rounded", desc: "宽松 · 产品营销" },
+  { id: "pill", label: "Pill", desc: "通透 · 品牌发布" },
 ];
+
+/** Style glyph: the corner-radius language of each recipe, drawn literally. */
+function StyleGlyph({ id, active }: { id: StyleRecipe; active: boolean }) {
+  const cls = `h-4 w-6 border-[1.5px] ${active ? "border-gold" : "border-ink-mute"}`;
+  if (id === "sharp") return <span className={`${cls} rounded-none`} aria-hidden="true" />;
+  if (id === "soft") return <span className={`${cls} rounded-[4px]`} aria-hidden="true" />;
+  if (id === "rounded") return <span className={`${cls} rounded-[8px]`} aria-hidden="true" />;
+  return <span className={`${cls} rounded-full`} aria-hidden="true" />;
+}
+
+function SectionHead({ no, title, hint }: { no: string; title: string; hint?: string }) {
+  return (
+    <div className="mb-3 flex items-baseline justify-between gap-2">
+      <div className="flex items-baseline gap-2">
+        <span className="section-no" aria-hidden="true">{no}</span>
+        <h3 className="text-[13px] font-semibold tracking-tight text-ink">{title}</h3>
+      </div>
+      {hint && <span className="text-[11px] text-ink-mute">{hint}</span>}
+    </div>
+  );
+}
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="block">
-      <span className="mono-label mb-1.5 block">{label}</span>
+      <span className="mb-1.5 block text-[11px] font-medium tracking-wide text-ink-mute">{label}</span>
       {children}
     </label>
   );
 }
 
 const inputCls =
-  "w-full rounded-md border border-line bg-elev px-3 py-2 text-sm text-ink placeholder:text-ink-mute transition focus:border-gold/60 focus:outline-none";
+  "w-full rounded-lg border border-line bg-elev px-3 py-2 text-sm text-ink placeholder:text-ink-mute/80 shadow-xs transition focus:border-gold/60 focus:outline-none";
 
 export default function ConfigPanel(props: Props) {
   const { set } = props;
@@ -144,7 +169,7 @@ export default function ConfigPanel(props: Props) {
       }
 
       setDetectedModels(modelIds);
-      setDetectStatus(`✅ 检测成功！探测到 ${modelIds.length} 个可用模型`);
+      setDetectStatus(`检测成功，探测到 ${modelIds.length} 个可用模型`);
 
       // Preserve a chosen model; detection must not silently switch its cost tier.
       if (!props.modelConfig.model.trim()) {
@@ -152,43 +177,50 @@ export default function ConfigPanel(props: Props) {
           modelConfig: { ...props.modelConfig, model: modelIds[0] },
         });
       } else if (!modelIds.includes(props.modelConfig.model)) {
-        setDetectStatus(`⚠️ 已获取 ${modelIds.length} 个模型，但当前型号未出现在列表中；已保留设置，请确认服务商支持该型号。`);
+        setDetectStatus(`已获取 ${modelIds.length} 个模型，但当前型号未出现在列表中；已保留设置，请确认服务商支持该型号。`);
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      setDetectStatus(`❌ 检测失败: ${msg}`);
+      setDetectStatus(`检测失败: ${msg}`);
     } finally {
       setIsDetecting(false);
     }
   };
 
+  const detectTone = detectStatus.startsWith("检测成功")
+    ? "text-success"
+    : detectStatus.startsWith("检测失败")
+      ? "text-danger"
+      : "text-ink-dim";
+
   return (
-    <div className="flex flex-col gap-5">
-      {/* 1. 模型服务配置三要素 (预设快捷选择 + 自定义 Endpoint + 自动检测) */}
-      <div className="rounded-lg border border-line bg-elev/60 p-3.5">
-        <div className="flex items-center justify-between mb-2.5">
-          <div className="flex items-center gap-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-azure" />
-            <span className="mono-label text-ink">MODEL SERVICE / 模型服务三要素</span>
+    <div className="flex flex-col gap-6">
+      {/* 01 模型服务 */}
+      <div>
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <div className="flex items-baseline gap-2">
+            <span className="section-no" aria-hidden="true">01</span>
+            <h3 className="text-[13px] font-semibold tracking-tight text-ink">模型服务</h3>
           </div>
           <button
             type="button"
             aria-expanded={showModelConfig}
             onClick={() => setShowModelConfig(!showModelConfig)}
-            className="text-xs text-ink-dim hover:text-ink underline"
+            className="press inline-flex items-center gap-1 text-[11px] text-ink-mute hover:text-ink"
           >
-            {showModelConfig ? "收起" : "展开配置"}
+            {showModelConfig ? "收起" : "展开"}
+            <IconChevronDown size={12} className={`transition-transform ${showModelConfig ? "rotate-180" : ""}`} />
           </button>
         </div>
 
         {showModelConfig && (
-          <div className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3.5">
             {/* 通信与请求模式切换 */}
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[11px] text-ink-dim font-medium">通信与请求模式：</span>
-                <span className="text-[10px] font-mono text-ink-mute">
-                  {requestMode === "proxy" ? "解决 CORS 跨域 · 内存透传" : "浏览器直连 · 100% 物理隔离"}
+              <div className="mb-1.5 flex items-center justify-between">
+                <span className="text-[11px] font-medium text-ink-mute">请求模式</span>
+                <span className="text-[10px] text-ink-mute">
+                  {requestMode === "proxy" ? "经本站内存转发 · 解决跨域" : "浏览器直连 · 不经服务器"}
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-2">
@@ -199,17 +231,19 @@ export default function ConfigPanel(props: Props) {
                     setDetectedModels([]); setDetectStatus("");
                     set({ modelConfig: { ...props.modelConfig, mode: "proxy" } });
                   }}
-                  className={`flex flex-col text-left p-2.5 rounded-md border transition ${
+                  className={`press flex flex-col rounded-lg border p-3 text-left ${
                     requestMode === "proxy"
-                      ? "border-gold bg-gold-soft/30 ring-1 ring-gold/60 text-ink shadow-xs"
-                      : "border-line bg-base/50 text-ink-dim hover:border-line-strong hover:text-ink"
+                      ? "border-gold bg-gold-soft shadow-xs ring-1 ring-gold/40"
+                      : "border-line bg-elev text-ink-dim shadow-xs hover:border-line-strong"
                   }`}
                 >
-                  <div className="flex items-center gap-1.5 font-medium text-xs text-ink">
-                    <span>🚀 代理模式 (推荐)</span>
-                  </div>
-                  <span className="text-[10px] text-ink-mute mt-1 leading-snug">
-                    解决跨域限制 · 纯内存管道透传 · 绝不落盘不记 Key
+                  <span className={`flex items-center gap-1.5 text-xs font-semibold ${requestMode === "proxy" ? "text-gold" : "text-ink"}`}>
+                    <IconServer size={14} />
+                    代理模式
+                    <span className="ml-auto rounded-full bg-gold px-1.5 py-px text-[9px] font-medium text-white">推荐</span>
+                  </span>
+                  <span className="mt-1 text-[10px] leading-snug text-ink-mute">
+                    解决跨域限制 · 纯内存管道透传 · 不落盘不记 Key
                   </span>
                 </button>
 
@@ -220,56 +254,41 @@ export default function ConfigPanel(props: Props) {
                     setDetectedModels([]); setDetectStatus("");
                     set({ modelConfig: { ...props.modelConfig, mode: "direct" } });
                   }}
-                  className={`flex flex-col text-left p-2.5 rounded-md border transition ${
+                  className={`press flex flex-col rounded-lg border p-3 text-left ${
                     requestMode === "direct"
-                      ? "border-azure bg-blue-soft/30 ring-1 ring-azure/60 text-ink shadow-xs"
-                      : "border-line bg-base/50 text-ink-dim hover:border-line-strong hover:text-ink"
+                      ? "border-azure bg-blue-soft shadow-xs ring-1 ring-azure/40"
+                      : "border-line bg-elev text-ink-dim shadow-xs hover:border-line-strong"
                   }`}
                 >
-                  <div className="flex items-center gap-1.5 font-medium text-xs text-ink">
-                    <span>🔒 纯前端直连模式</span>
-                  </div>
-                  <span className="text-[10px] text-ink-mute mt-1 leading-snug">
+                  <span className={`flex items-center gap-1.5 text-xs font-semibold ${requestMode === "direct" ? "text-azure" : "text-ink"}`}>
+                    <IconShield size={14} />
+                    纯前端直连
+                  </span>
+                  <span className="mt-1 text-[10px] leading-snug text-ink-mute">
                     浏览器直发服务商 · 物理隔离不经任何服务器
                   </span>
                 </button>
               </div>
             </div>
+
             {/* 常见服务商快速切换按钮 */}
             <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-[11px] text-ink-dim">预设服务商快捷选择：</span>
-                <div className="inline-flex rounded border border-line bg-base p-0.5 text-[10px]">
-                  <button
-                    type="button"
-                    aria-pressed={providerRegion === "all"}
-                    onClick={() => setProviderRegion("all")}
-                    className={`px-1.5 py-0.5 rounded transition ${
-                      providerRegion === "all" ? "bg-elev font-medium text-ink shadow-xs" : "text-ink-mute hover:text-ink"
-                    }`}
-                  >
-                    全部
-                  </button>
-                  <button
-                    type="button"
-                    aria-pressed={providerRegion === "cn"}
-                    onClick={() => setProviderRegion("cn")}
-                    className={`px-1.5 py-0.5 rounded transition ${
-                      providerRegion === "cn" ? "bg-elev font-medium text-ink shadow-xs" : "text-ink-mute hover:text-ink"
-                    }`}
-                  >
-                    🇨🇳 国内直连 (免梯)
-                  </button>
-                  <button
-                    type="button"
-                    aria-pressed={providerRegion === "global"}
-                    onClick={() => setProviderRegion("global")}
-                    className={`px-1.5 py-0.5 rounded transition ${
-                      providerRegion === "global" ? "bg-elev font-medium text-ink shadow-xs" : "text-ink-mute hover:text-ink"
-                    }`}
-                  >
-                    🌍 国际海外
-                  </button>
+              <div className="mb-1.5 flex items-center justify-between">
+                <span className="text-[11px] font-medium text-ink-mute">服务商</span>
+                <div className="inline-flex rounded-md border border-line bg-base p-0.5 text-[10px]" role="group" aria-label="服务商区域筛选">
+                  {([["all", "全部"], ["cn", "国内"], ["global", "海外"]] as const).map(([region, label]) => (
+                    <button
+                      key={region}
+                      type="button"
+                      aria-pressed={providerRegion === region}
+                      onClick={() => setProviderRegion(region)}
+                      className={`press rounded px-2 py-0.5 ${
+                        providerRegion === region ? "bg-elev font-medium text-ink shadow-xs" : "text-ink-mute hover:text-ink"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
                 </div>
               </div>
               <div className="flex flex-wrap gap-1.5">
@@ -277,40 +296,39 @@ export default function ConfigPanel(props: Props) {
                   (p) => providerRegion === "all" || p.id === "custom" || p.region === providerRegion
                 ).map((p) => {
                   const active = currentProviderId === p.id;
-                  const regionBadge = p.region === "cn" ? "🇨🇳" : p.region === "global" ? "🌍" : "⚙️";
                   return (
                     <button
                       key={p.id}
                       type="button"
                       aria-pressed={active}
                       onClick={() => handleSelectProvider(p.id)}
-                      className={`inline-flex items-center gap-1 rounded px-2.5 py-1 text-xs transition border ${
+                      className={`press inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] ${
                         active
-                          ? "border-gold bg-gold-soft text-gold font-medium"
+                          ? "border-gold bg-gold-soft font-medium text-gold"
                           : "border-line bg-elev text-ink-dim hover:border-line-strong hover:text-ink"
                       }`}
                     >
-                      <span className="text-[10px] opacity-70">{regionBadge}</span>
                       <span>{p.name.split(" ")[0]}</span>
-                      <span className="text-[10px] opacity-60">({p.badge})</span>
+                      <span className={`text-[9px] ${active ? "text-gold/70" : "text-ink-mute"}`}>{p.badge}</span>
                     </button>
                   );
                 })}
               </div>
             </div>
 
-            {/* Base URL (支持自由自定义修改) */}
+            {/* Base URL */}
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[11px] text-ink-dim">1. API Base URL (自定义或预设端点)</span>
+              <div className="mb-1 flex items-center justify-between">
+                <span className="text-[11px] font-medium text-ink-mute">API Base URL</span>
                 {matchedPreset?.docUrl && (
                   <a
                     href={matchedPreset.docUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-[10px] text-azure hover:underline"
+                    className="press inline-flex items-center gap-1 text-[10px] text-gold hover:underline"
                   >
-                    获取 API Key →
+                    获取 API Key
+                    <IconExternal size={10} />
                   </a>
                 )}
               </div>
@@ -322,7 +340,7 @@ export default function ConfigPanel(props: Props) {
                   setDetectedModels([]); setDetectStatus("");
                   set({ modelConfig: { ...props.modelConfig, baseUrl: e.target.value } });
                 }}
-                placeholder="例如: https://api.modelbest.cn/v1 或 自定义端点"
+                placeholder="例如: https://api.modelbest.cn/v1 或自定义端点"
               />
               <div className="mt-1 text-[10px] text-ink-mute">
                 {requestMode === "proxy" ? "自定义地址需由部署者在允许列表中显式批准。" : "直连是否可用取决于供应商的 CORS 策略。"}
@@ -331,11 +349,15 @@ export default function ConfigPanel(props: Props) {
 
             {/* API Key */}
             <div>
-              <div className="text-[11px] text-ink-dim mb-1">2. API Key (用于指定模型服务认证)</div>
+              <div className="mb-1 flex items-center gap-1 text-[11px] font-medium text-ink-mute">
+                <IconKey size={11} />
+                API Key
+              </div>
               <div className="flex gap-2">
                 <input
                   type="password"
                   aria-label="API Key"
+                  autoComplete="off"
                   className={inputCls}
                   value={props.modelConfig.apiKey}
                   onChange={(e) =>
@@ -349,35 +371,36 @@ export default function ConfigPanel(props: Props) {
                   type="button"
                   onClick={handleDetectModels}
                   disabled={isDetecting || !props.modelConfig.baseUrl}
-                  className="shrink-0 rounded-md border border-azure/60 bg-azure/10 px-3 py-2 text-xs font-medium text-azure transition hover:bg-azure/20 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="press inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-gold/50 bg-gold-soft px-3 py-2 text-xs font-medium text-gold hover:bg-gold/15 disabled:cursor-not-allowed disabled:opacity-50"
                   title="使用当前请求方式查询 /models"
                 >
-                  {isDetecting ? "检测中…" : "🔍 自动检测模型"}
+                  {isDetecting ? (
+                    <span className="spin inline-block h-3 w-3 rounded-full border-[1.5px] border-gold/30 border-t-gold" aria-hidden="true" />
+                  ) : (
+                    <IconSearch size={13} />
+                  )}
+                  {isDetecting ? "检测中" : "检测模型"}
                 </button>
               </div>
               {detectStatus && (
-                <div
-                  className={`mt-1 text-[11px] ${
-                    detectStatus.startsWith("✅") ? "text-emerald-400" : "text-amber-400"
-                  }`}
-                >
+                <div className={`mt-1 text-[11px] ${detectTone}`} role="status">
                   {detectStatus}
                 </div>
               )}
             </div>
 
-            {/* Model Name (模型选择或填入) */}
+            {/* Model Name */}
             <div>
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-[11px] text-ink-dim">3. Model Name (检测选择或手动填入)</span>
+              <div className="mb-1 flex items-center justify-between">
+                <span className="text-[11px] font-medium text-ink-mute">模型</span>
                 {detectedModels.length > 0 && (
-                  <span className="text-[10px] text-emerald-400 font-mono">
-                    已连通 ({detectedModels.length} 个模型)
+                  <span className="inline-flex items-center gap-1 text-[10px] text-success">
+                    <IconCheck size={10} />
+                    已连通 · {detectedModels.length} 个模型
                   </span>
                 )}
               </div>
 
-              {/* 如果自动探测到了模型，优先展示自动探测下拉列表 */}
               {detectedModels.length > 0 ? (
                 <div className="flex flex-col gap-1.5">
                   <select
@@ -402,7 +425,7 @@ export default function ConfigPanel(props: Props) {
                     ))}
                   </select>
                   <div className="text-[10px] text-ink-mute">
-                    * 已自动拉取该服务支持的模型列表，可直接点选。也可在下方修改为任意自定义 ID。
+                    已自动拉取该服务支持的模型列表，可直接点选，也可在下方改为任意自定义 ID。
                   </div>
                 </div>
               ) : matchedPreset && matchedPreset.models.length > 0 ? (
@@ -426,80 +449,49 @@ export default function ConfigPanel(props: Props) {
                   </select>
                 </div>
               ) : null}
-              <input aria-label="自定义模型名" className={`${inputCls} mt-1.5`} value={props.modelConfig.model}
+              <input aria-label="自定义模型名" className={`${inputCls} mt-1.5 font-mono text-xs`} value={props.modelConfig.model}
                 onChange={(e) => set({ modelConfig: { ...props.modelConfig, model: e.target.value } })}
                 placeholder="手动输入自定义模型 ID" />
             </div>
 
-            {/* ModelBest 注册教程与专属邀请入口 */}
-            <div className="rounded-md border border-gold/40 bg-gold-soft/60 p-2.5 text-xs text-ink-dim">
-              <div className="flex items-center justify-between font-medium text-ink mb-1">
-                <span className="flex items-center gap-1.5 text-gold">
-                  <span>💡</span> 推荐方案：ModelBest (MiniCPM) API 快速获取
-                </span>
-                <a
-                  href="https://platform.modelbest.cn/console/login?ref=A93DCA73"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded bg-gold px-2 py-0.5 text-[11px] font-semibold text-canvas hover:brightness-110"
-                >
-                  免费注册领取额度 →
-                </a>
-              </div>
-              <p className="text-[11px] leading-relaxed">
-                1. 点击专属邀请链接注册/登录：
-                <a
-                  href="https://platform.modelbest.cn/console/login?ref=A93DCA73"
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-azure underline mx-0.5"
-                >
-                  platform.modelbest.cn (专属邀请码 A93DCA73)
-                </a>
-                <br />
-                2. 进入控制台「API 密钥」创建并复制以 <code className="text-gold font-mono">sk-live-</code> 开头的密钥填入上方。
-                <br />
-                3. 当前默认模型为 <code className="text-azure font-mono">MiniCPM-V-4.7-1B</code>。可点击「🔍 自动检测模型」检查你填写的 Key 是否可用。
-              </p>
+            {/* ModelBest 推荐：一行式，不喧宾夺主 */}
+            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-line bg-base px-3 py-2">
+              <span className="text-[11px] text-ink-dim">
+                没有 Key？推荐 ModelBest（MiniCPM），默认模型
+                <code className="mx-1 font-mono text-[10px] text-ink">MiniCPM-V-4.7-1B</code>
+              </span>
+              <a
+                href="https://platform.modelbest.cn/console/login?ref=A93DCA73"
+                target="_blank"
+                rel="noreferrer"
+                className="press inline-flex items-center gap-1 text-[11px] font-medium text-gold hover:underline"
+              >
+                免费注册领取额度
+                <IconExternal size={10} />
+              </a>
             </div>
 
-            {/* 隐私与安全透明承诺 */}
-            <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-ink space-y-1.5">
-              <div className="flex items-center gap-1.5 font-semibold text-emerald-400">
-                <span>🛡️ 隐私与 API Key 零存储承诺</span>
+            {/* 隐私承诺：安静的脚注，而不是大色块 */}
+            <div className="border-t border-line pt-2.5 text-[10.5px] leading-relaxed text-ink-mute">
+              <div className="mb-1 flex items-center gap-1.5 font-medium text-ink-dim">
+                <IconLock size={11} className="text-success" />
+                隐私承诺
               </div>
-              <div className="text-[11px] text-ink-dim leading-relaxed space-y-1">
-                <div>
-                  • <b>PPTX 纯前端本地组装</b>：所有幻灯片几何图形、矢量文本完全在您本地浏览器组装生成，文件绝不上报或留存。
-                </div>
-                <div>
-                  • <b>Key 仅保留在当前浏览器内存中</b>：随用随走，绝不建库、绝不收集。
-                </div>
-                <div>
-                  • <b>通信安全</b>：
-                  {requestMode === "proxy" ? (
-                    <span className="text-amber-300">
-                      当前为【代理模式】，仅作为内存管道转发以解决浏览器跨域限制，服务器绝不落盘、绝不记录您的 Key。
-                    </span>
-                  ) : (
-                    <span className="text-emerald-300">
-                      当前为【纯前端直连模式】，浏览器直接与模型供应商通信，100% 物理隔离，不经过任何中间服务器。
-                    </span>
-                  )}
-                </div>
-              </div>
+              PPTX 纯前端本地组装，文件绝不上报；Key 仅保留在当前浏览器内存，绝不建库收集。
+              {requestMode === "proxy" ? (
+                <span className="text-warning"> 当前为代理模式：仅作内存管道转发以解决跨域，服务器不落盘、不记录 Key。</span>
+              ) : (
+                <span className="text-success"> 当前为直连模式：浏览器直接与供应商通信，不经过任何中间服务器。</span>
+              )}
             </div>
           </div>
         )}
       </div>
 
-      {/* 演示场合 / 场景预设 */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <span className="mono-label">OCCASION / 演示场景</span>
-          <span className="text-[10px] text-ink-mute">15 类主流场景联动</span>
-        </div>
-        <div className="grid grid-cols-3 gap-1.5 max-h-36 overflow-y-auto pr-1">
+      {/* 02 演示场景 */}
+      <div className="border-t border-line pt-4">
+        <SectionHead no="02" title="演示场景" hint="15 类场景联动风格" />
+        <div className="grid max-h-40 grid-cols-3 gap-1.5 overflow-y-auto pr-1">
           {OCCASION_PRESETS.map((o) => {
             const active = props.occasion === o.id;
             return (
@@ -518,184 +510,156 @@ export default function ConfigPanel(props: Props) {
                     topic: props.topic ? props.topic : o.sampleTopic,
                   });
                 }}
-                className={`rounded border p-1.5 text-left transition flex flex-col justify-between ${
+                className={`press rounded-lg border p-2 text-left ${
                   active
-                    ? "border-gold bg-gold-soft text-gold font-medium"
-                    : "border-line bg-elev/60 text-ink hover:border-line-strong hover:bg-elev"
+                    ? "border-gold bg-gold-soft shadow-xs"
+                    : "border-line bg-elev shadow-xs hover:border-line-strong"
                 }`}
               >
-                <div className="flex items-center justify-between w-full">
-                  <span className="text-xs font-medium truncate">{o.name.split(" / ")[0]}</span>
-                </div>
-                <span className="text-[10px] text-ink-mute truncate mt-0.5">{o.desc.split("、")[0]}</span>
+                <span className={`block truncate text-xs font-medium ${active ? "text-gold" : "text-ink"}`}>
+                  {o.name.split(" / ")[0]}
+                </span>
+                <span className="mt-0.5 block truncate text-[10px] text-ink-mute">{o.desc.split("、")[0]}</span>
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* 2. 创作模式切换: AI 自动规划 vs 自定义大纲 */}
-      <div>
-        <div className="mono-label mb-2">MODE / 创作模式</div>
-        <div className="grid grid-cols-3 gap-2">
+      {/* 03 创作模式与内容 */}
+      <div className="border-t border-line pt-4">
+        <SectionHead no="03" title="创作模式" />
+        <div className="mb-3 grid grid-cols-3 gap-1.5 rounded-lg border border-line bg-base p-1" role="group" aria-label="创作模式">
           {([
             ["topic", "主题生成"],
-            ["text", "粘贴文案 → AI"],
+            ["text", "粘贴文案"],
             ["json", "JSON 大纲"],
           ] as const).map(([mode, label]) => (
             <button key={mode} type="button" aria-pressed={props.inputMode === mode}
               onClick={() => set({ inputMode: mode })}
-              className={`rounded-md border px-3 py-2 text-center text-xs transition ${props.inputMode === mode
-                ? "border-gold bg-gold-soft text-gold font-medium"
-                : "border-line bg-elev text-ink-dim hover:border-line-strong hover:text-ink"}`}>
+              className={`press rounded-md px-2 py-1.5 text-center text-xs ${props.inputMode === mode
+                ? "bg-elev font-semibold text-ink shadow-xs"
+                : "text-ink-mute hover:text-ink"}`}>
               {label}
             </button>
           ))}
         </div>
+
+        {props.inputMode !== "json" ? (
+          <div className="flex flex-col gap-3">
+            {props.inputMode === "text" ? (
+              <Field label="原始文案">
+                <textarea aria-label="原始文案" className={`${inputCls} min-h-44 resize-y`}
+                  value={props.sourceText} maxLength={MAX_SOURCE_TEXT_LENGTH}
+                  onChange={(e) => set({ sourceText: e.target.value })}
+                  placeholder="粘贴文章、会议笔记、Markdown、列表或表格文本，无需转换为 JSON。AI 会整理为大纲并生成 PPTX。" />
+                <span className="mt-1 block text-[10px] text-ink-mute">{props.sourceText.length.toLocaleString()} / 20,000 字符 · 文案会发送给所选模型</span>
+              </Field>
+            ) : (
+              <Field label="主题">
+                <textarea aria-label="演示主题" className={`${inputCls} min-h-16 resize-y`} value={props.topic}
+                  onChange={(e) => set({ topic: e.target.value })} placeholder="例如：AI 驱动的年度战略汇报" />
+              </Field>
+            )}
+
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="受众">
+                <input
+                  className={inputCls}
+                  value={props.audience}
+                  onChange={(e) => set({ audience: e.target.value })}
+                  placeholder="管理层 / 产品团队"
+                />
+              </Field>
+              <Field label="语气">
+                <input
+                  className={inputCls}
+                  value={props.tone}
+                  onChange={(e) => set({ tone: e.target.value })}
+                  placeholder="专业、清晰、简洁"
+                />
+              </Field>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              <Field label="大致页数">
+                <input
+                  type="number"
+                  min={3}
+                  max={30}
+                  aria-label="大致页数"
+                  className={inputCls}
+                  value={props.slideCount}
+                  onChange={(e) => set({ slideCount: Math.max(3, Math.min(30, Number(e.target.value) || 8)) })}
+                  placeholder="约 8 页"
+                  title="设定大致目标页数（AI 会围绕主题自适应组织 3~30 页）"
+                />
+              </Field>
+              <Field label="语言">
+                <select
+                  aria-label="语言"
+                  className={inputCls}
+                  value={props.language}
+                  onChange={(e) => set({ language: e.target.value as "zh-CN" | "en-US" })}
+                >
+                  <option value="zh-CN">中文</option>
+                  <option value="en-US">English</option>
+                </select>
+              </Field>
+              <Field label="字体">
+                <select
+                  aria-label="字体配对"
+                  className={inputCls}
+                  value={props.fontPair}
+                  onChange={(e) => set({ fontPair: e.target.value as FontPairId })}
+                >
+                  {FONT_PAIRS.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.header} / {f.body}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            </div>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-2">
+            <Field label="自定义大纲 JSON">
+              <textarea
+                aria-label="自定义大纲 JSON"
+                className={`${inputCls} min-h-48 resize-y font-mono text-xs`}
+                value={props.customOutlineJson}
+                onChange={(e) => set({ customOutlineJson: e.target.value })}
+                placeholder={`{\n  "title": "自定义商业方案",\n  "slides": [\n    { "type": "cover", "title": "项目规划", "subtitle": "面向全员" },\n    { "type": "kpiDashboard", "title": "关键业务指标", "items": [{ "label": "ARR", "value": "120M", "change": "+30%", "context": "同比" }] },\n    { "type": "closing", "title": "感谢聆听", "action": "推进落地" }\n  ]\n}`}
+              />
+            </Field>
+            <div className="flex items-center justify-between text-[11px] text-ink-mute">
+              <span>支持 27 种原生版式，未知类型自动归一</span>
+              <button
+                type="button"
+                onClick={() => set({ customOutlineJson: JSON.stringify(SAMPLE_PLAN, null, 2) })}
+                className="press font-medium text-gold hover:underline"
+              >
+                填入标准示例
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* 3. 主题 / 自定义大纲内容 */}
-      {props.inputMode !== "json" ? (
-        <>
-          {props.inputMode === "text" ? (
-            <Field label="SOURCE TEXT / 粘贴原始文案">
-              <textarea aria-label="原始文案" className={`${inputCls} min-h-48 resize-y`}
-                value={props.sourceText} maxLength={MAX_SOURCE_TEXT_LENGTH}
-                onChange={(e) => set({ sourceText: e.target.value })}
-                placeholder="粘贴文章、会议笔记、Markdown、列表或表格文本，无需转换为 JSON。AI 会整理为大纲并生成 PPTX。" />
-              <span className="mt-1 block text-xs text-ink-mute">{props.sourceText.length.toLocaleString()} / 20,000 字符 · 文案会发送给所选模型。生成后可下载 PPTX 和 Markdown 大纲。</span>
-            </Field>
-          ) : (
-            <Field label="TOPIC / 主题">
-              <textarea className={`${inputCls} min-h-20 resize-y`} value={props.topic}
-                onChange={(e) => set({ topic: e.target.value })} placeholder="例如:AI 驱动的年度战略汇报" />
-            </Field>
-          )}
+      {/* 04 调色板 */}
+      <div className="border-t border-line pt-4">
+        <PalettePicker
+          value={props.paletteId}
+          customTheme={props.customTheme}
+          onChange={(paletteId) => set({ paletteId, customTheme: undefined })}
+          onCustomThemeChange={(customTheme) => set({ customTheme })}
+        />
+      </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="AUDIENCE / 受众">
-              <input
-                className={inputCls}
-                value={props.audience}
-                onChange={(e) => set({ audience: e.target.value })}
-                placeholder="管理层 / 产品团队"
-              />
-            </Field>
-            <Field label="TONE / 语气">
-              <input
-                className={inputCls}
-                value={props.tone}
-                onChange={(e) => set({ tone: e.target.value })}
-                placeholder="专业、清晰、简洁"
-              />
-            </Field>
-          </div>
-
-          <div className="grid grid-cols-3 gap-3">
-            <Field label="SLIDES / 大致页数 (预估篇幅)">
-              <input
-                type="number"
-                min={3}
-                max={30}
-                className={inputCls}
-                value={props.slideCount}
-                onChange={(e) => set({ slideCount: Math.max(3, Math.min(30, Number(e.target.value) || 8)) })}
-                placeholder="约 8 页"
-                title="设定大致目标页数（AI 会围绕主题自适应组织 3~30 页，不再做生硬的严格校验）"
-              />
-            </Field>
-            <Field label="LANGUAGE / 语言">
-              <select
-                className={inputCls}
-                value={props.language}
-                onChange={(e) => set({ language: e.target.value as "zh-CN" | "en-US" })}
-              >
-                <option value="zh-CN">中文</option>
-                <option value="en-US">English</option>
-              </select>
-            </Field>
-            <Field label="FONTS / 字体">
-              <select
-                className={inputCls}
-                value={props.fontPair}
-                onChange={(e) => set({ fontPair: e.target.value as FontPairId })}
-              >
-                {FONT_PAIRS.map((f) => (
-                  <option key={f.id} value={f.id}>
-                    {f.header} / {f.body}
-                  </option>
-                ))}
-              </select>
-            </Field>
-          </div>
-        </>
-      ) : (
-        <div className="flex flex-col gap-2">
-          <Field label="CUSTOM OUTLINE JSON / 自定义大纲数据">
-            <textarea
-              className={`${inputCls} min-h-48 font-mono text-xs resize-y`}
-              value={props.customOutlineJson}
-              onChange={(e) => set({ customOutlineJson: e.target.value })}
-              placeholder={`{\n  "title": "自定义商业方案",\n  "slides": [\n    { "type": "cover", "title": "项目规划", "subtitle": "面向全员" },\n    { "type": "kpiDashboard", "title": "关键业务指标", "items": [{ "label": "ARR", "value": "120M", "change": "+30%", "context": "同比" }] },\n    { "type": "closing", "title": "感谢聆听", "action": "推进落地" }\n  ]\n}`}
-            />
-          </Field>
-          <div className="flex justify-between items-center text-[11px] text-ink-mute">
-            <span>支持 25 种原生版式（cover, kpiDashboard, funnel, gantt, marketSize, faq 等）</span>
-            <button
-              type="button"
-              onClick={() => {
-                const sample = {
-                  title: "自定义商业全景汇报",
-                  slides: [
-                    {
-                      type: "cover",
-                      title: "自定义商业全景汇报",
-                      subtitle: "让结构与数据说话",
-                      kicker: "CUSTOM DECK",
-                    },
-                    {
-                      type: "executiveSummary",
-                      title: "核心决策与建议",
-                      decision: "聚焦核心场景\n全面推进矢量化架构",
-                      evidence: ["提升排版可读性", "杜绝文字乱码溢出", "多端一致性导出"],
-                      nextStep: "下周启动全面上线评审",
-                    },
-                    {
-                      type: "statCallout",
-                      title: "交付效率提升",
-                      stat: "100%",
-                      label: "原生矢量对象率",
-                      takeaway: "纯原生矢量几何与文本，支持自由修改",
-                      details: ["15 秒自动化生成", "零人工对齐成本"],
-                    },
-                    {
-                      type: "closing",
-                      title: "感谢关注与支持",
-                      action: "立即下载可编辑 PPTX 文件",
-                      contact: "GitHub: https://github.com/CacinieP/slide-recipes",
-                    },
-                  ],
-                };
-                set({ customOutlineJson: JSON.stringify(sample, null, 2) });
-              }}
-              className="text-gold hover:underline"
-            >
-              填入标准示例
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* 4. 商业语义与灵感色板及色相系统 */}
-      <PalettePicker
-        value={props.paletteId}
-        customTheme={props.customTheme}
-        onChange={(paletteId) => set({ paletteId, customTheme: undefined })}
-        onCustomThemeChange={(customTheme) => set({ customTheme })}
-      />
-
-      {/* 5. 风格配方 */}
-      <Field label="STYLE RECIPE / 风格">
+      {/* 05 风格配方 */}
+      <div className="border-t border-line pt-4">
+        <SectionHead no="05" title="风格配方" />
         <div className="grid grid-cols-4 gap-2">
           {STYLES.map((s) => {
             const active = props.styleRecipe === s.id;
@@ -705,23 +669,25 @@ export default function ConfigPanel(props: Props) {
                 type="button"
                 aria-pressed={active}
                 onClick={() => set({ styleRecipe: s.id })}
-                className={`rounded-md border px-2 py-2 text-center transition ${
+                className={`press flex flex-col items-center gap-1.5 rounded-lg border px-2 py-2.5 ${
                   active
-                    ? "border-gold bg-gold-soft text-gold font-medium"
-                    : "border-line bg-elev text-ink-dim hover:border-line-strong hover:text-ink"
+                    ? "border-gold bg-gold-soft shadow-xs"
+                    : "border-line bg-elev shadow-xs hover:border-line-strong"
                 }`}
               >
-                <div className="text-sm font-medium">{s.label}</div>
-                <div className="mt-0.5 text-[10px] text-ink-mute">{s.desc}</div>
+                <StyleGlyph id={s.id} active={active} />
+                <span className={`text-xs font-semibold ${active ? "text-gold" : "text-ink"}`}>{s.label}</span>
+                <span className="text-[9px] leading-tight text-ink-mute">{s.desc}</span>
               </button>
             );
           })}
         </div>
-      </Field>
+      </div>
 
-      {/* 6. 内容偏好 */}
+      {/* 06 内容偏好 */}
       {props.inputMode !== "json" && (
-        <Field label="PREFERENCES / 内容偏好">
+        <div className="border-t border-line pt-4">
+          <SectionHead no="06" title="内容偏好" />
           <div className="flex gap-2">
             {([
               ["includeCode", "代码片段"],
@@ -732,20 +698,20 @@ export default function ConfigPanel(props: Props) {
                 type="button"
                 aria-pressed={props[key]}
                 onClick={() => set({ [key]: !props[key] } as Partial<Props>)}
-                className={`flex flex-1 items-center justify-center gap-2 rounded-md border px-3 py-2 text-sm transition ${
+                className={`press flex flex-1 items-center justify-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium ${
                   props[key]
-                    ? "border-azure bg-blue-soft text-azure"
-                    : "border-line bg-elev text-ink-dim hover:border-line-strong"
+                    ? "border-gold bg-gold-soft text-gold"
+                    : "border-line bg-elev text-ink-dim shadow-xs hover:border-line-strong"
                 }`}
               >
-                <span
-                  className={`h-2 w-2 rounded-full ${props[key] ? "bg-azure" : "bg-ink-mute"}`}
-                />
+                <span className={`flex h-3.5 w-3.5 items-center justify-center rounded-full border ${props[key] ? "border-gold bg-gold text-white" : "border-line-strong bg-elev"}`} aria-hidden="true">
+                  {props[key] && <IconCheck size={8} />}
+                </span>
                 {label}
               </button>
             ))}
           </div>
-        </Field>
+        </div>
       )}
     </div>
   );
